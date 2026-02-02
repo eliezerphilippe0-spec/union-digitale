@@ -1,0 +1,68 @@
+# robots.txt for Union Digitale
+# Updated: 2026-01-12
+
+# Allow all crawlers by default
+User-agent: *
+Allow: /
+
+# Block admin and seller dashboards
+Disallow: /admin/
+Disallow: /seller/dashboard
+Disallow: /seller/products/
+Disallow: /seller/services/
+Disallow: /seller/cars/
+Disallow: /seller/real-estate/
+
+# Block user account pages
+Disallow: /account
+Disallow: /orders
+Disallow: /library
+Disallow: /favorites
+Disallow: /wallet
+
+# Block checkout and payment pages
+Disallow: /checkout
+Disallow: /cart
+Disallow: /order-confirmation
+
+# Block authentication pages
+Disallow: /login
+Disallow: /register
+
+# Block API endpoints
+Disallow: /api/
+
+# Block search results with parameters
+Disallow: /*?*q=
+Disallow: /*?*search=
+
+# Block filter pages with too many parameters
+Disallow: /*?*&*&*
+
+# Allow specific important pages
+Allow: /catalog
+Allow: /services
+Allow: /cars
+Allow: /real-estate
+Allow: /seller/welcome
+Allow: /ambassador
+
+# Sitemap location
+Sitemap: https://uniondigitale.ht/sitemap.xml
+
+# Crawl delay for specific bots (optional)
+# User-agent: Googlebot
+# Crawl-delay: 0
+
+# User-agent: Bingbot
+# Crawl-delay: 1
+
+# Block bad bots (optional - uncomment if needed)
+# User-agent: AhrefsBot
+# Disallow: /
+
+# User-agent: SemrushBot
+# Disallow: /
+
+# User-agent: MJ12bot
+# Disallow: /

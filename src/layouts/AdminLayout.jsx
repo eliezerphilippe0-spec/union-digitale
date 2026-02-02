@@ -1,0 +1,105 @@
+import React from 'react';
+import { Outlet, Link, useLocation } from 'react-router-dom';
+import { LayoutDashboard, Package, ShoppingBag, Settings, LogOut, User, Banknote, Crown } from 'lucide-react';
+
+const AdminLayout = ({ children }) => {
+    const location = useLocation();
+
+    const isActive = (path) => location.pathname === path;
+
+    return (
+        <div className="flex min-h-screen bg-gray-100 font-sans">
+            {/* Sidebar */}
+            <aside className="w-64 bg-gray-900 text-white flex flex-col">
+                <div className="p-6 border-b border-gray-800">
+                    <h1 className="text-2xl font-bold tracking-tight">
+                        Union<span className="text-secondary">Admin</span>
+                    </h1>
+                </div>
+
+                <nav className="flex-1 p-4 space-y-2">
+                    <Link
+                        to="/admin"
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/admin') ? 'bg-secondary text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
+                    >
+                        <LayoutDashboard className="w-5 h-5" />
+                        Tableau de bord
+                    </Link>
+                    <Link
+                        to="/admin/products"
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/admin/products') ? 'bg-secondary text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
+                    >
+                        <Package className="w-5 h-5" />
+                        Produits
+                    </Link>
+                    <Link
+                        to="/admin/orders"
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/admin/orders') ? 'bg-secondary text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
+                    >
+                        <ShoppingBag className="w-5 h-5" />
+                        Commandes
+                    </Link>
+                    <Link
+                        to="/admin/users"
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/admin/users') ? 'bg-secondary text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
+                    >
+                        <User className="w-5 h-5" />
+                        Utilisateurs
+                    </Link>
+                    <Link
+                        to="/admin/payouts"
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/admin/payouts') ? 'bg-secondary text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
+                    >
+                        <Banknote className="w-5 h-5" />
+                        Paiements
+                    </Link>
+                    <Link
+                        to="/admin/subscription"
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/admin/subscription') ? 'bg-secondary text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
+                    >
+                        <Crown className="w-5 h-5" />
+                        Abonnement
+                    </Link>
+                    <div className="pt-8 mt-8 border-t border-gray-800">
+                        <Link
+                            to="/admin/settings"
+                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/admin/settings') ? 'bg-secondary text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
+                        >
+                            <Settings className="w-5 h-5" />
+                            Paramètres
+                        </Link>
+                    </div>
+                </nav>
+
+                <div className="p-4 border-t border-gray-800">
+                    <Link to="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-gray-800 hover:text-red-300 transition-colors">
+                        <LogOut className="w-5 h-5" />
+                        Retour au site
+                    </Link>
+                </div>
+            </aside>
+
+            {/* Main Content */}
+            <main className="flex-1 overflow-auto">
+                <header className="bg-white shadow-sm px-8 py-4 flex justify-between items-center">
+                    <h2 className="text-xl font-bold text-gray-800">
+                        {isActive('/admin') && 'Tableau de bord'}
+                        {isActive('/admin/products') && 'Gestion des Produits'}
+                        {isActive('/admin/orders') && 'Suivi des Commandes'}
+                    </h2>
+                    <div className="flex items-center gap-4">
+                        <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center font-bold text-gray-600">
+                            A
+                        </div>
+                        <span className="text-sm font-medium">Admin</span>
+                    </div>
+                </header>
+                <div className="p-8">
+                    {children}
+                </div>
+            </main>
+        </div>
+    );
+};
+
+export default AdminLayout;

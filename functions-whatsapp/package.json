@@ -1,0 +1,14 @@
+{
+    "name": "whatsapp-functions",
+    "description": "WhatsApp Cloud Functions for Union Digitale",
+    "engines": {
+        "node": "18"
+    },
+    "main": "index.js",
+    "dependencies": {
+        "firebase-admin": "^11.11.0",
+        "firebase-functions": "^4.9.0",
+        "twilio": "^5.11.2"
+    },
+    "private": true
+}

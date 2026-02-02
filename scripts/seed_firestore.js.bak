@@ -1,0 +1,52 @@
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc, writeBatch, doc } from "firebase/firestore";
+import { products } from './src/data/products.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const firebaseConfig = {
+    apiKey: process.env.VITE_FIREBASE_API_KEY,
+    authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.VITE_FIREBASE_APP_ID
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+async function seedProducts() {
+    console.log('🌱 Seeding products to Firestore...');
+    const batch = writeBatch(db);
+
+    products.forEach((p) => {
+        const docRef = doc(collection(db, "products")); // Auto-ID
+        batch.set(docRef, {
+            title: p.title,
+            description: p.description,
+            price: p.price,
+            original_price: p.originalPrice,
+            currency: 'HTG',
+            image_url: p.image,
+            category: p.category || 'General',
+            subcategory: p.subcategory || 'General',
+            type: p.type,
+            stock: p.inStock ? 100 : 0,
+            rating: p.rating,
+            reviews_count: p.reviews,
+            created_at: new Date()
+        });
+    });
+
+    try {
+        await batch.commit();
+        console.log(`✅ Successfully added ${products.length} products to Firestore.`);
+    } catch (e) {
+        console.error("❌ Error seeding products: ", e);
+    }
+}
+
+seedProducts();

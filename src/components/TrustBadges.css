@@ -1,0 +1,323 @@
+/* Trust Badges Styles */
+
+/* Grid Layout (Default) */
+.trust-badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.trust-badge-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.trust-badge-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.trust-badge-card.green {
+    border-color: #10b981;
+}
+
+.trust-badge-card.blue {
+    border-color: #3b82f6;
+}
+
+.trust-badge-card.purple {
+    border-color: #8b5cf6;
+}
+
+.trust-badge-card.gold {
+    border-color: #f59e0b;
+}
+
+.trust-badge-card.red {
+    border-color: #ef4444;
+}
+
+.trust-badge-card.teal {
+    border-color: #14b8a6;
+}
+
+.badge-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.trust-badge-card.green .badge-icon {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.trust-badge-card.blue .badge-icon {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.trust-badge-card.purple .badge-icon {
+    background: #ede9fe;
+    color: #7c3aed;
+}
+
+.trust-badge-card.gold .badge-icon {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.trust-badge-card.red .badge-icon {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.trust-badge-card.teal .badge-icon {
+    background: #ccfbf1;
+    color: #0d9488;
+}
+
+.badge-content {
+    flex: 1;
+}
+
+.badge-label {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #1f2937;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.badge-description {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+/* Compact Variant */
+.trust-badges-compact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.trust-badge-compact {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: white;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+}
+
+.trust-badge-compact:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.trust-badge-compact.green {
+    color: #059669;
+    border: 1px solid #10b981;
+}
+
+.trust-badge-compact.blue {
+    color: #2563eb;
+    border: 1px solid #3b82f6;
+}
+
+.trust-badge-compact.purple {
+    color: #7c3aed;
+    border: 1px solid #8b5cf6;
+}
+
+.trust-badge-compact.gold {
+    color: #d97706;
+    border: 1px solid #f59e0b;
+}
+
+/* Inline Variant */
+.trust-badges-inline {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.trust-badge-inline {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+
+.trust-badge-inline.green {
+    border-left-color: #10b981;
+}
+
+.trust-badge-inline.blue {
+    border-left-color: #3b82f6;
+}
+
+.trust-badge-inline.purple {
+    border-left-color: #8b5cf6;
+}
+
+.trust-badge-inline.gold {
+    border-left-color: #f59e0b;
+}
+
+.badge-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.trust-badge-inline .badge-label {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #1f2937;
+}
+
+.trust-badge-inline .badge-description {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+/* Vendor Trust Badges */
+.vendor-trust-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.vendor-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.vendor-badge.green {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.vendor-badge.gold {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    color: #92400e;
+}
+
+.vendor-badge.yellow {
+    background: #fef9c3;
+    color: #854d0e;
+}
+
+.vendor-badge.blue {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.vendor-badge.purple {
+    background: #ede9fe;
+    color: #6b21a8;
+}
+
+/* Security Indicators */
+.security-indicators {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.security-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #166534;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .trust-badges-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .trust-badge-card {
+        padding: 1rem;
+    }
+
+    .badge-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .badge-label {
+        font-size: 0.85rem;
+    }
+
+    .badge-description {
+        font-size: 0.75rem;
+    }
+
+    .trust-badges-compact {
+        justify-content: center;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .trust-badge-card {
+        background: #1f2937;
+    }
+
+    .badge-label {
+        color: #f9fafb;
+    }
+
+    .badge-description {
+        color: #d1d5db;
+    }
+
+    .trust-badge-inline {
+        background: #1f2937;
+    }
+
+    .security-indicators {
+        background: #064e3b;
+        border-color: #059669;
+    }
+
+    .security-item {
+        color: #d1fae5;
+    }
+}

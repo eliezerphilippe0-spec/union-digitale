@@ -1,0 +1,72 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return request.auth.token.role == 'admin';
+    }
+    
+    function isValidImageSize() {
+      return request.resource.size < 5 * 1024 * 1024; // 5MB max
+    }
+    
+    function isValidImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    
+    // Vendor verification documents
+    match /vendors/{vendorId}/{document} {
+      // Only owner can upload their verification documents
+      allow write: if isOwner(vendorId) && 
+                      isValidImage() && 
+                      isValidImageSize() &&
+                      (document.matches('id_card_.*') || 
+                       document.matches('selfie_.*') || 
+                       document.matches('business_license_.*'));
+      
+      // Owner and admin can read
+      allow read: if isOwner(vendorId) || isAdmin();
+    }
+    
+    // Product images
+    match /products/{vendorId}/{productId}/{image} {
+      allow write: if isOwner(vendorId) && 
+                      isValidImage() && 
+                      isValidImageSize();
+      
+      allow read: if true; // Public product images
+    }
+    
+    // User avatars
+    match /users/{userId}/avatar.{ext} {
+      allow write: if isOwner(userId) && 
+                      isValidImage() && 
+                      isValidImageSize();
+      
+      allow read: if true; // Public avatars
+    }
+    
+    // Dispute evidence
+    match /disputes/{disputeId}/{evidence} {
+      allow write: if isAuthenticated() && 
+                      isValidImageSize() &&
+                      (isValidImage() || request.resource.contentType == 'application/pdf');
+      
+      allow read: if isAuthenticated(); // Only authenticated users
+    }
+    
+    // Default deny
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

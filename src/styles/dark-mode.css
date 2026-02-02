@@ -1,0 +1,256 @@
+/**
+ * UNION DIGITALE - DARK MODE STYLES
+ * Premium dark theme with gold accents
+ */
+
+@layer base {
+
+    /* Dark mode color scheme */
+    .dark {
+        color-scheme: dark;
+    }
+
+    /* Dark mode backgrounds */
+    .dark body {
+        @apply bg-neutral-900 text-neutral-100;
+    }
+
+    /* Dark mode cards */
+    .dark .bg-white {
+        @apply bg-neutral-800 text-neutral-100;
+    }
+
+    .dark .bg-neutral-50 {
+        @apply bg-neutral-900;
+    }
+
+    .dark .bg-neutral-100 {
+        @apply bg-neutral-800;
+    }
+
+    /* Dark mode borders */
+    .dark .border-neutral-200 {
+        @apply border-neutral-700;
+    }
+
+    .dark .border-neutral-300 {
+        @apply border-neutral-600;
+    }
+
+    .dark .border-gray-200 {
+        @apply border-neutral-700;
+    }
+
+    .dark .border-gray-300 {
+        @apply border-neutral-600;
+    }
+
+    /* Dark mode text colors */
+    .dark .text-gray-600 {
+        @apply text-neutral-300;
+    }
+
+    .dark .text-gray-700 {
+        @apply text-neutral-200;
+    }
+
+    .dark .text-gray-800 {
+        @apply text-neutral-100;
+    }
+
+    .dark .text-gray-900 {
+        @apply text-white;
+    }
+
+    .dark .text-neutral-600 {
+        @apply text-neutral-300;
+    }
+
+    .dark .text-neutral-700 {
+        @apply text-neutral-200;
+    }
+
+    .dark .text-neutral-800 {
+        @apply text-neutral-100;
+    }
+
+    .dark .text-neutral-900 {
+        @apply text-white;
+    }
+
+    /* Dark mode placeholder text */
+    .dark ::placeholder {
+        @apply text-neutral-400;
+    }
+
+    /* Dark mode hover states */
+    .dark .hover\:bg-gray-50:hover {
+        @apply bg-neutral-800;
+    }
+
+    .dark .hover\:bg-gray-100:hover {
+        @apply bg-neutral-700;
+    }
+
+    .dark .hover\:bg-neutral-100:hover {
+        @apply bg-neutral-800;
+    }
+
+    /* Dark mode inputs */
+    .dark input,
+    .dark textarea,
+    .dark select {
+        @apply bg-neutral-800 text-neutral-100 border-neutral-600;
+    }
+
+    .dark input:focus,
+    .dark textarea:focus,
+    .dark select:focus {
+        @apply border-gold-500 ring-gold-500/20;
+    }
+
+    /* Dark mode buttons */
+    .dark .bg-primary {
+        @apply bg-primary-800;
+    }
+
+    .dark .bg-primary-light {
+        @apply bg-primary-700;
+    }
+
+    /* Dark mode shadows - softer in dark mode */
+    .dark .shadow-sm {
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .dark .shadow {
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
+    }
+
+    .dark .shadow-md {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+    }
+
+    .dark .shadow-lg {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+    }
+
+    .dark .shadow-xl {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    }
+
+    .dark .shadow-2xl {
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Dark mode glassmorphism */
+    .dark .glass {
+        background: rgba(30, 30, 30, 0.7);
+        backdrop-filter: blur(10px) saturate(180%);
+        -webkit-backdrop-filter: blur(10px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .dark .glass-card {
+        background: rgba(30, 30, 30, 0.85);
+        backdrop-filter: blur(20px) saturate(200%);
+        -webkit-backdrop-filter: blur(20px) saturate(200%);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow:
+            0 8px 32px 0 rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .dark .frosted-light {
+        background: rgba(30, 30, 30, 0.6);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    /* Dark mode Hero section */
+    .dark .bg-gradient-to-br.from-primary-900 {
+        @apply from-neutral-950 via-neutral-900 to-neutral-950;
+    }
+
+    /* Dark mode Footer */
+    .dark footer {
+        @apply bg-neutral-900 border-t border-neutral-800;
+    }
+
+    .dark .bg-primary-950 {
+        @apply bg-neutral-950;
+    }
+
+    /* Dark mode product cards */
+    .dark .product-card {
+        @apply bg-neutral-800 border-neutral-700;
+    }
+
+    .dark .product-card:hover {
+        @apply border-gold-500/50 shadow-gold-500/10;
+    }
+
+    /* Dark mode category cards */
+    .dark .category-card {
+        @apply bg-neutral-800 border-neutral-700;
+    }
+
+    /* Dark mode modals */
+    .dark .modal-content {
+        @apply bg-neutral-800 border-neutral-700;
+    }
+
+    /* Dark mode dropdowns */
+    .dark .dropdown-menu {
+        @apply bg-neutral-800 border-neutral-700;
+    }
+
+    /* Dark mode scrollbar */
+    .dark ::-webkit-scrollbar-track {
+        @apply bg-neutral-900;
+    }
+
+    .dark ::-webkit-scrollbar-thumb {
+        @apply bg-neutral-700;
+    }
+
+    .dark ::-webkit-scrollbar-thumb:hover {
+        @apply bg-neutral-600;
+    }
+
+    /* Dark mode skeleton loaders */
+    .dark .skeleton {
+        background: linear-gradient(90deg,
+                #2a2a2a 25%,
+                #3a3a3a 50%,
+                #2a2a2a 75%);
+        background-size: 200% 100%;
+    }
+
+    /* Dark mode badges */
+    .dark .badge-primary {
+        @apply bg-primary-700 text-primary-100;
+    }
+
+    .dark .badge-secondary {
+        @apply bg-neutral-700 text-neutral-100;
+    }
+
+    /* Dark mode links */
+    .dark a:not(.no-dark) {
+        @apply text-gold-400;
+    }
+
+    .dark a:not(.no-dark):hover {
+        @apply text-gold-300;
+    }
+
+    /* Dark mode dividers */
+    .dark .divide-neutral-200>*+* {
+        @apply border-neutral-700;
+    }
+
+    .dark hr {
+        @apply border-neutral-700;
+    }
+}

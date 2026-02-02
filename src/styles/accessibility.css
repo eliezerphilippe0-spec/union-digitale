@@ -1,0 +1,245 @@
+/**
+ * UNION DIGITALE - ACCESSIBILITY STYLES
+ * WCAG 2.1 AA compliant focus styles and accessibility utilities
+ */
+
+@layer utilities {
+    /* ========================================
+     FOCUS STYLES - Premium & Visible
+     ======================================== */
+
+    /* Remove default outline and add custom focus ring */
+    *:focus {
+        outline: none;
+    }
+
+    /* Premium focus ring for interactive elements */
+    *:focus-visible {
+        outline: 2px solid var(--color-gold-500);
+        outline-offset: 2px;
+        border-radius: 0.25rem;
+    }
+
+    /* Focus ring variants */
+    .focus-ring-primary:focus-visible {
+        outline-color: var(--color-primary-500);
+    }
+
+    .focus-ring-secondary:focus-visible {
+        outline-color: var(--color-secondary-500);
+    }
+
+    .focus-ring-gold:focus-visible {
+        outline-color: var(--color-gold-500);
+    }
+
+    .focus-ring-white:focus-visible {
+        outline-color: white;
+        outline-width: 3px;
+    }
+
+    /* Focus ring for dark backgrounds */
+    .dark *:focus-visible {
+        outline-color: var(--color-gold-400);
+    }
+
+    /* Inset focus ring for buttons */
+    .focus-ring-inset:focus-visible {
+        outline-offset: -2px;
+    }
+
+    /* ========================================
+     SKIP LINKS
+     ======================================== */
+
+    .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        background: var(--color-primary-600);
+        color: white;
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        border-radius: 0 0 0.5rem 0;
+        font-weight: 600;
+        z-index: 9999;
+        transition: top 0.2s ease;
+    }
+
+    .skip-link:focus {
+        top: 0;
+    }
+
+    /* ========================================
+     SCREEN READER ONLY
+     ======================================== */
+
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+    }
+
+    .sr-only-focusable:focus {
+        position: static;
+        width: auto;
+        height: auto;
+        padding: inherit;
+        margin: inherit;
+        overflow: visible;
+        clip: auto;
+        white-space: normal;
+    }
+
+    /* ========================================
+     KEYBOARD NAVIGATION HELPERS
+     ======================================== */
+
+    /* Highlight interactive elements on keyboard focus */
+    .keyboard-focus:focus-visible {
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.5);
+    }
+
+    /* Tab order indicator (development only) */
+    [tabindex]:not([tabindex="-1"]) {
+        position: relative;
+    }
+
+    /* ========================================
+     REDUCED MOTION
+     ======================================== */
+
+    @media (prefers-reduced-motion: reduce) {
+
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+
+    /* ========================================
+     HIGH CONTRAST MODE
+     ======================================== */
+
+    @media (prefers-contrast: high) {
+        * {
+            border-color: currentColor !important;
+        }
+
+        *:focus-visible {
+            outline-width: 3px;
+            outline-offset: 3px;
+        }
+    }
+
+    /* ========================================
+     ARIA LIVE REGIONS
+     ======================================== */
+
+    .aria-live-polite {
+        position: absolute;
+        left: -10000px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+    }
+
+    /* ========================================
+     FOCUS TRAP (for modals)
+     ======================================== */
+
+    .focus-trap {
+        position: relative;
+    }
+
+    .focus-trap::before,
+    .focus-trap::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 0;
+    }
+
+    /* ========================================
+     ACCESSIBLE BUTTONS
+     ======================================== */
+
+    button:disabled,
+    [aria-disabled="true"] {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    /* ========================================
+     ACCESSIBLE LINKS
+     ======================================== */
+
+    a:not([class]) {
+        text-decoration: underline;
+        text-decoration-skip-ink: auto;
+    }
+
+    a:not([class]):focus-visible {
+        outline-offset: 4px;
+    }
+
+    /* ========================================
+     ACCESSIBLE FORMS
+     ======================================== */
+
+    /* Required field indicator */
+    .required::after {
+        content: ' *';
+        color: var(--color-red-500);
+        font-weight: bold;
+    }
+
+    /* Error state */
+    [aria-invalid="true"] {
+        border-color: var(--color-red-500) !important;
+    }
+
+    /* ========================================
+     TOUCH TARGETS (minimum 44x44px)
+     ======================================== */
+
+    .touch-target {
+        min-width: 44px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* ========================================
+     COLOR CONTRAST HELPERS
+     ======================================== */
+
+    .text-contrast-high {
+        color: var(--color-neutral-900);
+    }
+
+    .dark .text-contrast-high {
+        color: white;
+    }
+
+    .bg-contrast-high {
+        background-color: var(--color-neutral-900);
+        color: white;
+    }
+
+    .dark .bg-contrast-high {
+        background-color: white;
+        color: var(--color-neutral-900);
+    }
+}

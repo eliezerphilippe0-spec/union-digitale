@@ -1,0 +1,17 @@
+{
+    "name": "union-digitale-whatsapp",
+    "version": "1.0.0",
+    "description": "Twilio Serverless WhatsApp integration for Union Digitale",
+    "main": "functions/send-whatsapp.js",
+    "scripts": {
+        "start": "twilio-run",
+        "deploy": "twilio serverless:deploy"
+    },
+    "dependencies": {
+        "twilio": "^5.11.2",
+        "firebase-admin": "^11.11.0"
+    },
+    "devDependencies": {
+        "twilio-run": "^4.0.0"
+    }
+}

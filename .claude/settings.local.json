@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(curl:*)",
+      "Bash(start http://localhost:5173)",
+      "Bash(start cmd /k \"npm run dev\")"
+    ]
+  }
+}

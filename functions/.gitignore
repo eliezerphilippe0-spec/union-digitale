@@ -1,0 +1,26 @@
+# Node modules
+node_modules/
+package-lock.json
+
+# Environment variables - NEVER COMMIT
+.env
+.env.local
+.env.*.local
+
+# Firebase Admin SDK credentials - NEVER COMMIT
+firebase-adminsdk.json
+*-firebase-adminsdk-*.json
+
+# Logs
+*.log
+firebase-debug.log*
+
+# Build output
+lib/
+dist/
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo

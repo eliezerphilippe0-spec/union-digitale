@@ -1,0 +1,72 @@
+/**
+ * UNION DIGITALE - MAIN STYLES
+ * Professional Design System - International Standards
+ */
+
+/* Import Design System */
+@import './styles/design-tokens.css';
+@import './styles/base.css';
+@import './styles/animations.css';
+@import './styles/luxury-animations.css';
+@import './styles/glassmorphism.css';
+@import './styles/depth-effects.css';
+@import './styles/dark-mode.css';
+@import './styles/accessibility.css';
+
+/* Import Tailwind */
+@import "tailwindcss";
+
+/* Custom Tailwind Theme */
+@theme {
+  /* Primary Colors - Deep Blue */
+  --color-primary-50: #E5E8F1;
+  --color-primary-100: #CBD1E3;
+  --color-primary-200: #A0AFC8;
+  --color-primary-300: #758DAD;
+  --color-primary-400: #4A6B92;
+  --color-primary-500: #1F4977;
+  --color-primary-600: #1A3E67;
+  --color-primary-700: #153357;
+  --color-primary-800: #0F2847;
+  --color-primary-900: #0A1D37;
+
+  /* Gold Colors */
+  --color-gold-50: #FEFDF5;
+  --color-gold-100: #FCF9E6;
+  --color-gold-200: #F4EBC3;
+  --color-gold-300: #ECDCA0;
+  --color-gold-400: #E4CD7D;
+  --color-gold-500: #DCBE5A;
+  --color-gold-600: #D4AF37;
+  --color-gold-700: #C19F38;
+  --color-gold-800: #A68930;
+  --color-gold-900: #8B7328;
+
+  /* Accent Colors - Orange */
+  --color-accent-50: #FFF8F3;
+  --color-accent-100: #FFF0E6;
+  --color-accent-200: #FFDFCC;
+  --color-accent-300: #FFC199;
+  --color-accent-400: #FFA366;
+  --color-accent-500: #FF8533;
+  --color-accent-600: #FF6700;
+  --color-accent-700: #E65C00;
+  --color-accent-800: #CC5000;
+  --color-accent-900: #B34500;
+
+  /* Neutral Colors */
+  --color-neutral-50: #FAFAFA;
+  --color-neutral-100: #F8F8F8;
+  --color-neutral-200: #F3F4F6;
+  --color-neutral-300: #E5E7EB;
+  --color-neutral-400: #D1D5DB;
+  --color-neutral-500: #9CA3AF;
+  --color-neutral-600: #6B7280;
+  --color-neutral-700: #404040;
+  --color-neutral-800: #2D2D2D;
+  --color-neutral-900: #1A1A1A;
+
+  /* Font Families */
+  --font-display: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}

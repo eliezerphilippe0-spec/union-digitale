@@ -1,0 +1,123 @@
+/**
+ * Performance Mode CSS
+ * Adaptive styles based on connection speed and device capabilities
+ */
+
+/* High Performance Mode (4G, Desktop) */
+.performance-high {
+    /* Enable all animations */
+    --animation-duration: 300ms;
+    --transition-duration: 200ms;
+}
+
+/* Low Performance Mode (2G, 3G, Save Data) */
+.performance-low {
+    /* Disable heavy animations */
+    --animation-duration: 0ms;
+    --transition-duration: 0ms;
+}
+
+.performance-low * {
+    /* Disable all transitions and animations */
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+}
+
+.performance-low .animate-pulse,
+.performance-low .animate-spin,
+.performance-low .animate-bounce,
+.performance-low .animate-float,
+.performance-low .animate-shimmer {
+    /* Disable specific animations */
+    animation: none !important;
+}
+
+.performance-low .blur-sm,
+.performance-low .blur-md,
+.performance-low .blur-lg,
+.performance-low .blur-xl {
+    /* Remove blur effects (expensive) */
+    filter: none !important;
+}
+
+.performance-low .backdrop-blur-sm,
+.performance-low .backdrop-blur-md,
+.performance-low .backdrop-blur-lg {
+    /* Remove backdrop blur (very expensive) */
+    backdrop-filter: none !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.performance-low .shadow-2xl,
+.performance-low .shadow-xl {
+    /* Reduce shadow complexity */
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+}
+
+/* Reduced Motion Support (Accessibility) */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Save Data Mode */
+@media (prefers-reduced-data: reduce) {
+
+    /* Disable background images */
+    .hero-background,
+    .banner-image {
+        background-image: none !important;
+        background-color: var(--color-primary-900) !important;
+    }
+
+    /* Disable video backgrounds */
+    video {
+        display: none !important;
+    }
+}
+
+/* Low Bandwidth Optimizations */
+.performance-low img {
+    /* Force lazy loading via HTML attribute */
+    image-rendering: auto;
+}
+
+.performance-low .spline-background,
+.performance-low .animated-background {
+    /* Hide 3D/heavy backgrounds */
+    display: none !important;
+}
+
+/* Performance Indicators */
+.performance-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 8px;
+    font-size: 12px;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.performance-indicator.show {
+    opacity: 1;
+}
+
+.performance-indicator.slow {
+    background: rgba(255, 107, 0, 0.9);
+}
+
+.performance-indicator.fast {
+    background: rgba(34, 197, 94, 0.9);
+}
