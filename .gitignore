@@ -35,3 +35,8 @@ firebase-key.json
 
 # System files
 nul
+
+# AI/Editor temp files
+tmpclaude-*
+.aider*
+.cursor*
