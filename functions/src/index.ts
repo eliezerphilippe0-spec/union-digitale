@@ -59,3 +59,5 @@ export * from './shipping/shippingService';
 
 // Affiliate System
 export * from './affiliate/affiliateCommissions';
+export * from './affiliate/bonusSystem';
+export * from './affiliate/antifraud';
