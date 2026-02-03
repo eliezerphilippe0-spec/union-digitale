@@ -56,3 +56,6 @@ export * from './certificates/generateCertificate';
 
 // Shipping & Logistics
 export * from './shipping/shippingService';
+
+// Affiliate System
+export * from './affiliate/affiliateCommissions';
