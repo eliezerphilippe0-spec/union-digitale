@@ -197,19 +197,21 @@ export const ReviewSchema = z.object({
 
 /**
  * Validate data against a schema and return typed result
+ * @param {import('zod').ZodSchema} schema - Zod schema to validate against
+ * @param {unknown} data - Data to validate
+ * @returns {*} Validated data
  */
-export function validate<T>(schema: z.ZodSchema<T>, data: unknown): T {
+export function validate(schema, data) {
     return schema.parse(data);
 }
 
 /**
  * Safe validation that returns success/error
+ * @param {import('zod').ZodSchema} schema - Zod schema to validate against
+ * @param {unknown} data - Data to validate
+ * @returns {{ success: boolean, data?: *, error?: import('zod').ZodError }}
  */
-export function safeValidate<T>(schema: z.ZodSchema<T>, data: unknown): {
-    success: boolean;
-    data?: T;
-    error?: z.ZodError;
-} {
+export function safeValidate(schema, data) {
     const result = schema.safeParse(data);
     if (result.success) {
         return { success: true, data: result.data };
@@ -219,8 +221,10 @@ export function safeValidate<T>(schema: z.ZodSchema<T>, data: unknown): {
 
 /**
  * Format Zod errors for user-friendly messages
+ * @param {import('zod').ZodError} error - Zod error object
+ * @returns {string[]} Array of formatted error messages
  */
-export function formatValidationErrors(error: z.ZodError): string[] {
+export function formatValidationErrors(error) {
     return error.errors.map(err => {
         const path = err.path.join('.');
         return `${path}: ${err.message}`;

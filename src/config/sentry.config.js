@@ -1,17 +1,9 @@
 /**
  * Sentry Configuration for Union Digitale
- * Inspired by: Vercel, Stripe, Shopify error tracking
- * 
- * Features:
- * - Error tracking and monitoring
- * - Performance monitoring
- * - User feedback
- * - Release tracking
- * - Source maps support
+ * Modern Sentry SDK v8+ compatible
  */
 
 import * as Sentry from "@sentry/react";
-import { BrowserTracing } from "@sentry/tracing";
 
 /**
  * Initialize Sentry for error tracking
@@ -32,33 +24,17 @@ export const initSentry = () => {
         dsn,
         environment,
 
-        // Performance Monitoring
-        integrations: [
-            new BrowserTracing({
-                // Track navigation and route changes
-                routingInstrumentation: Sentry.reactRouterV6Instrumentation(
-                    React.useEffect,
-                    useLocation,
-                    useNavigationType,
-                    createRoutesFromChildren,
-                    matchRoutes
-                ),
-            }),
-        ],
-
         // Sample rate for performance monitoring
-        // 1.0 = 100% of transactions, 0.1 = 10%
         tracesSampleRate: environment === 'production' ? 0.1 : 1.0,
 
         // Sample rate for error tracking
-        // 1.0 = 100% of errors
         sampleRate: 1.0,
 
         // Release tracking
         release: `union-digitale@${import.meta.env.VITE_APP_VERSION || '0.0.0'}`,
 
         // Filter out sensitive data
-        beforeSend(event, hint) {
+        beforeSend(event) {
             // Don't send events in development unless explicitly enabled
             if (environment === 'development' && !enableSentry) {
                 return null;
@@ -66,27 +42,8 @@ export const initSentry = () => {
 
             // Filter out sensitive information
             if (event.request) {
-                // Remove sensitive headers
                 delete event.request.headers?.['Authorization'];
                 delete event.request.headers?.['Cookie'];
-
-                // Remove sensitive query parameters
-                if (event.request.query_string) {
-                    event.request.query_string = event.request.query_string
-                        .replace(/token=[^&]*/gi, 'token=[FILTERED]')
-                        .replace(/password=[^&]*/gi, 'password=[FILTERED]')
-                        .replace(/api_key=[^&]*/gi, 'api_key=[FILTERED]');
-                }
-            }
-
-            // Filter out payment details from extra data
-            if (event.extra) {
-                const sensitiveKeys = ['cardNumber', 'cvv', 'password', 'token', 'apiKey'];
-                sensitiveKeys.forEach(key => {
-                    if (event.extra[key]) {
-                        event.extra[key] = '[FILTERED]';
-                    }
-                });
             }
 
             return event;
@@ -94,28 +51,20 @@ export const initSentry = () => {
 
         // Ignore certain errors
         ignoreErrors: [
-            // Browser extensions
             'top.GLOBALS',
             'chrome-extension://',
             'moz-extension://',
-
-            // Network errors that are expected
             'NetworkError',
             'Failed to fetch',
             'Load failed',
-
-            // Firebase expected errors
             'auth/popup-closed-by-user',
             'auth/cancelled-popup-request',
-
-            // Ignore non-critical errors
             'ResizeObserver loop limit exceeded',
             'Non-Error promise rejection captured',
         ],
 
         // Don't report errors from certain URLs
         denyUrls: [
-            // Browser extensions
             /extensions\//i,
             /^chrome:\/\//i,
             /^moz-extension:\/\//i,
@@ -137,108 +86,97 @@ export const initSentry = () => {
 
         // Maximum breadcrumbs to keep
         maxBreadcrumbs: 50,
-
-        // Auto session tracking
-        autoSessionTracking: true,
-
-        // Enable user feedback
-        enableUserFeedback: true,
     });
 
-    // Set user context when available
-    window.setSentryUser = (user) => {
-        if (user) {
-            Sentry.setUser({
-                id: user.uid,
-                email: user.email,
-                username: user.displayName,
-                role: user.role,
-            });
-        } else {
-            Sentry.setUser(null);
-        }
-    };
+    console.log(`Sentry initialized for ${environment}`);
+};
 
-    console.log(`✅ Sentry initialized (${environment})`);
+/**
+ * Set user context for Sentry
+ */
+export const setSentryUser = (user) => {
+    if (!user) {
+        Sentry.setUser(null);
+        return;
+    }
+
+    Sentry.setUser({
+        id: user.uid,
+        email: user.email,
+        username: user.displayName,
+    });
+};
+
+/**
+ * Clear user context
+ */
+export const clearSentryUser = () => {
+    Sentry.setUser(null);
 };
 
 /**
  * Capture exception with context
- * @param {Error} error - The error to capture
- * @param {Object} context - Additional context
  */
 export const captureException = (error, context = {}) => {
-    Sentry.captureException(error, {
-        extra: context,
+    Sentry.withScope((scope) => {
+        if (context.tags) {
+            Object.entries(context.tags).forEach(([key, value]) => {
+                scope.setTag(key, value);
+            });
+        }
+
+        if (context.extra) {
+            Object.entries(context.extra).forEach(([key, value]) => {
+                scope.setExtra(key, value);
+            });
+        }
+
+        if (context.level) {
+            scope.setLevel(context.level);
+        }
+
+        Sentry.captureException(error);
     });
 };
 
 /**
- * Capture message with level
- * @param {string} message - The message to capture
- * @param {string} level - Severity level (info, warning, error)
- * @param {Object} context - Additional context
+ * Capture message with context
  */
 export const captureMessage = (message, level = 'info', context = {}) => {
-    Sentry.captureMessage(message, {
-        level,
-        extra: context,
+    Sentry.withScope((scope) => {
+        scope.setLevel(level);
+
+        if (context.tags) {
+            Object.entries(context.tags).forEach(([key, value]) => {
+                scope.setTag(key, value);
+            });
+        }
+
+        if (context.extra) {
+            Object.entries(context.extra).forEach(([key, value]) => {
+                scope.setExtra(key, value);
+            });
+        }
+
+        Sentry.captureMessage(message);
     });
 };
 
 /**
  * Add breadcrumb for debugging
- * @param {string} message - Breadcrumb message
- * @param {string} category - Category (navigation, http, user, etc.)
- * @param {Object} data - Additional data
  */
-export const addBreadcrumb = (message, category = 'custom', data = {}) => {
+export const addBreadcrumb = (breadcrumb) => {
     Sentry.addBreadcrumb({
-        message,
-        category,
-        data,
-        level: 'info',
-    });
-};
-
-/**
- * Start a performance transaction
- * @param {string} name - Transaction name
- * @param {string} op - Operation type
- * @returns {Transaction} Sentry transaction
- */
-export const startTransaction = (name, op = 'custom') => {
-    return Sentry.startTransaction({
-        name,
-        op,
-    });
-};
-
-/**
- * Show user feedback dialog
- * Allows users to report issues directly
- */
-export const showFeedbackDialog = () => {
-    Sentry.showReportDialog({
-        title: 'Un problème est survenu',
-        subtitle: 'Notre équipe a été notifiée.',
-        subtitle2: 'Vous pouvez nous aider en décrivant ce qui s\'est passé.',
-        labelName: 'Nom',
-        labelEmail: 'Email',
-        labelComments: 'Que s\'est-il passé ?',
-        labelClose: 'Fermer',
-        labelSubmit: 'Envoyer',
-        errorGeneric: 'Une erreur s\'est produite lors de l\'envoi de votre rapport.',
-        errorFormEntry: 'Certains champs sont invalides. Veuillez corriger les erreurs et réessayer.',
-        successMessage: 'Votre rapport a été envoyé. Merci !',
+        timestamp: Date.now() / 1000,
+        ...breadcrumb,
     });
 };
 
 export default {
     initSentry,
+    setSentryUser,
+    clearSentryUser,
     captureException,
     captureMessage,
     addBreadcrumb,
-    startTransaction,
-    showFeedbackDialog,
 };

@@ -122,10 +122,10 @@ export default defineConfig({
           'vendor-charts': ['recharts'],
 
           // Forms & Validation
-          'vendor-forms': ['react-hook-form', 'zod'],
+          'vendor-forms': ['zod'],
 
           // Utilities
-          'vendor-utils': ['lodash', 'date-fns', 'axios']
+          'vendor-utils': ['axios']
         },
         // Optimize chunk naming
         chunkFileNames: 'assets/js/[name]-[hash].js',
