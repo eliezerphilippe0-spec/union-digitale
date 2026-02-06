@@ -39,10 +39,19 @@ module.exports = {
   SMTP_PASS: process.env.SMTP_PASS,
   EMAIL_FROM: process.env.EMAIL_FROM || 'noreply@uniondigitale.ht',
   
-  // MonCash (Haiti payment)
+  // MonCash (Haiti payment - Digicel)
   MONCASH_CLIENT_ID: process.env.MONCASH_CLIENT_ID,
   MONCASH_CLIENT_SECRET: process.env.MONCASH_CLIENT_SECRET,
   MONCASH_MODE: process.env.MONCASH_MODE || 'sandbox',
+  
+  // NatCash (Haiti payment - Natcom)
+  NATCASH_MERCHANT_ID: process.env.NATCASH_MERCHANT_ID,
+  NATCASH_SECRET_KEY: process.env.NATCASH_SECRET_KEY,
+  NATCASH_MERCHANT_NUMBER: process.env.NATCASH_MERCHANT_NUMBER,
+  NATCASH_MODE: process.env.NATCASH_MODE || 'sandbox',
+  
+  // Backend URL (for callbacks)
+  BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:5000',
   
   // Frontend URL
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:5173',
