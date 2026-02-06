@@ -70,6 +70,13 @@ const AddService = React.lazy(() => import('./pages/seller/AddService'));
 const AddRealEstate = React.lazy(() => import('./pages/seller/AddRealEstate'));
 const SmartAudit = React.lazy(() => import('./pages/seller/SmartAudit'));
 const SellerSettings = React.lazy(() => import('./pages/seller/Settings'));
+const AdvancedAnalytics = React.lazy(() => import('./pages/seller/AdvancedAnalytics'));
+const POSTerminal = React.lazy(() => import('./pages/seller/POSTerminal'));
+const SellerCredit = React.lazy(() => import('./pages/seller/SellerCredit'));
+
+// New Features - lazy loaded
+const AppStore = React.lazy(() => import('./pages/AppStore'));
+const LoyaltyDashboard = React.lazy(() => import('./pages/LoyaltyDashboard'));
 
 // Ambassador - lazy loaded
 const AmbassadorLanding = React.lazy(() => import('./pages/Ambassador/Landing'));
@@ -107,6 +114,7 @@ import { FavoritesProvider } from './contexts/FavoritesContext';
 import { AmbassadorProvider } from './contexts/AmbassadorContext';
 import { PerformanceProvider } from './contexts/PerformanceContext';
 import { FittingRoomProvider } from './contexts/FittingRoomContext';
+import { LoyaltyProvider } from './contexts/LoyaltyContext';
 import { ToastProvider } from './components/ui/Toast';
 import SkipLinks from './components/SkipLinks';
 
@@ -149,7 +157,8 @@ function App() {
                         <FittingRoomProvider>
                           <CartProvider>
                             <WalletProvider>
-                              <ToastProvider>
+                              <LoyaltyProvider>
+                                <ToastProvider>
                                 <SkipLinks />
                                 <Suspense fallback={<PageLoader />}>
                                   <RouteTracker />
@@ -291,12 +300,22 @@ function App() {
                                     <Route path="seller/verify" element={<KYCVerification />} />
                                     <Route path="seller/dashboard" element={<DashboardUltimate />} />
                                     <Route path="seller/dashboard-pro" element={<SellerDashboard />} />
+                                    <Route path="seller/analytics" element={<AdvancedAnalytics />} />
+                                    <Route path="seller/pos" element={<POSTerminal />} />
+                                    <Route path="seller/credit" element={<SellerCredit />} />
                                     <Route path="cars/:id" element={<CarDetails />} />
+
+                                    {/* New Features */}
+                                    <Route path="apps" element={<AppStore />} />
+                                    <Route path="app-store" element={<AppStore />} />
+                                    <Route path="loyalty" element={<LoyaltyDashboard />} />
+                                    <Route path="rewards" element={<LoyaltyDashboard />} />
 
                                   </Routes>
                                 </Suspense>
-                                <WhatsAppWidget />
-                              </ToastProvider>
+                                  <WhatsAppWidget />
+                                </ToastProvider>
+                              </LoyaltyProvider>
                             </WalletProvider>
                           </CartProvider>
                         </FittingRoomProvider>
