@@ -1,311 +1,278 @@
-/**
- * Loyalty Dashboard - User Rewards & Progress
- * Gamified loyalty program interface
- */
-
 import React from 'react';
-import {
-    Star, Gift, Trophy, Target, Zap, ChevronRight, Lock,
-    CheckCircle, Clock, Flame, Crown, Medal, Award
+import { 
+  Star, Gift, TrendingUp, Award, Target,
+  Clock, ChevronRight, Zap, Shield
 } from 'lucide-react';
 import { useLoyalty } from '../contexts/LoyaltyContext';
 
-const LoyaltyDashboard = () => {
-    const {
-        loyaltyData,
-        tiers,
-        getTierInfo,
-        getNextTier,
-        getProgressToNextTier,
-        getEarnedBadges,
-        getAllBadges,
-        pointsToCurrency,
-    } = useLoyalty();
-
-    const currentTier = getTierInfo();
-    const nextTier = getNextTier();
-    const progress = getProgressToNextTier();
-    const earnedBadges = getEarnedBadges();
-    const allBadges = getAllBadges();
-
-    return (
-        <div className="min-h-screen bg-gray-50 py-8">
-            <div className="container mx-auto px-4">
-                {/* Hero Card */}
-                <div className={`bg-gradient-to-r ${currentTier.color} rounded-3xl p-8 text-white mb-8 relative overflow-hidden`}>
-                    {/* Background decoration */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
-                    
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-4 mb-6">
-                            <div className="text-6xl">{currentTier.icon}</div>
-                            <div>
-                                <p className="text-white/70 text-sm">Votre niveau</p>
-                                <h1 className="text-3xl font-bold">{currentTier.name}</h1>
-                            </div>
-                        </div>
-
-                        <div className="grid md:grid-cols-3 gap-6">
-                            {/* Points */}
-                            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-                                <p className="text-white/70 text-sm mb-1">Points disponibles</p>
-                                <p className="text-3xl font-bold">{loyaltyData.points.toLocaleString()}</p>
-                                <p className="text-white/70 text-sm">≈ {pointsToCurrency(loyaltyData.points).toLocaleString()} G</p>
-                            </div>
-
-                            {/* Lifetime Points */}
-                            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-                                <p className="text-white/70 text-sm mb-1">Points à vie</p>
-                                <p className="text-3xl font-bold">{loyaltyData.lifetimePoints.toLocaleString()}</p>
-                                <p className="text-white/70 text-sm">Depuis votre inscription</p>
-                            </div>
-
-                            {/* Multiplier */}
-                            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-                                <p className="text-white/70 text-sm mb-1">Multiplicateur</p>
-                                <p className="text-3xl font-bold">x{currentTier.multiplier}</p>
-                                <p className="text-white/70 text-sm">Sur tous vos achats</p>
-                            </div>
-                        </div>
-
-                        {/* Progress to next tier */}
-                        {nextTier && (
-                            <div className="mt-6">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm text-white/70">Prochain niveau: {nextTier.name} {nextTier.icon}</span>
-                                    <span className="text-sm font-medium">
-                                        {loyaltyData.lifetimePoints.toLocaleString()} / {nextTier.minPoints.toLocaleString()} pts
-                                    </span>
-                                </div>
-                                <div className="h-3 bg-white/20 rounded-full overflow-hidden">
-                                    <div 
-                                        className="h-full bg-white rounded-full transition-all duration-500"
-                                        style={{ width: `${progress}%` }}
-                                    />
-                                </div>
-                                <p className="text-sm text-white/70 mt-2">
-                                    Plus que {(nextTier.minPoints - loyaltyData.lifetimePoints).toLocaleString()} points pour atteindre {nextTier.name}!
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Main Content */}
-                    <div className="lg:col-span-2 space-y-8">
-                        {/* Daily Challenges */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm">
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                                    <Flame className="w-6 h-6 text-orange-500" />
-                                    Défis du jour
-                                </h2>
-                                <span className="text-sm text-gray-500">
-                                    Réinitialisé dans 12h
-                                </span>
-                            </div>
-                            
-                            <div className="space-y-4">
-                                {loyaltyData.dailyChallenges.map(challenge => {
-                                    const isCompleted = challenge.progress >= challenge.target;
-                                    return (
-                                        <div 
-                                            key={challenge.id}
-                                            className={`flex items-center gap-4 p-4 rounded-xl ${
-                                                isCompleted ? 'bg-green-50' : 'bg-gray-50'
-                                            }`}
-                                        >
-                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                                                isCompleted ? 'bg-green-500' : 'bg-gray-200'
-                                            }`}>
-                                                {isCompleted ? (
-                                                    <CheckCircle className="w-6 h-6 text-white" />
-                                                ) : (
-                                                    <Target className="w-6 h-6 text-gray-400" />
-                                                )}
-                                            </div>
-                                            <div className="flex-1">
-                                                <h3 className={`font-semibold ${isCompleted ? 'text-green-700' : 'text-gray-900'}`}>
-                                                    {challenge.name}
-                                                </h3>
-                                                <p className="text-sm text-gray-500">{challenge.description}</p>
-                                                <div className="flex items-center gap-2 mt-2">
-                                                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                        <div 
-                                                            className={`h-full rounded-full ${isCompleted ? 'bg-green-500' : 'bg-gold-500'}`}
-                                                            style={{ width: `${(challenge.progress / challenge.target) * 100}%` }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-xs text-gray-500">
-                                                        {challenge.progress}/{challenge.target}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div className="text-right">
-                                                <span className={`text-sm font-bold ${isCompleted ? 'text-green-600' : 'text-gold-600'}`}>
-                                                    +{challenge.points} pts
-                                                </span>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        {/* Badges */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm">
-                            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-6">
-                                <Medal className="w-6 h-6 text-gold-500" />
-                                Badges ({earnedBadges.length}/{Object.keys(allBadges).length})
-                            </h2>
-                            
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {Object.values(allBadges).map(badge => {
-                                    const isEarned = loyaltyData.badges.includes(badge.id);
-                                    return (
-                                        <div 
-                                            key={badge.id}
-                                            className={`text-center p-4 rounded-xl ${
-                                                isEarned ? 'bg-gold-50' : 'bg-gray-50 opacity-50'
-                                            }`}
-                                        >
-                                            <div className={`text-4xl mb-2 ${!isEarned && 'grayscale'}`}>
-                                                {badge.icon}
-                                            </div>
-                                            <h3 className="font-semibold text-sm text-gray-900">{badge.name}</h3>
-                                            <p className="text-xs text-gray-500 mt-1">{badge.description}</p>
-                                            {isEarned ? (
-                                                <span className="inline-block mt-2 text-xs text-green-600 font-medium">
-                                                    ✓ Obtenu
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center gap-1 mt-2 text-xs text-gray-400">
-                                                    <Lock className="w-3 h-3" /> +{badge.points} pts
-                                                </span>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        {/* Rewards to Redeem */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm">
-                            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-6">
-                                <Gift className="w-6 h-6 text-pink-500" />
-                                Récompenses disponibles
-                            </h2>
-                            
-                            <div className="grid md:grid-cols-2 gap-4">
-                                {[
-                                    { points: 500, reward: '500 G de réduction', icon: '🎫' },
-                                    { points: 1000, reward: 'Livraison gratuite x3', icon: '🚚' },
-                                    { points: 2500, reward: 'Produit mystère', icon: '🎁' },
-                                    { points: 5000, reward: 'Accès VIP 1 mois', icon: '👑' },
-                                ].map((item, index) => (
-                                    <button
-                                        key={index}
-                                        disabled={loyaltyData.points < item.points}
-                                        className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
-                                            loyaltyData.points >= item.points
-                                                ? 'border-gold-200 hover:border-gold-400 bg-white'
-                                                : 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
-                                        }`}
-                                    >
-                                        <div className="text-3xl">{item.icon}</div>
-                                        <div className="flex-1 text-left">
-                                            <h3 className="font-semibold text-gray-900">{item.reward}</h3>
-                                            <p className="text-sm text-gold-600">{item.points} points</p>
-                                        </div>
-                                        <ChevronRight className="w-5 h-5 text-gray-400" />
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Sidebar */}
-                    <div className="space-y-6">
-                        {/* Current Benefits */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm">
-                            <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <Crown className="w-5 h-5 text-gold-500" />
-                                Vos avantages {currentTier.name}
-                            </h3>
-                            <ul className="space-y-3">
-                                {currentTier.benefits.map((benefit, index) => (
-                                    <li key={index} className="flex items-center gap-2 text-sm text-gray-600">
-                                        <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                                        {benefit}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        {/* All Tiers */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm">
-                            <h3 className="font-bold text-gray-900 mb-4">Tous les niveaux</h3>
-                            <div className="space-y-3">
-                                {Object.entries(tiers).map(([key, tier]) => {
-                                    const isCurrentTier = key === loyaltyData.tier;
-                                    const isLocked = tier.minPoints > loyaltyData.lifetimePoints;
-                                    
-                                    return (
-                                        <div 
-                                            key={key}
-                                            className={`flex items-center gap-3 p-3 rounded-xl ${
-                                                isCurrentTier ? 'bg-gold-50 border-2 border-gold-200' : 
-                                                isLocked ? 'opacity-50' : 'bg-gray-50'
-                                            }`}
-                                        >
-                                            <span className="text-2xl">{tier.icon}</span>
-                                            <div className="flex-1">
-                                                <h4 className="font-semibold text-sm">{tier.name}</h4>
-                                                <p className="text-xs text-gray-500">
-                                                    {tier.minPoints.toLocaleString()}+ pts
-                                                </p>
-                                            </div>
-                                            <span className="text-xs font-medium text-gold-600">
-                                                x{tier.multiplier}
-                                            </span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        {/* How to earn */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm">
-                            <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <Zap className="w-5 h-5 text-yellow-500" />
-                                Comment gagner des points?
-                            </h3>
-                            <ul className="space-y-3 text-sm">
-                                <li className="flex items-center justify-between">
-                                    <span className="text-gray-600">Achat (100 G = 1 pt)</span>
-                                    <span className="font-medium text-gold-600">×{currentTier.multiplier}</span>
-                                </li>
-                                <li className="flex items-center justify-between">
-                                    <span className="text-gray-600">Écrire un avis</span>
-                                    <span className="font-medium text-gold-600">+25 pts</span>
-                                </li>
-                                <li className="flex items-center justify-between">
-                                    <span className="text-gray-600">Parrainer un ami</span>
-                                    <span className="font-medium text-gold-600">+200 pts</span>
-                                </li>
-                                <li className="flex items-center justify-between">
-                                    <span className="text-gray-600">Défis quotidiens</span>
-                                    <span className="font-medium text-gold-600">Variable</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+const tierColors = {
+  bronze: 'from-amber-600 to-amber-800',
+  silver: 'from-gray-400 to-gray-600',
+  gold: 'from-yellow-400 to-yellow-600',
+  platinum: 'from-purple-400 to-purple-700',
+  diamond: 'from-cyan-300 to-blue-600'
 };
 
-export default LoyaltyDashboard;
+const tierIcons = {
+  bronze: '🥉',
+  silver: '🥈',
+  gold: '🥇',
+  platinum: '💎',
+  diamond: '👑'
+};
+
+export default function LoyaltyDashboard() {
+  const { 
+    points, 
+    tier, 
+    badges, 
+    dailyChallenges, 
+    streakDays,
+    completeDailyChallenge,
+    redeemReward
+  } = useLoyalty();
+
+  const rewards = [
+    { id: 1, name: '5% de réduction', points: 500, icon: '🏷️' },
+    { id: 2, name: 'Livraison gratuite', points: 800, icon: '🚚' },
+    { id: 3, name: '10% de réduction', points: 1200, icon: '🎁' },
+    { id: 4, name: 'Accès VIP ventes flash', points: 2000, icon: '⚡' },
+    { id: 5, name: 'Produit mystère', points: 3000, icon: '🎲' },
+  ];
+
+  const nextTierPoints = {
+    bronze: 1000,
+    silver: 5000,
+    gold: 15000,
+    platinum: 50000,
+    diamond: Infinity
+  };
+
+  const progress = tier === 'diamond' ? 100 : (points / nextTierPoints[tier]) * 100;
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Header */}
+      <div className={`bg-gradient-to-r ${tierColors[tier]} text-white px-4 py-8`}>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-sm opacity-80">Votre niveau</p>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              {tierIcons[tier]} {tier.charAt(0).toUpperCase() + tier.slice(1)}
+            </h1>
+          </div>
+          <div className="text-right">
+            <p className="text-sm opacity-80">Points disponibles</p>
+            <p className="text-3xl font-bold">{points.toLocaleString()}</p>
+          </div>
+        </div>
+
+        {/* Progress to next tier */}
+        {tier !== 'diamond' && (
+          <div className="bg-white/20 rounded-full h-3 overflow-hidden">
+            <div 
+              className="bg-white h-full rounded-full transition-all duration-500"
+              style={{ width: `${Math.min(progress, 100)}%` }}
+            />
+          </div>
+        )}
+        <p className="text-xs mt-2 opacity-80">
+          {tier === 'diamond' 
+            ? '👑 Niveau maximum atteint!' 
+            : `${nextTierPoints[tier] - points} points pour le niveau suivant`
+          }
+        </p>
+      </div>
+
+      {/* Streak */}
+      <div className="px-4 -mt-4">
+        <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+              <Zap className="text-orange-500" size={24} />
+            </div>
+            <div>
+              <p className="font-semibold text-gray-900">Série en cours</p>
+              <p className="text-sm text-gray-600">{streakDays} jours consécutifs</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-bold text-orange-500">{streakDays}🔥</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Daily Challenges */}
+      <div className="px-4 mt-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold">Défis du jour</h2>
+          <span className="text-sm text-gray-500">
+            {dailyChallenges.filter(c => c.completed).length}/{dailyChallenges.length} complétés
+          </span>
+        </div>
+
+        <div className="space-y-3">
+          {dailyChallenges.map(challenge => (
+            <div 
+              key={challenge.id}
+              className={`bg-white rounded-xl p-4 border ${
+                challenge.completed ? 'border-green-200 bg-green-50' : 'border-gray-100'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    challenge.completed ? 'bg-green-100' : 'bg-primary-50'
+                  }`}>
+                    {challenge.completed ? (
+                      <Award className="text-green-600" size={20} />
+                    ) : (
+                      <Target className="text-primary-600" size={20} />
+                    )}
+                  </div>
+                  <div>
+                    <p className={`font-medium ${challenge.completed ? 'text-green-700' : 'text-gray-900'}`}>
+                      {challenge.title}
+                    </p>
+                    <p className="text-xs text-gray-500">{challenge.description}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-sm font-semibold text-primary-600">
+                    +{challenge.points} pts
+                  </span>
+                  {challenge.completed && (
+                    <p className="text-xs text-green-600">✓ Complété</p>
+                  )}
+                </div>
+              </div>
+              
+              {!challenge.completed && (
+                <div className="mt-3">
+                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>Progression</span>
+                    <span>{challenge.progress}/{challenge.target}</span>
+                  </div>
+                  <div className="bg-gray-100 rounded-full h-2">
+                    <div 
+                      className="bg-primary-500 h-full rounded-full transition-all"
+                      style={{ width: `${(challenge.progress / challenge.target) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Badges */}
+      <div className="px-4 mt-6">
+        <h2 className="text-lg font-semibold mb-3">Mes badges</h2>
+        <div className="grid grid-cols-4 gap-3">
+          {badges.map(badge => (
+            <div 
+              key={badge.id}
+              className={`text-center p-3 rounded-xl ${
+                badge.unlocked ? 'bg-white shadow' : 'bg-gray-100 opacity-50'
+              }`}
+            >
+              <span className="text-3xl">{badge.icon}</span>
+              <p className="text-xs mt-1 font-medium text-gray-700">{badge.name}</p>
+              {!badge.unlocked && (
+                <p className="text-xs text-gray-400">🔒</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Rewards Catalog */}
+      <div className="px-4 mt-6">
+        <h2 className="text-lg font-semibold mb-3">Échangez vos points</h2>
+        <div className="space-y-3">
+          {rewards.map(reward => {
+            const canRedeem = points >= reward.points;
+            return (
+              <div 
+                key={reward.id}
+                className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{reward.icon}</span>
+                  <div>
+                    <p className="font-medium text-gray-900">{reward.name}</p>
+                    <p className="text-sm text-primary-600 font-semibold">{reward.points} points</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => canRedeem && redeemReward(reward)}
+                  disabled={!canRedeem}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    canRedeem
+                      ? 'bg-primary-600 text-white hover:bg-primary-700'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  {canRedeem ? 'Échanger' : 'Insuffisant'}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tier Benefits */}
+      <div className="px-4 mt-6 mb-8">
+        <h2 className="text-lg font-semibold mb-3">Avantages {tier}</h2>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <ul className="space-y-3">
+            {tier === 'bronze' && (
+              <>
+                <li className="flex items-center gap-2 text-sm">
+                  <Star className="text-amber-600" /> 1 point par 100 FCFA dépensés
+                </li>
+                <li className="flex items-center gap-2 text-sm">
+                  <Gift className="text-amber-600" /> Offres anniversaire
+                </li>
+              </>
+            )}
+            {tier === 'silver' && (
+              <>
+                <li className="flex items-center gap-2 text-sm">
+                  <Star className="text-gray-500" /> 1.5x points sur tous les achats
+                </li>
+                <li className="flex items-center gap-2 text-sm">
+                  <TrendingUp className="text-gray-500" /> Accès ventes privées
+                </li>
+              </>
+            )}
+            {tier === 'gold' && (
+              <>
+                <li className="flex items-center gap-2 text-sm">
+                  <Star className="text-yellow-500" /> 2x points sur tous les achats
+                </li>
+                <li className="flex items-center gap-2 text-sm">
+                  <Zap className="text-yellow-500" /> Livraison prioritaire
+                </li>
+              </>
+            )}
+            {(tier === 'platinum' || tier === 'diamond') && (
+              <>
+                <li className="flex items-center gap-2 text-sm">
+                  <Star className="text-purple-500" /> 3x points sur tous les achats
+                </li>
+                <li className="flex items-center gap-2 text-sm">
+                  <Shield className="text-purple-500" /> Support client prioritaire
+                </li>
+                <li className="flex items-center gap-2 text-sm">
+                  <Gift className="text-purple-500" /> Cadeaux exclusifs mensuels
+                </li>
+              </>
+            )}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
