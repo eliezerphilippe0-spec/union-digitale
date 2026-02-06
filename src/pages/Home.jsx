@@ -10,6 +10,8 @@ import ServicesPreview from '../components/ServicesPreview';
 import StructuredData from '../components/StructuredData';
 import SocialProofLive from '../components/SocialProofLive';
 import { ProductGridSkeleton } from '../components/ui/Skeleton';
+import AIRecommendations from '../components/recommendations/AIRecommendations';
+import LiveStreamsList from '../components/live/LiveStreamsList';
 
 
 import {
@@ -136,7 +138,8 @@ const Home = () => {
             {/* Trusted By Section */}
             <TrustedBy />
 
-
+            {/* Live Shopping Streams */}
+            <LiveStreamsList />
 
             {/* Services Preview Section */}
             <ServicesPreview />
@@ -304,30 +307,9 @@ const Home = () => {
                     </div>
                 </section>
 
-                {/* Recommended Products */}
+                {/* AI Recommendations - Personalized */}
                 <section className="mb-12">
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
-                            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-                                {t('recommended_for_you') || 'Recommandé pour Vous'}
-                            </h2>
-                            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-                                {t('recommended_desc') || 'Sélection personnalisée basée sur vos préférences'}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                        {products.slice(4, 8).map((product, index) => (
-                            <div
-                                key={product.id}
-                                className="stagger-item opacity-0"
-                                style={{ animationDelay: `${index * 100}ms` }}
-                            >
-                                <ProductCard product={product} />
-                            </div>
-                        ))}
-                    </div>
+                    <AIRecommendations limit={8} />
                 </section>
             </div>
 
