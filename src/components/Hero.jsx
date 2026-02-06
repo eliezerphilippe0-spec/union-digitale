@@ -36,7 +36,7 @@ const Hero = () => {
     }, [shouldReduceAnimations]);
 
     return (
-        <div className="relative min-h-[85vh] md:min-h-[75vh] lg:min-h-[80vh] overflow-hidden bg-[#0a0f1a]">
+        <div className="relative min-h-[60vh] md:min-h-[55vh] lg:min-h-[65vh] overflow-hidden bg-[#0a0f1a]">
             {/* Exceptional Animated Background - Inspired by Linear/Vercel */}
             <div className="absolute inset-0">
                 {/* Base dark gradient */}

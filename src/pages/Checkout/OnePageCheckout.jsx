@@ -18,9 +18,18 @@ const OnePageCheckout = () => {
     const [email, setEmail] = useState(currentUser?.email || '');
     const [fullName, setFullName] = useState(currentUser?.displayName || '');
     const [phone, setPhone] = useState(currentUser?.phoneNumber || '');
+    const [address, setAddress] = useState('');
+    const [city, setCity] = useState('');
+    const [department, setDepartment] = useState('Ouest');
+    const [deliveryNotes, setDeliveryNotes] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('moncash');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
+    const departments = [
+        'Ouest', 'Nord', 'Nord-Est', 'Nord-Ouest', 'Artibonite',
+        'Centre', 'Sud', 'Sud-Est', 'Grande-Anse', 'Nippes'
+    ];
 
     // Example Bump Product (Should come from backend/config)
     const bumpProduct = {
@@ -48,6 +57,7 @@ const OnePageCheckout = () => {
                 items: cartItems,
                 total: cartTotal,
                 customer: { name: fullName, email, phone },
+                shipping: { address, city, department, notes: deliveryNotes },
                 paymentMethod
             };
 
@@ -130,10 +140,66 @@ const OnePageCheckout = () => {
                             </div>
                         </div>
 
-                        {/* Step 2: Payment */}
+                        {/* Step 2: Shipping Address */}
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">2</div>
+                                <h2 className="text-xl font-bold text-gray-800">Adresse de Livraison</h2>
+                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Adresse complète *</label>
+                                    <input
+                                        type="text"
+                                        value={address}
+                                        onChange={(e) => setAddress(e.target.value)}
+                                        className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border"
+                                        placeholder="123 Rue Example, Quartier"
+                                        required
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Ville / Commune *</label>
+                                        <input
+                                            type="text"
+                                            value={city}
+                                            onChange={(e) => setCity(e.target.value)}
+                                            className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border"
+                                            placeholder="Port-au-Prince"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Département *</label>
+                                        <select
+                                            value={department}
+                                            onChange={(e) => setDepartment(e.target.value)}
+                                            className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border bg-white"
+                                        >
+                                            {departments.map(dept => (
+                                                <option key={dept} value={dept}>{dept}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Instructions de livraison (optionnel)</label>
+                                    <textarea
+                                        value={deliveryNotes}
+                                        onChange={(e) => setDeliveryNotes(e.target.value)}
+                                        className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border"
+                                        placeholder="Ex: Près de l'église, portail bleu..."
+                                        rows={2}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Step 3: Payment */}
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">3</div>
                                 <h2 className="text-xl font-bold text-gray-800">Paiement</h2>
                             </div>
 

@@ -8,6 +8,8 @@ import TestimonialCarousel from '../components/TestimonialCarousel';
 import TrustedBy from '../components/TrustedBy';
 import ServicesPreview from '../components/ServicesPreview';
 import StructuredData from '../components/StructuredData';
+import SocialProofLive from '../components/SocialProofLive';
+import { ProductGridSkeleton } from '../components/ui/Skeleton';
 
 
 import {
@@ -164,7 +166,7 @@ const Home = () => {
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                         {categories.map((cat, index) => (
                             <div
                                 key={cat.key}
@@ -239,7 +241,7 @@ const Home = () => {
                             </button>
                         </div>
                         <div className="p-6">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                                 {products.slice(0, 4).map((product, index) => (
                                     <div
                                         key={product.id}
@@ -315,7 +317,7 @@ const Home = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                         {products.slice(4, 8).map((product, index) => (
                             <div
                                 key={product.id}
@@ -363,6 +365,9 @@ const Home = () => {
 
             {/* Full Width CTA */}
             <FullWidthCTA />
+
+            {/* Live Social Proof Notifications */}
+            <SocialProofLive products={products} />
         </div>
     );
 };

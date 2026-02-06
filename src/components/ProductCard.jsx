@@ -62,7 +62,7 @@ const ProductCard = ({ product }) => {
             "
         >
             {/* Image Container */}
-            <div className="relative h-56 bg-neutral-100 overflow-hidden aspect-square group-hover:bg-neutral-50 transition-colors duration-500">
+            <div className="relative h-36 sm:h-48 md:h-56 bg-neutral-100 overflow-hidden aspect-square group-hover:bg-neutral-50 transition-colors duration-500">
                 {/* Placeholder Image with lazy loading */}
                 <div className="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-700" loading="lazy">
                     <span className="text-neutral-300 text-6xl font-bold opacity-20">
@@ -185,52 +185,53 @@ const ProductCard = ({ product }) => {
             </div>
 
             {/* Content */}
-            <div className="p-4 flex-1 flex flex-col">
+            <div className="p-3 sm:p-4 flex-1 flex flex-col">
                 {/* Title */}
                 <h3 className="
                     font-semibold
                     text-primary-900
-                    mb-2
+                    mb-1 sm:mb-2
                     line-clamp-2
                     group-hover:text-accent-600
                     transition-colors
                     leading-snug
-                    min-h-[3rem]
+                    text-sm sm:text-base
+                    min-h-[2.5rem] sm:min-h-[3rem]
                 ">
                     {product.title}
                 </h3>
 
                 {/* Rating */}
-                <div className="flex items-center gap-1.5 mb-3 min-h-[20px]">
+                <div className="flex items-center gap-1 sm:gap-1.5 mb-2 sm:mb-3 min-h-[18px] sm:min-h-[20px]">
                     <div className="flex items-center gap-0.5">
                         {[...Array(5)].map((_, i) => (
                             <Star
                                 key={i}
-                                className={`w-4 h-4 ${i < product.rating
+                                className={`w-3 h-3 sm:w-4 sm:h-4 ${i < product.rating
                                     ? 'fill-gold-500 text-gold-500'
                                     : 'text-neutral-300'
                                     }`}
                             />
                         ))}
                     </div>
-                    <span className="text-sm text-neutral-600">
+                    <span className="text-xs sm:text-sm text-neutral-600">
                         ({product.reviews || 0})
                     </span>
                 </div>
 
                 {/* Price */}
                 <div className="mt-auto">
-                    <div className="flex items-baseline gap-2 mb-1 min-h-[32px]">
+                    <div className="flex flex-wrap items-baseline gap-1 sm:gap-2 mb-1 min-h-[24px] sm:min-h-[32px]">
                         <div className="flex items-baseline">
-                            <span className="text-2xl font-bold text-primary-900">
+                            <span className="text-lg sm:text-2xl font-bold text-primary-900">
                                 {product.price.toLocaleString()}
                             </span>
-                            <span className="text-sm font-medium text-neutral-600 ml-1">
+                            <span className="text-xs sm:text-sm font-medium text-neutral-600 ml-0.5 sm:ml-1">
                                 G
                             </span>
                         </div>
                         {product.originalPrice && product.originalPrice > product.price && (
-                            <span className="text-sm text-neutral-500 line-through">
+                            <span className="text-xs sm:text-sm text-neutral-500 line-through">
                                 {product.originalPrice.toLocaleString()} G
                             </span>
                         )}
@@ -238,7 +239,7 @@ const ProductCard = ({ product }) => {
 
                     {/* Union Plus Badge */}
                     {product.unionPlus && (
-                        <div className="flex items-center gap-1.5 text-xs text-primary-700 font-medium">
+                        <div className="hidden sm:flex items-center gap-1.5 text-xs text-primary-700 font-medium">
                             <Zap className="w-3.5 h-3.5 text-gold-600" />
                             <span>{t('one_day_delivery') || 'Livraison 1 jour'}</span>
                         </div>

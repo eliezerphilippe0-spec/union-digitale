@@ -99,7 +99,7 @@ const Footer = () => {
                         <span className="text-red-600 font-bold text-sm">MonCash</span>
                     </div>
                     <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Natcom_Logo.png/220px-Natcom_Logo.png" alt="Natcash" className="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Natcom_Logo.png/220px-Natcom_Logo.png" className="h-6" />
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Natcom_Logo.png/220px-Natcom_Logo.png" alt="Natcash" className="h-6" />
                         <span className="text-blue-600 font-bold text-sm">Natcash</span>
                     </div>
                     <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-md hover:shadow-lg transition-shadow text-gray-800">

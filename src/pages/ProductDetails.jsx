@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Check, Shirt } from 'lucide-react';
+import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Check, Shirt, Loader } from 'lucide-react';
 import { useProducts } from '../hooks/useProducts';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -8,9 +8,11 @@ import SocialProof from '../components/SocialProof';
 import CrossSell from '../components/CrossSell';
 import VirtualFittingRoom from '../components/VirtualFittingRoom';
 import ReviewSection from '../components/ReviewSection';
-import { Loader } from 'lucide-react';
 import SEO from '../components/SEO';
 import { useCart } from '../contexts/CartContext';
+import { useToast } from '../components/ui/Toast';
+import StickyAddToCart from '../components/StickyAddToCart';
+import UrgencyIndicators, { StockWarning, LiveViewers, RecentSales } from '../components/UrgencyIndicators';
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -19,11 +21,21 @@ const ProductDetails = () => {
     const { products, loading } = useProducts();
     const { t } = useLanguage();
     const { addToCart } = useCart();
+    const toast = useToast();
     const [showFittingRoom, setShowFittingRoom] = useState(false);
 
     // Find product by ID (handle both string and number IDs)
     const product = products.find(p => String(p.id) === String(id));
     const [activeImage, setActiveImage] = useState(0);
+
+    const handleAddToCart = () => {
+        for (let i = 0; i < quantity; i++) {
+            addToCart(product);
+        }
+        if (toast) {
+            toast.success(`${quantity}x ${product.title} ajouté au panier !`);
+        }
+    };
 
     if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader className="animate-spin w-8 h-8 text-secondary" /></div>;
 
@@ -174,6 +186,13 @@ const ProductDetails = () => {
                                 </div>
                             )}
 
+                            {/* Urgency Indicators */}
+                            <div className="mb-4 space-y-2">
+                                <StockWarning stock={product.stock || 8} />
+                                <LiveViewers productId={product.id} />
+                                <RecentSales count={product.recentSales || 12} hours={24} />
+                            </div>
+
                             <div className="text-xl text-green-700 font-medium mb-4">{t('in_stock')}</div>
 
                             <SEO
@@ -195,7 +214,7 @@ const ProductDetails = () => {
                                 </div>
 
                                 <button
-                                    onClick={() => alert(`Ajouté ${quantity} article(s) au panier !`)}
+                                    onClick={handleAddToCart}
                                     className="w-full bg-secondary hover:bg-secondary-hover text-white font-medium py-2 rounded-full shadow-sm transition-colors"
                                 >
                                     {t('add_to_cart')}
@@ -251,10 +270,15 @@ const ProductDetails = () => {
                     onClose={() => setShowFittingRoom(false)}
                     onAddToCart={(prod, size) => {
                         addToCart({ ...prod, selectedSize: size });
-                        alert(`Ajouté au panier - Taille ${size}`);
+                        if (toast) {
+                            toast.success(`Ajouté au panier - Taille ${size}`);
+                        }
                     }}
                 />
             )}
+
+            {/* Sticky Add to Cart for Mobile */}
+            <StickyAddToCart product={product} />
         </div>
     );
 };
