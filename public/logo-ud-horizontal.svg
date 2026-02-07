@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" fill="none">
+  <!-- Icon -->
+  <g transform="translate(0, 0)">
+    <circle cx="40" cy="40" r="36" fill="#0F2847"/>
+    <circle cx="40" cy="40" r="36" stroke="#D4AF37" stroke-width="1.5" fill="none"/>
+    <!-- U -->
+    <path d="M22 22 L22 45 C22 56 30 62 40 62" 
+          stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" fill="none"/>
+    <!-- D -->
+    <path d="M40 18 L40 62 M40 18 C58 18 65 30 65 40 C65 50 58 62 40 62" 
+          stroke="#D4AF37" stroke-width="5" stroke-linecap="round" fill="none"/>
+    <circle cx="40" cy="40" r="2.5" fill="#D4AF37"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="90" y="52" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="700" fill="#0F2847">
+    Union<tspan fill="#D4AF37">Digitale</tspan>
+  </text>
+</svg>

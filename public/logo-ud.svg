@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Background Circle -->
+  <circle cx="60" cy="60" r="56" fill="#0F2847"/>
+  
+  <!-- Gold Accent Ring -->
+  <circle cx="60" cy="60" r="56" stroke="#D4AF37" stroke-width="2" fill="none"/>
+  
+  <!-- U Letter -->
+  <path d="M32 35 L32 65 C32 80 44 90 60 90 L60 90" 
+        stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" fill="none"/>
+  
+  <!-- D Letter -->
+  <path d="M60 30 L60 90 M60 30 C85 30 95 50 95 60 C95 70 85 90 60 90" 
+        stroke="#D4AF37" stroke-width="8" stroke-linecap="round" fill="none"/>
+  
+  <!-- Connecting dot -->
+  <circle cx="60" cy="60" r="4" fill="#D4AF37"/>
+</svg>

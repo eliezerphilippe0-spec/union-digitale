@@ -146,6 +146,7 @@ export default defineConfig({
   server: {
     hmr: {
       overlay: false // Disable error overlay for better dev performance
-    }
+    },
+    allowedHosts: ['uniondigitale.loca.lt', 'localhost', '.loca.lt']
   }
 })
