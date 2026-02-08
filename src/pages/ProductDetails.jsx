@@ -20,6 +20,14 @@ import ProductVariants from '../components/ProductVariants';
 import BuyNowButton from '../components/BuyNowButton';
 import QuestionsAnswers from '../components/QuestionsAnswers';
 import DeliveryEstimate from '../components/DeliveryEstimate';
+// Composants spécifiques produits digitaux
+import { 
+    DigitalProductFeatures, 
+    CourseContent, 
+    DigitalPreview, 
+    InstructorCard, 
+    DigitalBuyBox 
+} from '../components/digital';
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -31,6 +39,10 @@ const ProductDetails = () => {
     const toast = useToast();
     const [showFittingRoom, setShowFittingRoom] = useState(false);
     const [selectedVariants, setSelectedVariants] = useState({});
+    const [showDigitalPreview, setShowDigitalPreview] = useState(false);
+
+    // Check if product is digital
+    const isDigitalProduct = product?.type === 'digital';
 
     // Find product by ID (handle both string and number IDs)
     const product = products.find(p => String(p.id) === String(id));
@@ -193,6 +205,10 @@ const ProductDetails = () => {
 
                     {/* Right Column: Buy Box (3 cols) */}
                     <div className="lg:col-span-3">
+                        {/* Digital Product: Special Buy Box */}
+                        {isDigitalProduct ? (
+                            <DigitalBuyBox product={product} />
+                        ) : (
                         <div className="border border-gray-200 rounded-lg p-4 shadow-sm">
                             <SocialProof />
                             <div className="text-2xl font-medium text-red-700 mb-2">{product.price.toLocaleString()} G</div>
@@ -302,7 +318,28 @@ const ProductDetails = () => {
                                 {t('secure_transaction')}
                             </div>
                         </div>
+                        )}
                     </div>
+
+                    {/* Digital Product Specific Sections */}
+                    {isDigitalProduct && (
+                        <>
+                            {/* Course Content / Table of Contents */}
+                            <div className="lg:col-span-8">
+                                <CourseContent course={product} />
+                            </div>
+                            
+                            {/* Instructor / Author Card */}
+                            <div className="lg:col-span-4">
+                                <InstructorCard instructor={product.instructor} />
+                            </div>
+                            
+                            {/* Digital Product Features */}
+                            <div className="lg:col-span-12">
+                                <DigitalProductFeatures product={product} />
+                            </div>
+                        </>
+                    )}
 
                     {/* Frequently Bought Together - Amazon Style */}
                     <div className="lg:col-span-12">
@@ -312,14 +349,16 @@ const ProductDetails = () => {
                         />
                     </div>
 
-                    {/* Delivery Estimate */}
-                    <div className="lg:col-span-12">
-                        <DeliveryEstimate 
-                            department="Ouest"
-                            hasUnionPlus={product.unionPlus}
-                            productType={product.type}
-                        />
-                    </div>
+                    {/* Delivery Estimate - Only for physical */}
+                    {!isDigitalProduct && (
+                        <div className="lg:col-span-12">
+                            <DeliveryEstimate 
+                                department="Ouest"
+                                hasUnionPlus={product.unionPlus}
+                                productType={product.type}
+                            />
+                        </div>
+                    )}
 
                     {/* Questions & Answers - Amazon Style */}
                     <div className="lg:col-span-12">
@@ -349,6 +388,15 @@ const ProductDetails = () => {
                             toast.success(`Ajouté au panier - Taille ${size}`);
                         }
                     }}
+                />
+            )}
+
+            {/* Digital Preview Modal */}
+            {showDigitalPreview && isDigitalProduct && (
+                <DigitalPreview
+                    product={product}
+                    isOpen={showDigitalPreview}
+                    onClose={() => setShowDigitalPreview(false)}
                 />
             )}
 
