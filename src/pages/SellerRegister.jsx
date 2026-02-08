@@ -6,7 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../lib/firebase';
-import SEO from '../components/SEO';
+import SEO from '../components/common/SEO';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import RegistrationSteps from '../components/RegistrationSteps';

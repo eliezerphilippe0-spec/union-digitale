@@ -3,8 +3,8 @@ import { X, Ruler, TrendingUp, AlertCircle, Check, ChevronRight } from 'lucide-r
 import { useFittingRoom } from '../contexts/FittingRoomContext';
 import { recommendSize } from '../services/sizeRecommendationService';
 import { determineBodyType, getBodyTypeRecommendations } from '../utils/measurementUtils';
-import BodyMeasurementForm from './BodyMeasurementForm';
-import SizeRecommendation from './SizeRecommendation';
+import BodyMeasurementForm from './forms/BodyMeasurementForm';
+import SizeRecommendation from './product/SizeRecommendation';
 import Button from './ui/Button';
 import Card from './ui/Card';
 import Badge from './ui/Badge';

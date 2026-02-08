@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ShoppingBag, Eye, EyeOff, Loader, CheckCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import SEO from '../components/SEO';
+import SEO from '../components/common/SEO';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 

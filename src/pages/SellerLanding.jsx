@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Store, TrendingUp, Users, Shield, BarChart3, CreditCard, Package, Zap, CheckCircle, ArrowRight, Star } from 'lucide-react';
-import SEO from '../components/SEO';
+import SEO from '../components/common/SEO';
 import Button from '../components/ui/Button';
-import UniversalAccess from '../components/UniversalAccess';
+import UniversalAccess from '../components/common/UniversalAccess';
 
 const SellerLanding = () => {
     const navigate = useNavigate();

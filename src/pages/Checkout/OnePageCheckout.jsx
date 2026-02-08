@@ -6,7 +6,7 @@ import { useAffiliation } from '../../contexts/AffiliationContext';
 import { paymentService } from '../../services/paymentService';
 import { useNavigate } from 'react-router-dom';
 import { Loader, Lock, ShieldCheck, CreditCard, Smartphone, Zap } from 'lucide-react';
-import AddressAutocomplete from '../../components/AddressAutocomplete';
+import AddressAutocomplete from '../../components/forms/AddressAutocomplete';
 import OrderBump from '../../components/OrderBump';
 
 const OnePageCheckout = () => {

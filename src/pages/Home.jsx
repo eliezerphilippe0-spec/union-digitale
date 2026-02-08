@@ -4,17 +4,17 @@
  */
 
 import { useProducts } from '../hooks/useProducts';
-import FlashSaleCountdown from '../components/FlashSaleCountdown';
-import Hero from '../components/Hero';
-import ProductCard from '../components/ProductCard';
-import FullWidthCTA from '../components/FullWidthCTA';
-import HowItWorks from '../components/HowItWorks';
-import TestimonialCarousel from '../components/TestimonialCarousel';
-import TrustedBy from '../components/TrustedBy';
+import FlashSaleCountdown from '../components/marketing/FlashSaleCountdown';
+import Hero from '../components/marketing/Hero';
+import ProductCard from '../components/product/ProductCard';
+import FullWidthCTA from '../components/marketing/FullWidthCTA';
+import HowItWorks from '../components/marketing/HowItWorks';
+import TestimonialCarousel from '../components/marketing/TestimonialCarousel';
+import TrustedBy from '../components/marketing/TrustedBy';
 import ServicesPreview from '../components/ServicesPreview';
-import StructuredData from '../components/StructuredData';
-import SocialProofLive from '../components/SocialProofLive';
-import PromoBanner from '../components/PromoBanner';
+import StructuredData from '../components/common/StructuredData';
+import SocialProofLive from '../components/marketing/SocialProofLive';
+import PromoBanner from '../components/marketing/PromoBanner';
 import AIRecommendations from '../components/recommendations/AIRecommendations';
 import LiveStreamsList from '../components/live/LiveStreamsList';
 

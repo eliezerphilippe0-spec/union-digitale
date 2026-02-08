@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { CheckCircle, Package, BarChart3, CreditCard, ArrowRight, Zap } from 'lucide-react';
-import SEO from '../components/SEO';
+import SEO from '../components/common/SEO';
 import Button from '../components/ui/Button';
 
 const SellerOnboarding = () => {

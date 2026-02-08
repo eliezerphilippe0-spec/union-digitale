@@ -6,7 +6,7 @@ import { CartProvider } from './contexts/CartContext';
 // Critical path - loaded immediately (NOT lazy!)
 import MainLayout from './layouts/MainLayout';
 import Home from './pages/Home';
-import ErrorBoundary from './components/ErrorBoundary';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 // Everything else - lazy loaded
 const Services = React.lazy(() => import('./pages/Services'));
@@ -93,8 +93,8 @@ const PageLoader = () => (
 );
 
 import { HelmetProvider } from 'react-helmet-async';
-import SEO from './components/SEO';
-import RouteTracker from './components/RouteTracker';
+import SEO from './components/common/SEO';
+import RouteTracker from './components/common/RouteTracker';
 
 import { WalletProvider } from './contexts/WalletContext';
 
@@ -105,7 +105,7 @@ const MyLibrary = React.lazy(() => import('./pages/MyLibrary'));
 const Travel = React.lazy(() => import('./pages/Travel'));
 const Favorites = React.lazy(() => import('./pages/Favorites'));
 const UnionPlus = React.lazy(() => import('./pages/UnionPlus'));
-const WhatsAppWidget = React.lazy(() => import('./components/WhatsAppWidget'));
+const WhatsAppWidget = React.lazy(() => import('./components/common/WhatsAppWidget'));
 
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -116,7 +116,7 @@ import { PerformanceProvider } from './contexts/PerformanceContext';
 import { FittingRoomProvider } from './contexts/FittingRoomContext';
 import { LoyaltyProvider } from './contexts/LoyaltyContext';
 import { ToastProvider } from './components/ui/Toast';
-import SkipLinks from './components/SkipLinks';
+import SkipLinks from './components/common/SkipLinks';
 
 // Services - lazy loaded
 const ServiceCatalog = React.lazy(() => import('./pages/services/ServiceCatalog'));

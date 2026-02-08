@@ -2,7 +2,7 @@ import React from 'react';
 import MainLayout from '../layouts/MainLayout';
 import { TrendingUp, Award, BarChart3, ArrowUpRight } from 'lucide-react';
 import { useProducts } from '../hooks/useProducts';
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../components/product/ProductCard';
 
 const Analytics = () => {
     const { products } = useProducts();

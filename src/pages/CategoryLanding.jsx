@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useProducts } from '../hooks/useProducts';
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../components/product/ProductCard';
 import { Loader, Music, Book, Smartphone, Briefcase, Gift } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 

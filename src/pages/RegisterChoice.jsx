@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingBag, Store, ArrowRight, Check } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import SEO from '../components/SEO';
+import SEO from '../components/common/SEO';
 
 const RegisterChoice = () => {
     const navigate = useNavigate();

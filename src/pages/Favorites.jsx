@@ -2,7 +2,7 @@ import React from 'react';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { products } from '../data/products';
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../components/product/ProductCard';
 import { Heart } from 'lucide-react';
 
 const Favorites = () => {

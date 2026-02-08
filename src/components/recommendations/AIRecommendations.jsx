@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Sparkles, TrendingUp, Clock, Heart, ChevronRight, RefreshCw } from 'lucide-react';
-import ProductCard from '../ProductCard';
+import ProductCard from '../product/ProductCard';
 import recommendationService, { EVENT_TYPES } from '../../services/recommendationService';
 import { useProducts } from '../../hooks/useProducts';
 

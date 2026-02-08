@@ -1,8 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import BottomNav from '../components/BottomNav';
+import { Header, Footer, BottomNav } from '../components/layout';
 
 const MainLayout = () => {
     return (

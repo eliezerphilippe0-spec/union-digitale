@@ -4,22 +4,22 @@ import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Check, Shirt, Loader,
 import { useProducts } from '../hooks/useProducts';
 import { useLanguage } from '../contexts/LanguageContext';
 
-import SocialProof from '../components/SocialProof';
-import CrossSell from '../components/CrossSell';
+import SocialProof from '../components/marketing/SocialProof';
+import CrossSell from '../components/product/CrossSell';
 import VirtualFittingRoom from '../components/VirtualFittingRoom';
-import ReviewSection from '../components/ReviewSection';
-import SEO from '../components/SEO';
+import ReviewSection from '../components/product/ReviewSection';
+import SEO from '../components/common/SEO';
 import { useCart } from '../contexts/CartContext';
 import { useToast } from '../components/ui/Toast';
-import StickyAddToCart from '../components/StickyAddToCart';
-import UrgencyIndicators, { StockWarning, LiveViewers, RecentSales } from '../components/UrgencyIndicators';
-import ImageZoom from '../components/ImageZoom';
+import StickyAddToCart from '../components/product/StickyAddToCart';
+import UrgencyIndicators, { StockWarning, LiveViewers, RecentSales } from '../components/marketing/UrgencyIndicators';
+import ImageZoom from '../components/product/ImageZoom';
 // Nouveaux composants inspirés des géants
-import FrequentlyBoughtTogether from '../components/FrequentlyBoughtTogether';
-import ProductVariants from '../components/ProductVariants';
-import BuyNowButton from '../components/BuyNowButton';
-import QuestionsAnswers from '../components/QuestionsAnswers';
-import DeliveryEstimate from '../components/DeliveryEstimate';
+import FrequentlyBoughtTogether from '../components/product/FrequentlyBoughtTogether';
+import ProductVariants from '../components/product/ProductVariants';
+import BuyNowButton from '../components/product/BuyNowButton';
+import QuestionsAnswers from '../components/product/QuestionsAnswers';
+import DeliveryEstimate from '../components/product/DeliveryEstimate';
 // Composants spécifiques produits digitaux
 import { 
     DigitalProductFeatures, 

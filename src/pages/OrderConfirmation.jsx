@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { CheckCircle, Package, ArrowRight } from 'lucide-react';
-import Celebration from '../components/Celebration';
+import Celebration from '../components/marketing/Celebration';
 
 import { useLanguage } from '../contexts/LanguageContext';
 

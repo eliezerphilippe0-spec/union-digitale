@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import ProductCard from '../components/ProductCard';
-import QuickViewModal from '../components/QuickViewModal';
+import ProductCard from '../components/product/ProductCard';
+import QuickViewModal from '../components/product/QuickViewModal';
 import { useProducts } from '../hooks/useProducts';
 import { Star, Filter, Loader, X, SlidersHorizontal, Grid, List } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
-import SEO from '../components/SEO';
+import SEO from '../components/common/SEO';
 import { ProductGridSkeleton } from '../components/ui/Skeleton';
 
 const Catalog = ({ predefinedFilter }) => {

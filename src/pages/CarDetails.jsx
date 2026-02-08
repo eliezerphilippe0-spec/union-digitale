@@ -4,7 +4,7 @@ import { db } from '../lib/firebase';
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { Calendar, MapPin, Gauge, Tag, DollarSign, User, Phone, MessageCircle } from 'lucide-react';
-import SEO from '../components/SEO';
+import SEO from '../components/common/SEO';
 
 export default function CarDetails() {
     const { id } = useParams();
