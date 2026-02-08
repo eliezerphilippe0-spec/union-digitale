@@ -104,4 +104,92 @@ export const CheckoutSkeleton = () => (
     </div>
 );
 
+// Dashboard Stats Skeleton - P3 FIX
+export const DashboardSkeleton = () => (
+    <div className="space-y-6">
+        {/* Action Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-32 rounded-2xl" />
+            ))}
+        </div>
+        
+        {/* KPI Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+                <Skeleton key={i} className="h-28 rounded-xl" />
+            ))}
+        </div>
+        
+        {/* Chart */}
+        <Skeleton className="h-80 rounded-xl" />
+    </div>
+);
+
+// Product Details Skeleton - P3 FIX
+export const ProductDetailsSkeleton = () => (
+    <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Image */}
+            <div className="lg:col-span-5 flex gap-4">
+                <div className="flex flex-col gap-2">
+                    {[...Array(4)].map((_, i) => (
+                        <Skeleton key={i} className="w-12 h-12" />
+                    ))}
+                </div>
+                <Skeleton className="flex-1 h-[400px] rounded-lg" />
+            </div>
+            
+            {/* Info */}
+            <div className="lg:col-span-4 space-y-4">
+                <Skeleton variant="text" className="w-3/4 h-8" />
+                <Skeleton variant="text" className="w-1/2 h-4" />
+                <div className="flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                        <Skeleton key={i} variant="circle" className="w-5 h-5" />
+                    ))}
+                </div>
+                <Skeleton className="h-32 rounded-xl" />
+                <Skeleton variant="text" className="w-full h-4" />
+                <Skeleton variant="text" className="w-full h-4" />
+                <Skeleton variant="text" className="w-2/3 h-4" />
+            </div>
+            
+            {/* Buy Box */}
+            <div className="lg:col-span-3">
+                <Skeleton className="h-80 rounded-xl" />
+            </div>
+        </div>
+    </div>
+);
+
+// Review Card Skeleton
+export const ReviewSkeleton = () => (
+    <div className="border-b border-gray-200 pb-4 mb-4">
+        <div className="flex items-center gap-3 mb-2">
+            <Skeleton variant="circle" className="w-10 h-10" />
+            <div className="space-y-1">
+                <Skeleton variant="text" className="w-24" />
+                <div className="flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                        <Skeleton key={i} variant="circle" className="w-3 h-3" />
+                    ))}
+                </div>
+            </div>
+        </div>
+        <Skeleton variant="text" className="w-full" />
+        <Skeleton variant="text" className="w-full" />
+        <Skeleton variant="text" className="w-2/3" />
+    </div>
+);
+
+// Reviews List Skeleton
+export const ReviewsListSkeleton = ({ count = 3 }) => (
+    <div className="space-y-4">
+        {[...Array(count)].map((_, i) => (
+            <ReviewSkeleton key={i} />
+        ))}
+    </div>
+);
+
 export default Skeleton;

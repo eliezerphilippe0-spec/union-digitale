@@ -7,12 +7,22 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useToast } from './ui/Toast';
 import Badge from './ui/Badge';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, onQuickView }) => {
     const navigate = useNavigate();
     const { addToCart } = useCart();
     const { isFavorite, toggleFavorite } = useFavorites();
     const { t } = useLanguage();
     const toast = useToast();
+
+    const handleQuickView = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (onQuickView) {
+            onQuickView(product);
+        } else {
+            navigate(`/product/${product.id}`);
+        }
+    };
 
     const handleToggleFavorite = (e) => {
         e.preventDefault();
@@ -61,8 +71,8 @@ const ProductCard = ({ product }) => {
                 cursor-pointer
             "
         >
-            {/* Image Container */}
-            <div className="relative h-36 sm:h-48 md:h-56 bg-neutral-100 overflow-hidden aspect-square group-hover:bg-neutral-50 transition-colors duration-500">
+            {/* Image Container - P1 FIX: Hauteur réduite sur mobile */}
+            <div className="relative h-32 sm:h-40 md:h-48 bg-neutral-100 overflow-hidden aspect-square group-hover:bg-neutral-50 transition-colors duration-500">
                 {/* Placeholder Image with lazy loading */}
                 <div className="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-700" loading="lazy">
                     <span className="text-neutral-300 text-6xl font-bold opacity-20">
@@ -135,11 +145,7 @@ const ProductCard = ({ product }) => {
                     backdrop-blur-[2px]
                 ">
                     <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            navigate(`/product/${product.id}`);
-                        }}
+                        onClick={handleQuickView}
                         className="
                             glass-premium
                             hover:bg-white/90

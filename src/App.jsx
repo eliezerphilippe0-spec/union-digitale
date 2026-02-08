@@ -3,9 +3,10 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 
-// Critical path - loaded immediately
+// Critical path - loaded immediately (NOT lazy!)
 import MainLayout from './layouts/MainLayout';
 import Home from './pages/Home';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Everything else - lazy loaded
 const Services = React.lazy(() => import('./pages/Services'));
@@ -28,7 +29,6 @@ const ComingSoon = React.lazy(() => import('./pages/ComingSoon'));
 const PlaceholderPage = React.lazy(() => import('./pages/PlaceholderPage'));
 const BestShops = React.lazy(() => import('./pages/BestShops'));
 const PoliciesPage = React.lazy(() => import('./pages/legal/PoliciesPage'));
-const ErrorBoundary = React.lazy(() => import('./components/ErrorBoundary'));
 const AddCar = React.lazy(() => import('./pages/seller/AddCar'));
 const KYCVerification = React.lazy(() => import('./pages/seller/KYCVerification'));
 const CarDetails = React.lazy(() => import('./pages/CarDetails'));

@@ -20,7 +20,7 @@ import LiveStreamsList from '../components/live/LiveStreamsList';
 
 import {
     Loader, ArrowRight, Star, TrendingUp, Sparkles, Zap, Shield, Truck, Clock,
-    ChevronRight, Package, Fire, Gift
+    ChevronRight, Package, Flame, Gift
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import Button from '../components/ui/Button';

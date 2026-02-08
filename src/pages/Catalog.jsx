@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
+import QuickViewModal from '../components/QuickViewModal';
 import { useProducts } from '../hooks/useProducts';
 import { Star, Filter, Loader, X, SlidersHorizontal, Grid, List } from 'lucide-react';
 import { useParams } from 'react-router-dom';
@@ -16,7 +17,8 @@ const Catalog = ({ predefinedFilter }) => {
     const [selectedCategory, setSelectedCategory] = useState(category || 'All');
     const [sortBy, setSortBy] = useState('featured');
     const [showMobileFilters, setShowMobileFilters] = useState(false);
-    const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+    const [viewMode, setViewMode] = useState('grid');
+    const [quickViewProduct, setQuickViewProduct] = useState(null); // QuickView integration
 
     // Update selectedCategory if URL param changes
     useEffect(() => {
@@ -207,6 +209,59 @@ const Catalog = ({ predefinedFilter }) => {
 
                 {/* Product Grid */}
                 <main className="flex-1">
+                    
+                    {/* 📱 STICKY FILTERS MOBILE - P2 FIX */}
+                    <div className="lg:hidden sticky top-16 z-30 -mx-4 px-4 py-3 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md border-b border-gray-200 dark:border-neutral-700 mb-4 -mt-4">
+                        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                            {/* Filter button */}
+                            <button
+                                onClick={() => setShowMobileFilters(true)}
+                                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-full text-sm font-medium"
+                            >
+                                <Filter className="w-4 h-4" />
+                                Filtres
+                            </button>
+                            
+                            {/* Sort chip */}
+                            <select 
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="flex-shrink-0 px-3 py-2 bg-gray-100 dark:bg-neutral-800 rounded-full text-sm font-medium border-0 focus:ring-2 focus:ring-gold-500"
+                            >
+                                <option value="featured">Populaires</option>
+                                <option value="newest">Nouveaux</option>
+                                <option value="price_asc">Prix ↑</option>
+                                <option value="price_desc">Prix ↓</option>
+                                <option value="rating">Notes</option>
+                            </select>
+                            
+                            {/* Quick category chips */}
+                            {['All', 'electronics', 'local', 'fashion'].map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setSelectedCategory(cat)}
+                                    className={`flex-shrink-0 px-3 py-2 rounded-full text-sm font-medium transition-colors ${
+                                        selectedCategory === cat
+                                            ? 'bg-gold-500 text-primary-900'
+                                            : 'bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300'
+                                    }`}
+                                >
+                                    {cat === 'All' ? 'Tout' : cat === 'electronics' ? '📱 High-Tech' : cat === 'local' ? '🇭🇹 Local' : '👗 Mode'}
+                                </button>
+                            ))}
+                            
+                            {/* Active filters indicator */}
+                            {(selectedRating > 0 || priceRange < 75000 || selectedCategory !== 'All') && (
+                                <button
+                                    onClick={() => { setSelectedCategory('All'); setPriceRange(75000); setSelectedRating(0); }}
+                                    className="flex-shrink-0 px-3 py-2 bg-red-100 text-red-700 rounded-full text-sm font-medium"
+                                >
+                                    ✕ Effacer
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
                     {/* Header with filters, sort, and view toggle */}
                     <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
                         <div className="flex items-center gap-3">
@@ -299,7 +354,11 @@ const Catalog = ({ predefinedFilter }) => {
                                 : "flex flex-col gap-4"
                         }>
                             {sortedProducts.map(product => (
-                                <ProductCard key={product.id} product={product} />
+                                <ProductCard 
+                                    key={product.id} 
+                                    product={product} 
+                                    onQuickView={() => setQuickViewProduct(product)}
+                                />
                             ))}
                         </div>
                     ) : (
@@ -325,6 +384,13 @@ const Catalog = ({ predefinedFilter }) => {
                     )}
                 </main>
             </div>
+
+            {/* QuickView Modal */}
+            <QuickViewModal 
+                product={quickViewProduct}
+                isOpen={!!quickViewProduct}
+                onClose={() => setQuickViewProduct(null)}
+            />
         </div>
     );
 };

@@ -1,7 +1,8 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { usePerformance } from '../contexts/PerformanceContext';
-import { ShoppingBag, TrendingUp, Shield, ArrowRight, Star, CheckCircle2, Truck, CreditCard, RefreshCcw } from 'lucide-react';
+import { ShoppingBag, TrendingUp, Shield, ArrowRight, Star, CheckCircle2, Truck, CreditCard, RefreshCcw, Search, Sparkles } from 'lucide-react';
 import Button from './ui/Button';
 import CountUpAnimation from './CountUpAnimation';
 
@@ -9,10 +10,23 @@ const SplineBackground = lazy(() => import('./SplineBackground'));
 
 const Hero = () => {
     const { t } = useLanguage();
+    const navigate = useNavigate();
     const { shouldReduceAnimations, isSlowConnection } = usePerformance();
     const [isDesktop, setIsDesktop] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [isVisible, setIsVisible] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchFocused, setSearchFocused] = useState(false);
+
+    // Popular searches for suggestions
+    const popularSearches = ['iPhone', 'Café Haïtien', 'Panneau Solaire', 'MacBook', 'Vêtements'];
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            navigate(`/catalog?search=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    };
 
     useEffect(() => {
         setIsDesktop(window.innerWidth > 768);
@@ -92,7 +106,7 @@ const Hero = () => {
                     <div className={`max-w-2xl transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                         
                         {/* Location Badge */}
-                        <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-white/5 backdrop-blur-xl border border-white/10">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 mb-4 rounded-full bg-white/5 backdrop-blur-xl border border-white/10">
                             <span className="text-2xl">🇭🇹</span>
                             <span className="text-sm text-gray-300 font-medium">
                                 La Marketplace #1 en Haïti
@@ -102,6 +116,44 @@ const Hero = () => {
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                             </span>
                         </div>
+
+                        {/* 🔍 SEARCH BAR - P1 FIX: Prominent search */}
+                        <form onSubmit={handleSearch} className="relative max-w-xl mb-6">
+                            <div className={`relative transition-all duration-300 ${searchFocused ? 'scale-[1.02]' : ''}`}>
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onFocus={() => setSearchFocused(true)}
+                                    onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
+                                    placeholder="Rechercher un produit, une marque..."
+                                    className="w-full h-14 pl-12 pr-32 rounded-2xl bg-white/10 backdrop-blur-xl border-2 border-white/20 focus:border-gold-400/60 text-white placeholder-gray-400 outline-none transition-all duration-300 text-lg"
+                                />
+                                <button
+                                    type="submit"
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-primary-900 font-bold px-6 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2"
+                                >
+                                    <Search className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Chercher</span>
+                                </button>
+                            </div>
+                            
+                            {/* Popular searches */}
+                            <div className="flex items-center gap-2 mt-3 flex-wrap">
+                                <span className="text-xs text-gray-500">Populaires:</span>
+                                {popularSearches.map((term, i) => (
+                                    <button
+                                        key={i}
+                                        type="button"
+                                        onClick={() => { setSearchQuery(term); navigate(`/catalog?search=${encodeURIComponent(term)}`); }}
+                                        className="px-3 py-1 text-xs bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white rounded-full border border-white/10 transition-all"
+                                    >
+                                        {term}
+                                    </button>
+                                ))}
+                            </div>
+                        </form>
 
                         {/* Main Headline - CLEAR VALUE PROPOSITION */}
                         <h1 className="text-[2rem] sm:text-4xl md:text-5xl lg:text-[3.5rem] font-bold leading-[1.1] mb-4 tracking-tight">

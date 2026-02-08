@@ -99,6 +99,15 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         let unsubscribeFirestore = null;
+        let timeoutId = null;
+
+        // Safety timeout - never block more than 5 seconds
+        timeoutId = setTimeout(() => {
+            if (loading) {
+                console.warn('Auth loading timeout - proceeding without user data');
+                setLoading(false);
+            }
+        }, 5000);
 
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
             // Unsubscribe from previous user's data if exists
@@ -108,47 +117,58 @@ export const AuthProvider = ({ children }) => {
             }
 
             if (user) {
-                // Get custom claims (role, sellerId)
-                const idTokenResult = await user.getIdTokenResult();
-                const customClaims = idTokenResult.claims;
+                try {
+                    // Get custom claims (role, sellerId)
+                    const idTokenResult = await user.getIdTokenResult();
+                    const customClaims = idTokenResult.claims;
 
-                // User is signed in, listen to Firestore modifications
-                const userRef = doc(db, 'users', user.uid);
-                unsubscribeFirestore = onSnapshot(userRef, (doc) => {
-                    if (doc.exists()) {
-                        setCurrentUser({
-                            ...user,
-                            ...doc.data(),
-                            // Add custom claims to user object
-                            customClaims: {
-                                role: customClaims.role || 'buyer',
-                                sellerId: customClaims.sellerId || null
-                            }
-                        });
-                    } else {
-                        // Fallback if firestore doc doesn't exist yet
-                        setCurrentUser({
-                            ...user,
-                            customClaims: {
-                                role: customClaims.role || 'buyer',
-                                sellerId: customClaims.sellerId || null
-                            }
-                        });
-                    }
-                    setLoading(false);
-                }, (error) => {
-                    console.error("Error fetching user data:", error);
+                    // User is signed in, listen to Firestore modifications
+                    const userRef = doc(db, 'users', user.uid);
+                    unsubscribeFirestore = onSnapshot(userRef, (docSnap) => {
+                        clearTimeout(timeoutId);
+                        if (docSnap.exists()) {
+                            setCurrentUser({
+                                ...user,
+                                ...docSnap.data(),
+                                // Add custom claims to user object
+                                customClaims: {
+                                    role: customClaims.role || 'buyer',
+                                    sellerId: customClaims.sellerId || null
+                                }
+                            });
+                        } else {
+                            // Fallback if firestore doc doesn't exist yet
+                            setCurrentUser({
+                                ...user,
+                                customClaims: {
+                                    role: customClaims.role || 'buyer',
+                                    sellerId: customClaims.sellerId || null
+                                }
+                            });
+                        }
+                        setLoading(false);
+                    }, (error) => {
+                        clearTimeout(timeoutId);
+                        console.error("Error fetching user data:", error);
+                        setCurrentUser(user);
+                        setLoading(false);
+                    });
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    console.error("Auth error:", error);
                     setCurrentUser(user);
                     setLoading(false);
-                });
+                }
             } else {
                 // User is signed out
+                clearTimeout(timeoutId);
                 setCurrentUser(null);
                 setLoading(false);
             }
         });
 
         return () => {
+            clearTimeout(timeoutId);
             unsubscribeAuth();
             if (unsubscribeFirestore) {
                 unsubscribeFirestore();

@@ -5,7 +5,8 @@ import { useWallet } from '../../contexts/WalletContext';
 import { useAffiliation } from '../../contexts/AffiliationContext';
 import { paymentService } from '../../services/paymentService';
 import { useNavigate } from 'react-router-dom';
-import { Loader, Lock, ShieldCheck, CreditCard, Smartphone } from 'lucide-react';
+import { Loader, Lock, ShieldCheck, CreditCard, Smartphone, Zap } from 'lucide-react';
+import AddressAutocomplete from '../../components/AddressAutocomplete';
 import OrderBump from '../../components/OrderBump';
 
 const OnePageCheckout = () => {
@@ -89,16 +90,90 @@ const OnePageCheckout = () => {
     if (cartItems.length === 0) return null;
 
     return (
-        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+        <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 font-sans">
             <div className="max-w-4xl mx-auto">
-                <div className="text-center mb-10">
-                    <h1 className="text-3xl font-extrabold text-gray-900">Caisse Sécurisée</h1>
-                    <p className="mt-2 text-gray-600">Finalisez votre commande en quelques secondes.</p>
+                
+                {/* 📊 PROGRESS BAR - P1 FIX */}
+                <div className="mb-8">
+                    <div className="flex items-center justify-center gap-2 md:gap-4">
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gold-500 text-white flex items-center justify-center font-bold text-sm">1</div>
+                            <span className="hidden sm:block text-sm font-medium text-gray-900">Livraison</span>
+                        </div>
+                        <div className="w-12 md:w-24 h-1 bg-gray-200 rounded">
+                            <div className="w-1/2 h-full bg-gold-500 rounded"></div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-sm">2</div>
+                            <span className="hidden sm:block text-sm font-medium text-gray-500">Paiement</span>
+                        </div>
+                        <div className="w-12 md:w-24 h-1 bg-gray-200 rounded"></div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-sm">3</div>
+                            <span className="hidden sm:block text-sm font-medium text-gray-500">Confirmation</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <div className="text-center mb-8">
+                    <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 flex items-center justify-center gap-2">
+                        <Lock className="w-6 h-6 text-green-600" />
+                        Caisse Sécurisée
+                    </h1>
+                    <p className="mt-1 text-gray-600">Finalisez votre commande en quelques secondes.</p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Left Column: Details & Payment */}
-                    <div className="space-y-8">
+                    <div className="space-y-6">
+
+                        {/* ⚡ EXPRESS CHECKOUT - P1 FIX: En premier */}
+                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-2xl border-2 border-green-200 shadow-sm">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Zap className="w-5 h-5 text-green-600" />
+                                <h2 className="text-lg font-bold text-gray-900">Paiement Express</h2>
+                                <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded-full">Recommandé</span>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-4">Payez instantanément avec votre mobile money</p>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('moncash')}
+                                    className={`h-14 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                                        paymentMethod === 'moncash' 
+                                            ? 'bg-red-500 text-white ring-2 ring-red-600 ring-offset-2' 
+                                            : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-red-300'
+                                    }`}
+                                >
+                                    <span className="text-xl">📱</span>
+                                    <span>MonCash</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('natcash')}
+                                    className={`h-14 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                                        paymentMethod === 'natcash' 
+                                            ? 'bg-blue-500 text-white ring-2 ring-blue-600 ring-offset-2' 
+                                            : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-300'
+                                    }`}
+                                >
+                                    <span className="text-xl">💳</span>
+                                    <span>NatCash</span>
+                                </button>
+                            </div>
+                            <div className="mt-3 flex items-center gap-3 text-xs text-gray-500">
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('wallet')}
+                                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full transition-all ${
+                                        paymentMethod === 'wallet' ? 'bg-purple-100 text-purple-700' : 'hover:bg-gray-100'
+                                    }`}
+                                >
+                                    <CreditCard className="w-3 h-3" />
+                                    Portefeuille Union ({balance?.toLocaleString() || 0} HTG)
+                                </button>
+                            </div>
+                        </div>
 
                         {/* Step 1: Contact Info */}
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -149,13 +224,12 @@ const OnePageCheckout = () => {
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Adresse complète *</label>
-                                    <input
-                                        type="text"
+                                    {/* P3 FIX: AddressAutocomplete */}
+                                    <AddressAutocomplete
                                         value={address}
-                                        onChange={(e) => setAddress(e.target.value)}
-                                        className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border"
-                                        placeholder="123 Rue Example, Quartier"
-                                        required
+                                        onChange={setAddress}
+                                        department={department}
+                                        placeholder="Ex: Pétion-Ville, Delmas 33..."
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -243,10 +317,13 @@ const OnePageCheckout = () => {
 
                     </div>
 
-                    {/* Right Column: Summary & Bump */}
-                    <div className="space-y-8">
-                        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 sticky top-6">
-                            <h2 className="text-xl font-bold text-gray-800 mb-6">Résumé de la commande</h2>
+                    {/* Right Column: Summary & Bump - P2 FIX: Sticky enhanced */}
+                    <div className="lg:sticky lg:top-4 lg:self-start space-y-4">
+                        <div className="bg-white p-6 rounded-2xl shadow-xl border-2 border-gray-100">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-xl font-bold text-gray-800">Votre Commande</h2>
+                                <span className="text-sm bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{cartItems.length} article{cartItems.length > 1 ? 's' : ''}</span>
+                            </div>
 
                             <div className="space-y-4 mb-6 max-h-60 overflow-y-auto pr-2">
                                 {cartItems.map((item) => (

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Check, Shirt, Loader } from 'lucide-react';
+import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Check, Shirt, Loader, ThumbsUp } from 'lucide-react';
 import { useProducts } from '../hooks/useProducts';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -13,6 +13,7 @@ import { useCart } from '../contexts/CartContext';
 import { useToast } from '../components/ui/Toast';
 import StickyAddToCart from '../components/StickyAddToCart';
 import UrgencyIndicators, { StockWarning, LiveViewers, RecentSales } from '../components/UrgencyIndicators';
+import ImageZoom from '../components/ImageZoom';
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -72,19 +73,17 @@ const ProductDetails = () => {
                             ))}
                         </div>
 
-                        {/* Main Image */}
-                        <div className="flex-1 bg-gray-50 rounded-lg flex items-center justify-center min-h-[400px] border border-gray-100 relative overflow-hidden">
-                            {(() => {
-                                const currentImg = (product.images && product.images[activeImage]) || product.image;
-                                if (currentImg && (currentImg.startsWith('http') || currentImg.startsWith('/'))) {
-                                    return <img src={currentImg} alt={product.title} className="w-full h-full object-contain" />;
-                                } else {
-                                    return <span className="text-6xl text-gray-200 font-bold">{currentImg}</span>;
-                                }
-                            })()}
+                        {/* Main Image with Zoom - P3 FIX */}
+                        <div className="flex-1 relative">
+                            <ImageZoom
+                                src={(product.images && product.images[activeImage]) || product.image}
+                                alt={product.title}
+                                placeholder={product.title?.charAt(0) || '📦'}
+                                className="min-h-[400px] border border-gray-100"
+                            />
 
                             {product.type === 'digital' && (
-                                <div className="absolute top-4 right-4 bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
+                                <div className="absolute top-4 right-4 bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded flex items-center gap-1 z-10">
                                     <Download className="w-3 h-3" /> {t('download_label')}
                                 </div>
                             )}
@@ -96,7 +95,7 @@ const ProductDetails = () => {
                         <h1 className="text-2xl font-medium text-gray-900 mb-1">{product.title}</h1>
                         <a href="#" className="text-blue-600 text-sm hover:underline mb-2 block">{t('visit_store')} {product.brand}</a>
 
-                        <div className="flex items-center gap-2 mb-4">
+                        <div className="flex items-center gap-2 mb-3">
                             <div className="flex text-secondary">
                                 {[...Array(5)].map((_, i) => (
                                     <Star key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'fill-current' : 'text-gray-300'}`} />
@@ -105,28 +104,62 @@ const ProductDetails = () => {
                             <span className="text-blue-600 text-sm hover:underline cursor-pointer">{product.reviews} {t('ratings_count')}</span>
                         </div>
 
-                        <div className="border-t border-b border-gray-200 py-4 my-4">
-                            <div className="flex items-start gap-2">
-                                <span className="text-sm text-gray-500 mt-1">{t('price_label')}</span>
-                                <div className="flex flex-col">
-                                    <span className="text-2xl font-medium text-red-700">{product.price.toLocaleString()} G</span>
-                                    {product.originalPrice && (
-                                        <span className="text-sm text-gray-500 line-through">{t('suggested_price')} {product.originalPrice.toLocaleString()} G</span>
-                                    )}
-                                    <div className="text-sm text-green-600 font-bold mt-1">
-                                        {t('cashback_earn')} {Math.floor(product.price * 0.02).toLocaleString()} G {t('cashback_suffix')} (2%)
-                                    </div>
-                                    <div className="text-sm text-orange-600 font-bold mt-0.5 flex items-center gap-1">
-                                        <span className="bg-orange-100 px-1 rounded text-xs">{t('new_label')}</span>
-                                        {t('points_earn')} {Math.floor(product.price / 100).toLocaleString()} {t('points_suffix')}
-                                    </div>
+                        {/* ⭐ REVIEWS SUMMARY - P3 FIX: Visible immédiatement */}
+                        <div className="flex items-center gap-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl mb-4">
+                            <div className="text-center px-3 border-r border-green-200">
+                                <div className="text-2xl font-black text-green-700">{product.rating}</div>
+                                <div className="flex justify-center">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star key={i} className={`w-3 h-3 ${i < Math.floor(product.rating) ? 'text-gold-500 fill-gold-500' : 'text-gray-300'}`} />
+                                    ))}
                                 </div>
                             </div>
+                            <div className="flex-1 text-sm">
+                                <div className="flex items-center gap-2 text-green-700 font-semibold">
+                                    <ThumbsUp className="w-4 h-4" />
+                                    <span>94% recommandent ce produit</span>
+                                </div>
+                                <p className="text-green-600 text-xs mt-0.5">{product.reviews || 0} avis vérifiés</p>
+                            </div>
+                        </div>
+
+                        {/* 💰 PRIX - P1 FIX: Plus gros, plus visible */}
+                        <div className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-5 my-4">
+                            {/* Prix principal - TRÈS VISIBLE */}
+                            <div className="flex items-baseline gap-3 mb-3">
+                                <span className="text-4xl md:text-5xl font-black text-gray-900">
+                                    {product.price.toLocaleString()}
+                                    <span className="text-2xl ml-1">HTG</span>
+                                </span>
+                                {product.originalPrice && product.originalPrice > product.price && (
+                                    <>
+                                        <span className="text-xl text-gray-400 line-through">
+                                            {product.originalPrice.toLocaleString()} HTG
+                                        </span>
+                                        <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+                                            -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                                        </span>
+                                    </>
+                                )}
+                            </div>
+                            
+                            {/* Avantages */}
+                            <div className="flex flex-wrap gap-3 mb-3">
+                                <div className="flex items-center gap-1.5 text-sm bg-green-50 text-green-700 px-3 py-1.5 rounded-full">
+                                    <span className="text-base">💰</span>
+                                    <span className="font-semibold">+{Math.floor(product.price * 0.02).toLocaleString()} HTG cashback</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-sm bg-orange-50 text-orange-700 px-3 py-1.5 rounded-full">
+                                    <span className="text-base">⭐</span>
+                                    <span className="font-semibold">+{Math.floor(product.price / 100)} points fidélité</span>
+                                </div>
+                            </div>
+
                             {product.unionPlus && product.type === 'physical' && (
-                                <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
-                                    <span className="bg-[#FFC400] text-primary px-1 rounded-sm text-xs italic font-bold">Union Plus</span>
-                                    <span>{t('one_day_delivery')}</span>
-                                    <span className="text-green-600 font-bold">{t('free_returns')}</span>
+                                <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+                                    <span className="bg-gradient-to-r from-yellow-400 to-amber-500 text-primary-900 px-2 py-0.5 rounded text-xs font-bold">Union Plus</span>
+                                    <span className="text-sm text-gray-600">{t('one_day_delivery')}</span>
+                                    <span className="text-sm text-green-600 font-bold">{t('free_returns')}</span>
                                 </div>
                             )}
                         </div>

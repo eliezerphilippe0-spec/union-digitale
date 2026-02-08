@@ -183,6 +183,58 @@ const SellerDashboard = () => {
             </header>
 
             <div className="p-6 space-y-6">
+                
+                {/* 🚨 ACTION CARDS - P2 FIX: Tâches prioritaires en premier */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Commandes à traiter */}
+                    <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-5 text-white relative overflow-hidden group hover:shadow-xl transition-all cursor-pointer">
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
+                        <div className="relative z-10 flex items-center justify-between">
+                            <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Package size={20} />
+                                    <span className="font-medium">Commandes à traiter</span>
+                                </div>
+                                <div className="text-4xl font-black">{stats.pendingOrders}</div>
+                                <p className="text-orange-100 text-sm mt-1">Expédier aujourd'hui</p>
+                            </div>
+                            <ChevronRight size={24} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                        </div>
+                    </div>
+
+                    {/* Stock bas */}
+                    <div className="bg-gradient-to-r from-red-500 to-rose-500 rounded-2xl p-5 text-white relative overflow-hidden group hover:shadow-xl transition-all cursor-pointer">
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
+                        <div className="relative z-10 flex items-center justify-between">
+                            <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <AlertTriangle size={20} />
+                                    <span className="font-medium">Stock Critique</span>
+                                </div>
+                                <div className="text-4xl font-black">{stats.lowStockProducts}</div>
+                                <p className="text-red-100 text-sm mt-1">Produits à réapprovisionner</p>
+                            </div>
+                            <ChevronRight size={24} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                        </div>
+                    </div>
+
+                    {/* Retrait disponible */}
+                    <div className="bg-gradient-to-r from-emerald-500 to-green-500 rounded-2xl p-5 text-white relative overflow-hidden group hover:shadow-xl transition-all cursor-pointer">
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
+                        <div className="relative z-10 flex items-center justify-between">
+                            <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <DollarSign size={20} />
+                                    <span className="font-medium">Disponible à retirer</span>
+                                </div>
+                                <div className="text-3xl font-black">{formatCurrency(stats.availableBalance)}</div>
+                                <p className="text-emerald-100 text-sm mt-1">Retirer sur MonCash →</p>
+                            </div>
+                            <ChevronRight size={24} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                        </div>
+                    </div>
+                </div>
+
                 {/* KPIs Principaux - Finance */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* Revenus Totaux */}
