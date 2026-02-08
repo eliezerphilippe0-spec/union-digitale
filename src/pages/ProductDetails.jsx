@@ -14,6 +14,12 @@ import { useToast } from '../components/ui/Toast';
 import StickyAddToCart from '../components/StickyAddToCart';
 import UrgencyIndicators, { StockWarning, LiveViewers, RecentSales } from '../components/UrgencyIndicators';
 import ImageZoom from '../components/ImageZoom';
+// Nouveaux composants inspirés des géants
+import FrequentlyBoughtTogether from '../components/FrequentlyBoughtTogether';
+import ProductVariants from '../components/ProductVariants';
+import BuyNowButton from '../components/BuyNowButton';
+import QuestionsAnswers from '../components/QuestionsAnswers';
+import DeliveryEstimate from '../components/DeliveryEstimate';
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -24,10 +30,21 @@ const ProductDetails = () => {
     const { addToCart } = useCart();
     const toast = useToast();
     const [showFittingRoom, setShowFittingRoom] = useState(false);
+    const [selectedVariants, setSelectedVariants] = useState({});
 
     // Find product by ID (handle both string and number IDs)
     const product = products.find(p => String(p.id) === String(id));
     const [activeImage, setActiveImage] = useState(0);
+
+    // Related products for bundles (same category, different product)
+    const relatedProducts = products
+        .filter(p => p.category === product?.category && p.id !== product?.id)
+        .slice(0, 4);
+
+    // Handle variant change
+    const handleVariantChange = (type, value) => {
+        setSelectedVariants(prev => ({ ...prev, [type]: value }));
+    };
 
     const handleAddToCart = () => {
         for (let i = 0; i < quantity; i++) {
@@ -248,16 +265,19 @@ const ProductDetails = () => {
 
                                 <button
                                     onClick={handleAddToCart}
-                                    className="w-full bg-secondary hover:bg-secondary-hover text-white font-medium py-2 rounded-full shadow-sm transition-colors"
+                                    className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 font-bold py-3 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
                                 >
+                                    <span>🛒</span>
                                     {t('add_to_cart')}
                                 </button>
-                                <button
-                                    onClick={() => navigate('/checkout')}
-                                    className="w-full bg-orange-400 hover:bg-orange-500 text-gray-900 font-medium py-2 rounded-full shadow-sm transition-colors"
-                                >
-                                    {t('buy_now')}
-                                </button>
+                                
+                                {/* Buy Now - Amazon Style avec confirmation */}
+                                <BuyNowButton 
+                                    product={product} 
+                                    quantity={parseInt(quantity)}
+                                    variant="primary"
+                                    className="w-full"
+                                />
                             </div>
 
                             <div className="mt-4 text-xs text-gray-500 space-y-1">
@@ -282,6 +302,28 @@ const ProductDetails = () => {
                                 {t('secure_transaction')}
                             </div>
                         </div>
+                    </div>
+
+                    {/* Frequently Bought Together - Amazon Style */}
+                    <div className="lg:col-span-12">
+                        <FrequentlyBoughtTogether 
+                            mainProduct={product} 
+                            relatedProducts={relatedProducts}
+                        />
+                    </div>
+
+                    {/* Delivery Estimate */}
+                    <div className="lg:col-span-12">
+                        <DeliveryEstimate 
+                            department="Ouest"
+                            hasUnionPlus={product.unionPlus}
+                            productType={product.type}
+                        />
+                    </div>
+
+                    {/* Questions & Answers - Amazon Style */}
+                    <div className="lg:col-span-12">
+                        <QuestionsAnswers productId={id} />
                     </div>
 
                     {/* Review Section */}
