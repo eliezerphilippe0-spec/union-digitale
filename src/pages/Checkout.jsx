@@ -102,7 +102,7 @@ const Checkout = () => {
         }
 
         if (!paymentMethod) {
-            setError(t('select_payment_method') || "Veuillez sélectionner un moyen de paiement.");
+            setError(t('select_payment_method'));
             return;
         }
 
@@ -230,10 +230,11 @@ const Checkout = () => {
 
                         {/* Shipping Address - Only for Physical Items */}
                         {cartItems.some(item => item.type === 'physical' || !item.type) && (
-                            <div className="bg-white p-6 rounded shadow-sm">
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                                 <h2 className="text-lg font-bold mb-4 flex justify-between">
                                     <span>{t('shipping_address_title')}</span>
-                                    <div className="flex gap-4">
+                                    <div className="flex gap-4 items-center">
+                                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">Pré-remplie</span>
                                         <button
                                             type="button"
                                             onClick={getLocation}
@@ -392,7 +393,7 @@ const Checkout = () => {
                                 <div className="text-green-700 font-bold mb-2">{t('estimated_delivery')}</div>
                                 {cartItems.map((item) => (
                                     <div key={item.id} className="flex gap-4">
-                                        <div className="w-16 h-16 bg-gray-100 flex items-center justify-center text-2xl text-gray-400 overflow-hidden rounded">
+                                        <div className="w-20 h-20 bg-gray-100 flex items-center justify-center text-2xl text-gray-400 overflow-hidden rounded-lg">
                                             {item.image ? <img src={item.image} alt={item.title} className="w-full h-full object-cover" /> : <span>{t('img_placeholder')}</span>}
                                         </div>
                                         <div>
@@ -487,6 +488,27 @@ const Checkout = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Mobile sticky pay bar */}
+            {paymentMethod !== 'stripe' && paymentMethod !== 'paypal' && (
+                <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 z-50">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-gray-600">{t('total_amount')}</span>
+                        <span className="text-lg font-bold text-red-700">{totalWithBump.toLocaleString()} G</span>
+                    </div>
+                    <button
+                        onClick={handlePayment}
+                        disabled={loading}
+                        className="w-full bg-secondary hover:bg-secondary-hover text-white font-medium py-2 rounded-lg shadow-sm transition-colors text-sm flex justify-center items-center gap-2"
+                    >
+                        {loading ? <Loader className="animate-spin w-4 h-4" /> : null}
+                        {paymentMethod === 'moncash' ? t('pay_with_moncash_btn') :
+                            paymentMethod === 'wallet' ? t('pay_with_wallet_btn') :
+                                paymentMethod === 'union_pay_3x' ? t('pay_with_union_pay_btn') :
+                                    t('pay_now_btn')}
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

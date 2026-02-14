@@ -182,12 +182,12 @@ const SellerDashboard = () => {
                 </div>
             </header>
 
-            <div className="p-6 space-y-6">
+            <div className="p-4 md:p-6 space-y-6">
                 
                 {/* 🚨 ACTION CARDS - P2 FIX: Tâches prioritaires en premier */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {/* Commandes à traiter */}
-                    <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-5 text-white relative overflow-hidden group hover:shadow-xl transition-all cursor-pointer">
+                    <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-4 md:p-5 text-white relative overflow-hidden group hover:shadow-xl transition-all cursor-pointer">
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
                         <div className="relative z-10 flex items-center justify-between">
                             <div>
@@ -203,7 +203,7 @@ const SellerDashboard = () => {
                     </div>
 
                     {/* Stock bas */}
-                    <div className="bg-gradient-to-r from-red-500 to-rose-500 rounded-2xl p-5 text-white relative overflow-hidden group hover:shadow-xl transition-all cursor-pointer">
+                    <div className="bg-gradient-to-r from-red-500 to-rose-500 rounded-2xl p-4 md:p-5 text-white relative overflow-hidden group hover:shadow-xl transition-all cursor-pointer">
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
                         <div className="relative z-10 flex items-center justify-between">
                             <div>
@@ -219,7 +219,7 @@ const SellerDashboard = () => {
                     </div>
 
                     {/* Retrait disponible */}
-                    <div className="bg-gradient-to-r from-emerald-500 to-green-500 rounded-2xl p-5 text-white relative overflow-hidden group hover:shadow-xl transition-all cursor-pointer">
+                    <div className="bg-gradient-to-r from-emerald-500 to-green-500 rounded-2xl p-4 md:p-5 text-white relative overflow-hidden group hover:shadow-xl transition-all cursor-pointer">
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
                         <div className="relative z-10 flex items-center justify-between">
                             <div>

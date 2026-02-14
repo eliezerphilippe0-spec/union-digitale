@@ -44,7 +44,7 @@ const Cart = () => {
             <div className="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
                 {/* Cart Items (Left) */}
-                <div className="lg:col-span-9 bg-white p-6 rounded shadow-sm">
+                <div className="lg:col-span-9 bg-white p-5 md:p-6 rounded-xl shadow-sm border border-gray-100">
                     <h1 className="text-2xl font-medium mb-4 border-b pb-2">{t('your_cart')}</h1>
 
                     <FreeShippingProgress currentAmount={cartTotal} />
@@ -52,7 +52,7 @@ const Cart = () => {
                     <div className="space-y-6">
                         {cartItems.map((item) => (
                             <div key={item.id} className="flex gap-4 border-b border-gray-100 pb-6 last:border-0">
-                                <div className="w-32 h-32 bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-4xl overflow-hidden">
+                                <div className="w-24 h-24 md:w-32 md:h-32 bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-3xl md:text-4xl overflow-hidden rounded-xl">
                                     {item.image ? (
                                         <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                                     ) : (
@@ -110,7 +110,7 @@ const Cart = () => {
 
                 {/* Checkout Sidebar (Right) */}
                 <div className="lg:col-span-3">
-                    <div className="bg-white p-6 rounded shadow-sm sticky top-4">
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 sticky top-4">
                         <div className="text-lg mb-4">
                             {t('subtotal_items')} ({cartItems.length} {t('items_count')}) : <span className="font-bold">{cartTotal.toLocaleString()} G</span>
                         </div>
@@ -124,6 +124,17 @@ const Cart = () => {
                     </div>
                 </div>
 
+            </div>
+
+            {/* Mobile sticky checkout bar */}
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 z-50">
+                <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">{t('subtotal_items')} ({cartItems.length})</span>
+                    <span className="text-lg font-bold text-gray-900">{cartTotal.toLocaleString()} G</span>
+                </div>
+                <Link to="/checkout" className="block w-full bg-secondary hover:bg-secondary-hover text-white text-center font-medium py-2 rounded-lg shadow-sm transition-colors">
+                    {t('proceed_to_checkout')}
+                </Link>
             </div>
         </div>
     );
