@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Star, Gift, TrendingUp, Award, Target,
-  Clock, ChevronRight, Zap, Shield
+  Clock, ChevronRight, Zap, Shield, Wallet
 } from 'lucide-react';
 import { useLoyalty } from '../contexts/LoyaltyContext';
+import { appApiClient } from '../services/apiClient';
+import SEO from '../components/common/SEO';
 
 const tierColors = {
   bronze: 'from-amber-600 to-amber-800',
@@ -32,6 +34,44 @@ export default function LoyaltyDashboard() {
     redeemReward
   } = useLoyalty();
 
+  const [wallet, setWallet] = useState({ balance: 0 });
+  const [ledger, setLedger] = useState([]);
+  const [ledgerLoading, setLedgerLoading] = useState(false);
+  const [ledgerPage, setLedgerPage] = useState(1);
+  const [ledgerTotalPages, setLedgerTotalPages] = useState(1);
+  const [ledgerType, setLedgerType] = useState('ALL');
+  const [expiringSoonPoints, setExpiringSoonPoints] = useState(0);
+  const [daily, setDaily] = useState([]);
+
+  const loadPoints = async (page = 1, type = ledgerType, append = false) => {
+    try {
+      setLedgerLoading(true);
+      const params = new URLSearchParams();
+      params.set('page', String(page));
+      params.set('limit', '10');
+      if (type && type !== 'ALL') params.set('type', type);
+
+      const data = await appApiClient.get(`/users/me/points?${params.toString()}`);
+      setWallet(data.wallet || { balance: 0 });
+      setLedger(prev => append ? [...prev, ...(data.ledger || [])] : (data.ledger || []));
+      setLedgerPage(data.pagination?.page || 1);
+      setLedgerTotalPages(data.pagination?.pages || 1);
+      setExpiringSoonPoints(data.expiringSoonPoints || 0);
+      setDaily(data.daily || []);
+    } catch (e) {
+      // silent fallback
+    } finally {
+      setLedgerLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let mounted = true;
+    if (!mounted) return;
+    loadPoints(1, ledgerType, false);
+    return () => { mounted = false; };
+  }, [ledgerType]);
+
   const rewards = [
     { id: 1, name: '5% de réduction', points: 500, icon: '🏷️' },
     { id: 2, name: 'Livraison gratuite', points: 800, icon: '🚚' },
@@ -52,6 +92,7 @@ export default function LoyaltyDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
+      <SEO title="Fidélité" description="Suivez vos points, cashback et récompenses." />
       {/* Header */}
       <div className={`bg-gradient-to-r ${tierColors[tier]} text-white px-4 py-8`}>
         <div className="flex items-center justify-between mb-4">
@@ -187,6 +228,104 @@ export default function LoyaltyDashboard() {
         </div>
       </div>
 
+      {/* Points Wallet */}
+      <div className="px-4 mt-6">
+        <h2 className="text-lg font-semibold mb-3">Mes points</h2>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
+                <Wallet className="text-blue-600" size={20} />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Solde points</p>
+                <p className="text-2xl font-bold text-gray-900">{(wallet?.balance ?? points).toLocaleString()}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-gray-500">Valeur</p>
+              <p className="text-sm font-semibold text-gray-700">≈ {(wallet?.balance ?? points) * 10} HTG</p>
+            </div>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between text-xs">
+            <span className="text-gray-500">Points bientôt expirés</span>
+            <span className={expiringSoonPoints > 0 ? 'text-red-600 font-semibold' : 'text-gray-500'}>
+              {expiringSoonPoints} pts
+            </span>
+          </div>
+
+          {/* Timeline */}
+          <div className="mt-4">
+            <p className="text-sm font-semibold mb-2">Activité 7 derniers jours</p>
+            <div className="flex items-end gap-2 h-20">
+              {daily.map((d, idx) => (
+                <div key={idx} className="flex-1">
+                  <div
+                    className="bg-primary-500 rounded-md"
+                    style={{ height: `${Math.min(Math.abs(d.points), 50) + 5}px` }}
+                    title={`${d.day}: ${d.points} pts`}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-semibold">Historique</p>
+              <select
+                className="text-xs border border-gray-200 rounded px-2 py-1"
+                value={ledgerType}
+                onChange={(e) => setLedgerType(e.target.value)}
+              >
+                <option value="ALL">Tous</option>
+                <option value="EARN">Gagnés</option>
+                <option value="REDEEM">Utilisés</option>
+                <option value="ADJUST">Ajustés</option>
+                <option value="REFUND">Remboursés</option>
+                <option value="EXPIRE">Expirés</option>
+              </select>
+            </div>
+
+            {ledgerLoading && <p className="text-xs text-gray-500">Chargement…</p>}
+            {!ledgerLoading && ledger.length === 0 && (
+              <p className="text-xs text-gray-500">Aucune transaction pour l’instant.</p>
+            )}
+            <div className="space-y-2">
+              {ledger.map(tx => (
+                <div key={tx.id} className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">{tx.type}</span>
+                  <span className={tx.points > 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
+                    {tx.points > 0 ? `+${tx.points}` : tx.points}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-3 mt-3">
+              {ledgerPage < ledgerTotalPages && (
+                <button
+                  className="text-xs text-primary-600 hover:underline"
+                  onClick={() => loadPoints(ledgerPage + 1, ledgerType, true)}
+                  disabled={ledgerLoading}
+                >
+                  Voir plus
+                </button>
+              )}
+              <a
+                href="/api/users/me/points/export"
+                className="text-xs text-gray-600 hover:underline"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Exporter CSV
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Rewards Catalog */}
       <div className="px-4 mt-6">
         <h2 className="text-lg font-semibold mb-3">Échangez vos points</h2>
@@ -219,6 +358,18 @@ export default function LoyaltyDashboard() {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Points Policy */}
+      <div className="px-4 mt-6">
+        <h2 className="text-lg font-semibold mb-3">{t('points_policy_title')}</h2>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-sm text-gray-700 space-y-2">
+          <p>• {t('points_policy_rate')}</p>
+          <p>• {t('points_policy_cap')}</p>
+          <p>• {t('points_policy_scope')}</p>
+          <p>• {t('points_policy_debit')}</p>
+          <p>• {t('points_policy_earn')}</p>
         </div>
       </div>
 

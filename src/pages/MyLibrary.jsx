@@ -6,6 +6,7 @@ import { httpsCallable } from 'firebase/functions';
 import { Download, BookOpen, Music, Video, Loader, CheckCircle, AlertCircle, BarChart3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import SEO from '../components/common/SEO';
 import logger from '../utils/logger';
 
 const MyLibrary = () => {
@@ -125,6 +126,7 @@ const MyLibrary = () => {
 
     return (
         <div className="bg-gray-50 min-h-screen py-12">
+            <SEO title="Ma bibliothèque" description="Accédez à vos contenus numériques achetés." />
             <div className="container mx-auto px-4 max-w-6xl">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
                     <h1 className="text-3xl font-extrabold text-gray-900 flex items-center gap-3">

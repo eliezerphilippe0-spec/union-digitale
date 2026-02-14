@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Star, MapPin, Clock, ShieldCheck, Share2 } from 'lucide-react';
 import BookingCalendar from '../../components/services/BookingCalendar';
 import { useLanguage } from '../../contexts/LanguageContext';
+import SEO from '../../components/common/SEO';
 import { useServices } from '../../hooks/useServices';
 import { useToast } from '../../components/ui/Toast';
 
@@ -94,6 +95,7 @@ const ServiceDetails = () => {
 
     return (
         <div className="bg-gray-50 min-h-screen py-8">
+            <SEO title={service?.title || 'Service'} description={service?.description || 'Détails du service sur Union Digitale.'} />
             <div className="container mx-auto px-4 max-w-5xl">
 
                 {/* Breadcrumbs */}

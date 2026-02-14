@@ -1,6 +1,7 @@
 import React from 'react';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import SEO from '../components/common/SEO';
 import { products } from '../data/products';
 import ProductCard from '../components/product/ProductCard';
 import { Heart } from 'lucide-react';
@@ -17,6 +18,7 @@ const Favorites = () => {
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <SEO title="Favoris" description="Retrouvez vos articles favoris." />
             <h1 className="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-3">
                 <Heart className="fill-red-500 text-red-500" /> {t('my_favorites')}
             </h1>

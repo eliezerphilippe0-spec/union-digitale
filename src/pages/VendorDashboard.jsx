@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getVendorStats, getWalletTransactions, requestPayout, getPayoutHistory } from '../services/vendorWalletService';
 import { getCommissionBreakdown } from '../services/commissionService';
+import SEO from '../components/common/SEO';
 import './VendorDashboard.css';
 
 export default function VendorDashboard() {
@@ -60,6 +61,7 @@ export default function VendorDashboard() {
 
     return (
         <div className="vendor-dashboard">
+            <SEO title="Dashboard vendeur" description="Suivez vos ventes, commissions et paiements." />
             <header className="dashboard-header">
                 <h1>Tableau de Bord Vendeur</h1>
                 <div className="verification-badge">

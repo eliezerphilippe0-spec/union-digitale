@@ -15,6 +15,7 @@ import { getVendor, getVendorStats } from '../services/vendorService';
 import { getVendorOffers } from '../services/offerService';
 import OfferCard from '../components/OfferCard';
 import './VendorShop.css';
+import SEO from '../components/common/SEO';
 
 const VendorShop = () => {
     const { vendorId } = useParams();
@@ -107,6 +108,7 @@ const VendorShop = () => {
 
     return (
         <div className="vendor-shop">
+            <SEO title={vendor?.name ? `${vendor.name} | Boutique` : 'Boutique'} description={vendor?.description || 'Découvrez cette boutique sur Union Digitale.'} />
             {/* Header with banner */}
             <div className="vendor-banner">
                 {vendor.shopBanner ? (
