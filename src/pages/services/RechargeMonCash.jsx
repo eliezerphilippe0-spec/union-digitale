@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import SEO from '../../components/common/SEO';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Smartphone, Shield, Clock, CheckCircle, Phone, DollarSign } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -93,6 +94,7 @@ const RechargeMonCash = () => {
 
     return (
         <div className="service-page">
+            <SEO title="Recharge MonCash" description="Rechargez MonCash en quelques secondes." />
             <div className="service-container">
                 {/* Breadcrumb */}
                 <nav className="breadcrumb">

@@ -1,4 +1,5 @@
 ﻿import React, { useState } from 'react';
+import SEO from '../../components/common/SEO';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Droplet, Shield, Clock, CheckCircle, Hash, Calendar, DollarSign } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -99,6 +100,7 @@ const PaiementCAMEP = () => {
 
     return (
         <div className="service-page">
+            <SEO title="Paiement CAMEP" description="Payer vos factures CAMEP rapidement et en toute sécurité." />
             <div className="service-container">
                 {/* Breadcrumb */}
                 <nav className="breadcrumb">

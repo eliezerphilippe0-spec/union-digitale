@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import SEO from '../../components/common/SEO';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, Shield, Clock, CheckCircle, User, Phone, DollarSign } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -86,6 +87,7 @@ const TransfertArgent = () => {
 
     return (
         <div className="service-page">
+            <SEO title="Transfert d’argent" description="Envoyez de l’argent rapidement en Haïti." />
             <div className="service-container">
                 {/* Breadcrumb */}
                 <nav className="breadcrumb">
