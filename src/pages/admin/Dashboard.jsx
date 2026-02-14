@@ -40,20 +40,20 @@ const AdminDashboard = () => {
 
     // Charts Data
     const gmvData = [
-        { name: 'Jan', gmv: 8500000, orders: 1750 },
-        { name: 'Fév', gmv: 9200000, orders: 1890 },
-        { name: 'Mar', gmv: 10100000, orders: 2080 },
-        { name: 'Avr', gmv: 9800000, orders: 2010 },
-        { name: 'Mai', gmv: 11200000, orders: 2300 },
-        { name: 'Juin', gmv: 12450000, orders: 2567 },
+        { name: t('month_jan_short'), gmv: 8500000, orders: 1750 },
+        { name: t('month_feb_short'), gmv: 9200000, orders: 1890 },
+        { name: t('month_mar_short'), gmv: 10100000, orders: 2080 },
+        { name: t('month_apr_short'), gmv: 9800000, orders: 2010 },
+        { name: t('month_may_short'), gmv: 11200000, orders: 2300 },
+        { name: t('month_jun_short'), gmv: 12450000, orders: 2567 },
     ];
 
     const categoryData = [
-        { name: 'High-Tech', value: 35, color: '#6366f1' },
-        { name: 'Mode', value: 28, color: '#ec4899' },
-        { name: 'Maison', value: 18, color: '#10b981' },
-        { name: 'Beauté', value: 12, color: '#f59e0b' },
-        { name: 'Autres', value: 7, color: '#6b7280' },
+        { name: t('high_tech'), value: 35, color: '#6366f1' },
+        { name: t('fashion'), value: 28, color: '#ec4899' },
+        { name: t('home_kitchen'), value: 18, color: '#10b981' },
+        { name: t('beauty'), value: 12, color: '#f59e0b' },
+        { name: t('admin_category_other'), value: 7, color: '#6b7280' },
     ];
 
     const topVendors = [
@@ -65,17 +65,17 @@ const AdminDashboard = () => {
     ];
 
     const recentOrders = [
-        { id: '#UD-9842', product: 'iPhone 15 Pro', customer: 'Jean Baptiste', destination: 'Port-au-Prince', status: 'delivered', amount: 125000, date: 'Il y a 2h' },
-        { id: '#UD-9841', product: 'MacBook Air M2', customer: 'Marie Claire', destination: 'Miami, USA', status: 'shipped', amount: 185000, date: 'Il y a 5h' },
-        { id: '#UD-9840', product: 'Nike Air Max', customer: 'Pierre Louis', destination: 'Montréal, CA', status: 'processing', amount: 15000, date: 'Il y a 8h' },
-        { id: '#UD-9839', product: 'Samsung Galaxy S24', customer: 'Anne Joseph', destination: 'Cap-Haïtien', status: 'pending', amount: 98000, date: 'Hier' },
+        { id: '#UD-9842', product: 'iPhone 15 Pro', customer: 'Jean Baptiste', destination: 'Port-au-Prince', status: 'delivered', amount: 125000, date: t('time_2h_ago') },
+        { id: '#UD-9841', product: 'MacBook Air M2', customer: 'Marie Claire', destination: 'Miami, USA', status: 'shipped', amount: 185000, date: t('time_5h_ago') },
+        { id: '#UD-9840', product: 'Nike Air Max', customer: 'Pierre Louis', destination: 'Montréal, CA', status: 'processing', amount: 15000, date: t('time_8h_ago') },
+        { id: '#UD-9839', product: 'Samsung Galaxy S24', customer: 'Anne Joseph', destination: 'Cap-Haïtien', status: 'pending', amount: 98000, date: t('time_yesterday') },
     ];
 
     const deliveryZones = [
-        { zone: 'Haïti', orders: 1542, avgDelay: '2.1j', performance: 96 },
-        { zone: 'USA', orders: 687, avgDelay: '4.5j', performance: 92 },
-        { zone: 'Canada', orders: 234, avgDelay: '5.2j', performance: 89 },
-        { zone: 'France', orders: 104, avgDelay: '7.1j', performance: 85 },
+        { zone: t('zone_haiti'), orders: 1542, avgDelay: '2.1j', performance: 96 },
+        { zone: t('zone_usa'), orders: 687, avgDelay: '4.5j', performance: 92 },
+        { zone: t('zone_canada'), orders: 234, avgDelay: '5.2j', performance: 89 },
+        { zone: t('zone_france'), orders: 104, avgDelay: '7.1j', performance: 85 },
     ];
 
     const heatmapData = [
@@ -124,7 +124,7 @@ const AdminDashboard = () => {
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <div className="text-center">
                     <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600 font-medium">Chargement du dashboard...</p>
+                    <p className="text-gray-600 font-medium">{t('admin_loading_dashboard')}</p>
                 </div>
             </div>
         );
@@ -134,22 +134,22 @@ const AdminDashboard = () => {
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
             <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-                <div className="px-6 py-4 flex items-center justify-between">
+                <div className="px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Dashboard Stratégique</h1>
-                        <p className="text-sm text-gray-500 mt-0.5">Vue d'ensemble de la marketplace Union Digitale</p>
+                        <h1 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">{t('admin_dashboard_title')}</h1>
+                        <p className="text-sm text-gray-500 mt-0.5">{t('admin_dashboard_subtitle')}</p>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-3">
                         {/* Date Range Filter */}
                         <select
                             value={dateRange}
                             onChange={(e) => setDateRange(e.target.value)}
                             className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         >
-                            <option value="7">7 derniers jours</option>
-                            <option value="30">30 derniers jours</option>
-                            <option value="90">90 derniers jours</option>
-                            <option value="365">Cette année</option>
+                            <option value="7">{t('admin_date_range_7')}</option>
+                            <option value="30">{t('admin_date_range_30')}</option>
+                            <option value="90">{t('admin_date_range_90')}</option>
+                            <option value="365">{t('admin_date_range_year')}</option>
                         </select>
 
                         {/* Currency Selector */}
@@ -170,13 +170,13 @@ const AdminDashboard = () => {
                         {/* Export Button */}
                         <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm">
                             <Download size={16} />
-                            Exporter
+                            {t('admin_export')}
                         </button>
                     </div>
                 </div>
             </header>
 
-            <div className="p-6 space-y-6">
+            <div className="p-4 md:p-6 space-y-6">
                 {/* KPI Principal - GMV & Revenue */}
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                     {/* GMV Card */}
@@ -188,7 +188,7 @@ const AdminDashboard = () => {
                                     <div className="p-2 bg-white/20 rounded-lg">
                                         <Wallet size={20} />
                                     </div>
-                                    <span className="text-sm font-medium text-indigo-200">GMV Total</span>
+                                    <span className="text-sm font-medium text-indigo-200">{t('admin_gmv_total')}</span>
                                 </div>
                                 <span className="flex items-center gap-1 text-xs font-bold bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-full">
                                     <ArrowUpRight size={12} />
@@ -196,7 +196,7 @@ const AdminDashboard = () => {
                                 </span>
                             </div>
                             <div className="text-4xl font-bold mb-1">{formatCurrency(stats.gmv)}</div>
-                            <p className="text-indigo-200 text-sm">Volume total des transactions</p>
+                            <p className="text-indigo-200 text-sm">{t('admin_gmv_volume')}</p>
                         </div>
                     </div>
 
@@ -211,9 +211,9 @@ const AdminDashboard = () => {
                                 +22.3%
                             </span>
                         </div>
-                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Revenu Net</p>
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin_net_revenue')}</p>
                         <div className="text-2xl font-bold text-gray-900 mt-1">{formatCurrency(stats.netRevenue)}</div>
-                        <p className="text-xs text-gray-400 mt-1">Commission {stats.avgCommission}% moyenne</p>
+                        <p className="text-xs text-gray-400 mt-1">{t('admin_avg_commission', { percent: stats.avgCommission })}</p>
                     </div>
 
                     {/* Orders */}
@@ -227,9 +227,9 @@ const AdminDashboard = () => {
                                 +12.8%
                             </span>
                         </div>
-                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Commandes</p>
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin_orders')}</p>
                         <div className="text-2xl font-bold text-gray-900 mt-1">{stats.orders.toLocaleString()}</div>
-                        <p className="text-xs text-gray-400 mt-1">Panier moyen: {formatCurrency(stats.avgBasket)}</p>
+                        <p className="text-xs text-gray-400 mt-1">{t('admin_avg_basket', { amount: formatCurrency(stats.avgBasket) })}</p>
                     </div>
                 </div>
 
@@ -238,50 +238,50 @@ const AdminDashboard = () => {
                     <div className="bg-white rounded-xl p-4 border border-gray-100">
                         <div className="flex items-center gap-2 mb-2">
                             <Users size={16} className="text-indigo-500" />
-                            <span className="text-xs font-medium text-gray-500">Vendeurs Actifs</span>
+                            <span className="text-xs font-medium text-gray-500">{t('admin_active_vendors')}</span>
                         </div>
                         <div className="text-xl font-bold text-gray-900">{stats.activeVendors}</div>
-                        <span className="text-xs text-emerald-600">+{stats.newVendors} ce mois</span>
+                        <span className="text-xs text-emerald-600">{t('admin_new_vendors', { count: stats.newVendors })}</span>
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-gray-100">
                         <div className="flex items-center gap-2 mb-2">
                             <Package size={16} className="text-purple-500" />
-                            <span className="text-xs font-medium text-gray-500">Produits</span>
+                            <span className="text-xs font-medium text-gray-500">{t('admin_products')}</span>
                         </div>
                         <div className="text-xl font-bold text-gray-900">{stats.activeProducts.toLocaleString()}</div>
-                        <span className="text-xs text-gray-400">En catalogue</span>
+                        <span className="text-xs text-gray-400">{t('admin_in_catalog')}</span>
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-gray-100">
                         <div className="flex items-center gap-2 mb-2">
                             <Truck size={16} className="text-emerald-500" />
-                            <span className="text-xs font-medium text-gray-500">Taux Livraison</span>
+                            <span className="text-xs font-medium text-gray-500">{t('admin_delivery_rate')}</span>
                         </div>
                         <div className="text-xl font-bold text-gray-900">{stats.deliveryRate}%</div>
-                        <span className="text-xs text-emerald-600">Excellent</span>
+                        <span className="text-xs text-emerald-600">{t('admin_excellent')}</span>
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-gray-100">
                         <div className="flex items-center gap-2 mb-2">
                             <XCircle size={16} className="text-amber-500" />
-                            <span className="text-xs font-medium text-gray-500">Taux Annulation</span>
+                            <span className="text-xs font-medium text-gray-500">{t('admin_cancel_rate')}</span>
                         </div>
                         <div className="text-xl font-bold text-gray-900">{stats.cancelRate}%</div>
-                        <span className="text-xs text-amber-600">À surveiller</span>
+                        <span className="text-xs text-amber-600">{t('admin_watch')}</span>
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-gray-100">
                         <div className="flex items-center gap-2 mb-2">
                             <RefreshCw size={16} className="text-blue-500" />
-                            <span className="text-xs font-medium text-gray-500">Remboursements</span>
+                            <span className="text-xs font-medium text-gray-500">{t('admin_refunds')}</span>
                         </div>
                         <div className="text-xl font-bold text-gray-900">{stats.refundRate}%</div>
-                        <span className="text-xs text-emerald-600">Normal</span>
+                        <span className="text-xs text-emerald-600">{t('admin_normal')}</span>
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-gray-100">
                         <div className="flex items-center gap-2 mb-2">
                             <AlertTriangle size={16} className="text-red-500" />
-                            <span className="text-xs font-medium text-gray-500">Litiges</span>
+                            <span className="text-xs font-medium text-gray-500">{t('admin_disputes')}</span>
                         </div>
                         <div className="text-xl font-bold text-gray-900">{stats.disputeRate}%</div>
-                        <span className="text-xs text-emerald-600">Très bas</span>
+                        <span className="text-xs text-emerald-600">{t('admin_very_low')}</span>
                     </div>
                 </div>
 
@@ -291,17 +291,17 @@ const AdminDashboard = () => {
                     <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h3 className="font-bold text-gray-900">Évolution du GMV</h3>
-                                <p className="text-sm text-gray-500">6 derniers mois</p>
+                                <h3 className="font-bold text-gray-900">{t('admin_gmv_evolution')}</h3>
+                                <p className="text-sm text-gray-500">{t('admin_last_6_months')}</p>
                             </div>
                             <div className="flex items-center gap-4 text-xs">
                                 <span className="flex items-center gap-1">
                                     <span className="w-3 h-3 rounded-full bg-indigo-500"></span>
-                                    GMV
+                                    {t('admin_chart_gmv')}
                                 </span>
                                 <span className="flex items-center gap-1">
                                     <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
-                                    Commandes
+                                    {t('admin_chart_orders')}
                                 </span>
                             </div>
                         </div>
@@ -319,7 +319,7 @@ const AdminDashboard = () => {
                                     <YAxis stroke="#9ca3af" fontSize={12} tickFormatter={(v) => `${(v/1000000).toFixed(1)}M`} />
                                     <Tooltip
                                         contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
-                                        formatter={(value, name) => [name === 'gmv' ? formatCurrency(value) : value, name === 'gmv' ? 'GMV' : 'Commandes']}
+                                        formatter={(value, name) => [name === 'gmv' ? formatCurrency(value) : value, name === 'gmv' ? t('admin_chart_gmv') : t('admin_chart_orders')]}
                                     />
                                     <Area type="monotone" dataKey="gmv" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#colorGmv)" />
                                 </AreaChart>
@@ -329,7 +329,7 @@ const AdminDashboard = () => {
 
                     {/* Category Distribution */}
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                        <h3 className="font-bold text-gray-900 mb-6">Répartition par Catégorie</h3>
+                        <h3 className="font-bold text-gray-900 mb-6">{t('admin_category_distribution')}</h3>
                         <div className="h-48">
                             <ResponsiveContainer width="100%" height="100%">
                                 <RechartsPie>
@@ -374,12 +374,12 @@ const AdminDashboard = () => {
                                     <Award size={20} className="text-amber-600" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-gray-900">Top Vendeurs</h3>
-                                    <p className="text-xs text-gray-500">Par chiffre d'affaires</p>
+                                    <h3 className="font-bold text-gray-900">{t('admin_top_vendors')}</h3>
+                                    <p className="text-xs text-gray-500">{t('admin_by_revenue')}</p>
                                 </div>
                             </div>
                             <button className="text-indigo-600 text-sm font-medium flex items-center gap-1 hover:underline">
-                                Voir tout <ChevronRight size={14} />
+                                {t('admin_view_all')} <ChevronRight size={14} />
                             </button>
                         </div>
                         <div className="divide-y divide-gray-50">
@@ -390,7 +390,7 @@ const AdminDashboard = () => {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="font-semibold text-gray-900 text-sm truncate">{vendor.name}</div>
-                                        <div className="text-xs text-gray-500">{vendor.orders} commandes</div>
+                                        <div className="text-xs text-gray-500">{t('admin_orders_count', { count: vendor.orders })}</div>
                                     </div>
                                     <div className="text-right">
                                         <div className="font-bold text-gray-900 text-sm">{formatCurrency(vendor.revenue)}</div>
@@ -400,7 +400,7 @@ const AdminDashboard = () => {
                                         </div>
                                     </div>
                                     <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${getVendorStatusColor(vendor.status)}`}>
-                                        {vendor.status.toUpperCase()}
+                                        {t(`vendor_status_${vendor.status}`).toUpperCase()}
                                     </span>
                                 </div>
                             ))}
@@ -415,12 +415,12 @@ const AdminDashboard = () => {
                                     <ShoppingBag size={20} className="text-blue-600" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-gray-900">Commandes Récentes</h3>
-                                    <p className="text-xs text-gray-500">Dernières transactions</p>
+                                    <h3 className="font-bold text-gray-900">{t('admin_recent_orders')}</h3>
+                                    <p className="text-xs text-gray-500">{t('admin_latest_transactions')}</p>
                                 </div>
                             </div>
                             <button className="text-indigo-600 text-sm font-medium flex items-center gap-1 hover:underline">
-                                Voir tout <ChevronRight size={14} />
+                                {t('admin_view_all')} <ChevronRight size={14} />
                             </button>
                         </div>
                         <div className="divide-y divide-gray-50">
@@ -429,7 +429,7 @@ const AdminDashboard = () => {
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="font-mono text-xs text-gray-500">{order.id}</span>
                                         <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
-                                            {order.status.toUpperCase()}
+                                            {t(`status_${order.status}`).toUpperCase()}
                                         </span>
                                     </div>
                                     <div className="flex items-center justify-between">
@@ -457,18 +457,18 @@ const AdminDashboard = () => {
                                 <Globe size={20} className="text-emerald-600" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-gray-900">Performance Logistique par Zone</h3>
-                                <p className="text-xs text-gray-500">Délais moyens et taux de succès</p>
+                                <h3 className="font-bold text-gray-900">{t('admin_logistics_zone_performance')}</h3>
+                                <p className="text-xs text-gray-500">{t('admin_avg_delay_success')}</p>
                             </div>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
                                     <tr className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100">
-                                        <th className="pb-3">Zone</th>
-                                        <th className="pb-3">Commandes</th>
-                                        <th className="pb-3">Délai Moyen</th>
-                                        <th className="pb-3">Performance</th>
+                                        <th className="pb-3">{t('admin_zone')}</th>
+                                        <th className="pb-3">{t('admin_orders')}</th>
+                                        <th className="pb-3">{t('admin_avg_delay')}</th>
+                                        <th className="pb-3">{t('admin_performance')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50">
@@ -503,14 +503,13 @@ const AdminDashboard = () => {
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4">
                                 <Zap size={24} className="text-amber-300" />
                             </div>
-                            <h3 className="text-xl font-bold mb-2">Insight Stratégique</h3>
+                            <h3 className="text-xl font-bold mb-2">{t('admin_insight_title')}</h3>
                             <p className="text-indigo-200 text-sm leading-relaxed mb-6">
-                                Le corridor Haïti-USA représente 75% de la croissance ce mois.
-                                Opportunité d'expansion sur le marché canadien identifiée.
+                                {t('admin_insight_text')}
                             </p>
                             <div className="p-3 bg-white/10 rounded-xl border border-white/20 backdrop-blur-sm">
                                 <p className="text-xs text-indigo-200">
-                                    <span className="font-bold text-white">Recommandation:</span> Augmenter les partenariats transporteurs vers Montréal.
+                                    <span className="font-bold text-white">{t('admin_recommendation')}</span> {t('admin_recommendation_text')}
                                 </p>
                             </div>
                         </div>
@@ -524,12 +523,12 @@ const AdminDashboard = () => {
                             <div className="p-2 bg-emerald-50 rounded-lg">
                                 <CreditCard size={20} className="text-emerald-600" />
                             </div>
-                            <span className="text-sm font-medium text-gray-500">Commissions Encaissées</span>
+                            <span className="text-sm font-medium text-gray-500">{t('admin_commissions_collected')}</span>
                         </div>
                         <div className="text-3xl font-bold text-gray-900 mb-1">{formatCurrency(1450000)}</div>
                         <p className="text-xs text-emerald-600 flex items-center gap-1">
                             <ArrowUpRight size={12} />
-                            +15.3% vs mois dernier
+                            {t('admin_vs_last_month')}
                         </p>
                     </div>
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -537,20 +536,20 @@ const AdminDashboard = () => {
                             <div className="p-2 bg-amber-50 rounded-lg">
                                 <Clock size={20} className="text-amber-600" />
                             </div>
-                            <span className="text-sm font-medium text-gray-500">Paiements en Attente</span>
+                            <span className="text-sm font-medium text-gray-500">{t('admin_payments_pending')}</span>
                         </div>
                         <div className="text-3xl font-bold text-gray-900 mb-1">{formatCurrency(385000)}</div>
-                        <p className="text-xs text-gray-500">42 vendeurs concernés</p>
+                        <p className="text-xs text-gray-500">{t('admin_vendors_affected')}</p>
                     </div>
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="p-2 bg-blue-50 rounded-lg">
                                 <Wallet size={20} className="text-blue-600" />
                             </div>
-                            <span className="text-sm font-medium text-gray-500">Soldes Vendeurs</span>
+                            <span className="text-sm font-medium text-gray-500">{t('admin_vendor_balances')}</span>
                         </div>
                         <div className="text-3xl font-bold text-gray-900 mb-1">{formatCurrency(2850000)}</div>
-                        <p className="text-xs text-gray-500">Total à distribuer</p>
+                        <p className="text-xs text-gray-500">{t('admin_total_to_distribute')}</p>
                     </div>
                 </div>
             </div>
