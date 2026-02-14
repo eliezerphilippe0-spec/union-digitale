@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import MainLayout from '../layouts/MainLayout';
 import { Truck, RotateCcw, MessageCircle, HelpCircle, Mail, Phone, ChevronDown, ChevronUp } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import SEO from '../components/common/SEO';
 
 const CustomerService = () => {
     const { t } = useLanguage();
@@ -39,6 +40,7 @@ const CustomerService = () => {
 
     return (
         <MainLayout>
+            <SEO title="Service client" description="Aide, FAQ et support Union Digitale." />
             <div className="bg-gray-50 min-h-screen pb-12">
                 {/* Hero Banner */}
                 <div className="bg-secondary text-white py-12 px-4 text-center">

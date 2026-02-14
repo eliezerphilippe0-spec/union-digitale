@@ -4,6 +4,7 @@ import { useProducts } from '../hooks/useProducts';
 import ProductCard from '../components/product/ProductCard';
 import { Loader, Music, Book, Smartphone, Briefcase, Gift } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import SEO from '../components/common/SEO';
 
 const CategoryLanding = ({ type }) => {
     const { products, loading } = useProducts();
@@ -69,7 +70,9 @@ const CategoryLanding = ({ type }) => {
     if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader className="animate-spin w-8 h-8 text-secondary" /></div>;
 
     return (
-        <div className="bg-white min-h-screen pb-12">
+        <>
+            <SEO title={config.title} description={config.description} />
+            <div className="bg-white min-h-screen pb-12">
             {/* Hero Section */}
             <div className={`${config.bgColor} py-12 px-4 border-b border-gray-200`}>
                 <div className="container mx-auto flex items-center gap-6">
@@ -113,6 +116,7 @@ const CategoryLanding = ({ type }) => {
                 )}
             </div>
         </div>
+        </>
     );
 };
 

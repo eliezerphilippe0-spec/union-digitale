@@ -13,6 +13,7 @@ import TestimonialCarousel from '../components/marketing/TestimonialCarousel';
 import TrustedBy from '../components/marketing/TrustedBy';
 import ServicesPreview from '../components/ServicesPreview';
 import StructuredData from '../components/common/StructuredData';
+import SEO from '../components/common/SEO';
 import SocialProofLive from '../components/marketing/SocialProofLive';
 import PromoBanner from '../components/marketing/PromoBanner';
 import AIRecommendations from '../components/recommendations/AIRecommendations';
@@ -95,6 +96,7 @@ const Home = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-neutral-900">
+            <SEO title="Union Digitale" description="Marketplace haïtienne pour produits et services, paiements sécurisés et livraison rapide." />
             <StructuredData />
             
             {/* Promo Banner - First Purchase Discount */}

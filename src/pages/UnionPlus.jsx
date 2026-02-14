@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useLanguage } from '../contexts/LanguageContext';
+import SEO from '../components/common/SEO';
 
 const UnionPlus = () => {
     const { currentUser } = useAuth();
@@ -56,7 +57,9 @@ const UnionPlus = () => {
     }
 
     return (
-        <div className="bg-gray-50 min-h-screen pb-12">
+        <>
+            <SEO title="Union Plus" description="Abonnement premium: livraison rapide, avantages exclusifs et économies." />
+            <div className="bg-gray-50 min-h-screen pb-12">
             {/* Hero Section - Modern Gradient Design */}
             <div className="bg-gradient-to-br from-[#0A1D37] via-[#1a3a5c] to-[#0A1D37] text-white py-20 text-center px-4 relative overflow-hidden">
                 {/* Decorative elements */}
@@ -146,6 +149,7 @@ const UnionPlus = () => {
                 </div>
             </div>
         </div>
+        </>
     );
 };
 

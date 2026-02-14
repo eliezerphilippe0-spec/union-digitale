@@ -6,7 +6,7 @@ const SEO = ({ title, description, keywords, image, url, type = 'website' }) => 
     const finalTitle = title ? `${title} | Union Digitale` : siteTitle;
     const defaultDescription = 'Découvrez Union Digitale, la première plateforme e-commerce en Haïti proposant des produits physiques et digitaux, livraison rapide et paiements sécurisés.';
     const finalDescription = description || defaultDescription;
-    const finalImage = image || '/og-image.jpg'; // Ensure you have a default OG image in public folder
+    const finalImage = image || '/logo-ud-horizontal.svg';
     const finalUrl = url || window.location.href;
 
     return (

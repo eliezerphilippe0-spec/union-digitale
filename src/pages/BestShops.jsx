@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../lib/firebase';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { Helmet } from 'react-helmet-async';
+import SEO from '../components/common/SEO';
 import { Store, TrendingUp, Star, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -51,10 +51,7 @@ const BestShops = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 pb-12">
-            <Helmet>
-                <title>{t('best_shops_meta_title')}</title>
-                <meta name="description" content={t('best_shops_meta_desc')} />
-            </Helmet>
+            <SEO title={t('best_shops_meta_title')} description={t('best_shops_meta_desc')} />
 
             {/* Hero Section */}
             <div className="bg-secondary text-white py-12 px-4 shadow-md">

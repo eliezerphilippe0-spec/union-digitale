@@ -1,12 +1,14 @@
 import React from 'react';
 import { Truck, MapPin, Globe, Package, Clock, AlertTriangle, HelpCircle } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import SEO from '../components/common/SEO';
 
 const ShippingPolicy = () => {
     const { t } = useLanguage();
 
     return (
         <div className="bg-gray-50 min-h-screen py-12">
+            <SEO title={t('shipping_policy_title')} description="Politique de livraison Union Digitale: délais, zones et conditions." />
             <div className="container mx-auto px-4 max-w-4xl">
                 <div className="bg-white rounded-xl shadow-sm p-8 md:p-12">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('shipping_policy_title')}</h1>

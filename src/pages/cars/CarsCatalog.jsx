@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Car, MapPin, Calendar, DollarSign, Fuel, Users } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
+import SEO from '../../components/common/SEO';
 
 const CarsCatalog = () => {
     const navigate = useNavigate();
@@ -38,7 +39,9 @@ const CarsCatalog = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
+        <>
+            <SEO title="Union Auto" description="Achetez ou louez des voitures en Haïti: annonces vérifiées et offres locales." />
+            <div className="min-h-screen bg-gray-50 py-8">
             <div className="container mx-auto px-4">
                 {/* Header */}
                 <div className="text-center mb-8">
@@ -183,6 +186,7 @@ const CarsCatalog = () => {
                 )}
             </div>
         </div>
+        </>
     );
 };
 

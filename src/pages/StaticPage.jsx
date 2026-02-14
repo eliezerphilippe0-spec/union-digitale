@@ -1,9 +1,11 @@
 import React from 'react';
 import MainLayout from '../layouts/MainLayout';
+import SEO from '../components/common/SEO';
 
 const StaticPage = ({ title, content }) => {
     return (
         <MainLayout>
+            <SEO title={title} description={`Union Digitale - ${title}`} />
             <div className="bg-white min-h-screen py-12">
                 <div className="container mx-auto px-4 max-w-3xl">
                     <h1 className="text-3xl font-bold mb-8 text-gray-900 border-b pb-4">{title}</h1>

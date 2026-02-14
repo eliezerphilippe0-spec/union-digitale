@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useRealEstate } from '../../hooks/useRealEstate';
 import { MapPin, Home, Bed, Bath, Search, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import SEO from '../../components/common/SEO';
 
 const RealEstateCatalog = () => {
     const { listings, fetchListings, loading } = useRealEstate();
@@ -19,7 +20,9 @@ const RealEstateCatalog = () => {
     });
 
     return (
-        <div className="bg-gray-50 min-h-screen py-10">
+        <>
+            <SEO title="Immobilier en Haïti" description="Maisons, terrains et locations en Haïti. Trouvez des offres vérifiées." />
+            <div className="bg-gray-50 min-h-screen py-10">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-10">
                     <h1 className="text-3xl font-bold mb-4 text-gray-900">Immobilier & Locations</h1>
@@ -89,6 +92,7 @@ const RealEstateCatalog = () => {
                 )}
             </div>
         </div>
+        </>
     );
 };
 

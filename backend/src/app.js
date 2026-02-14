@@ -11,6 +11,7 @@ const rateLimit = require('express-rate-limit');
 
 const config = require('./config');
 const errorHandler = require('./middleware/errorHandler');
+const prisma = require('./lib/prisma');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -47,6 +48,9 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
+// Stripe webhook needs raw body
+app.use('/api/payments/webhook/stripe', express.raw({ type: 'application/json' }));
+
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -68,6 +72,70 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     environment: config.NODE_ENV,
   });
+});
+
+// Dynamic sitemap
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const baseUrl = (config.FRONTEND_URL || 'https://uniondigitale.ht').replace(/\/$/, '');
+    const formatDate = (date) => new Date(date || Date.now()).toISOString().split('T')[0];
+
+    const staticRoutes = [
+      '/',
+      '/catalog',
+      '/services',
+      '/cars',
+      '/real-estate',
+      '/utilities',
+      '/pay',
+      '/learn',
+      '/music',
+      '/books',
+      '/apps',
+      '/seller/welcome',
+      '/ambassador',
+      '/union-plus',
+      '/gift-cards',
+      '/about-us',
+      '/customer-service',
+      '/shipping-policy',
+      '/policies',
+      '/careers',
+      '/sustainability',
+      '/best-shops'
+    ];
+
+    const [products, stores] = await Promise.all([
+      prisma.product.findMany({
+        where: { status: { in: ['ACTIVE', 'OUT_OF_STOCK'] } },
+        select: { slug: true, updatedAt: true }
+      }),
+      prisma.store.findMany({
+        where: { status: 'ACTIVE' },
+        select: { slug: true, updatedAt: true }
+      })
+    ]);
+
+    const urls = [];
+    for (const path of staticRoutes) {
+      urls.push(`\n  <url><loc>${baseUrl}${path}</loc><lastmod>${formatDate()}</lastmod></url>`);
+    }
+    for (const product of products) {
+      urls.push(`\n  <url><loc>${baseUrl}/product/${product.slug}</loc><lastmod>${formatDate(product.updatedAt)}</lastmod></url>`);
+    }
+    for (const store of stores) {
+      urls.push(`\n  <url><loc>${baseUrl}/store/${store.slug}</loc><lastmod>${formatDate(store.updatedAt)}</lastmod></url>`);
+    }
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n` +
+      `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join('')}\n</urlset>`;
+
+    res.header('Content-Type', 'application/xml');
+    res.send(xml);
+  } catch (error) {
+    console.error('Sitemap error:', error);
+    res.status(500).send('Sitemap generation error');
+  }
 });
 
 // API routes

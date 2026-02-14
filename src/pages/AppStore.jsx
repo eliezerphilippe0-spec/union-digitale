@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import SEO from '../components/common/SEO';
 import { 
   Grid, ShoppingBag, Truck, DollarSign, BarChart2, 
   MessageSquare, Share2, Camera, Star, Download,
@@ -134,7 +135,9 @@ export default function AppStore() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <>
+      <SEO title="App Store" description="Extensions et apps pour vendeurs: analytics, shipping, marketing et plus." />
+      <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
       <div className="bg-gradient-to-r from-primary-600 to-primary-800 text-white px-4 py-8">
         <h1 className="text-2xl font-bold mb-2">App Store</h1>
@@ -287,5 +290,6 @@ export default function AppStore() {
         </div>
       </div>
     </div>
+    </>
   );
 }

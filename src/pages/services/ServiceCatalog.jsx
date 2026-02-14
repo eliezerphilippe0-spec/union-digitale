@@ -3,6 +3,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { Search, MapPin, Filter, Star, Briefcase, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useServices } from '../../hooks/useServices';
+import SEO from '../../components/common/SEO';
 
 const CATEGORIES = [
     { id: 'all', label: 'Tous', icon: Briefcase },
@@ -33,6 +34,7 @@ const ServiceCatalog = () => {
 
     return (
         <div className="bg-gray-50 min-h-screen py-8">
+            <SEO title="Union Services" description="Trouvez des professionnels en Haïti: beauté, maison, éducation, business et événements." />
             <div className="container mx-auto px-4 max-w-6xl">
 
                 {/* Header & Search */}

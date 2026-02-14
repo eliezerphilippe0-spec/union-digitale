@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Gift, CreditCard, Check } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import SEO from '../components/common/SEO';
 
 const GiftCards = () => {
     const { addToCart } = useCart();
@@ -36,7 +37,9 @@ const GiftCards = () => {
     };
 
     return (
-        <div className="bg-gray-50 min-h-screen py-12">
+        <>
+            <SEO title="Cartes-cadeaux" description="Offrez des cartes-cadeaux Union Digitale pour tous les budgets." />
+            <div className="bg-gray-50 min-h-screen py-12">
             <div className="container mx-auto px-4 max-w-4xl">
                 <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row">
                     {/* Visual Preview */}
@@ -138,6 +141,7 @@ const GiftCards = () => {
                 </div>
             </div>
         </div>
+        </>
     );
 };
 
