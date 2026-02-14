@@ -213,9 +213,14 @@ const Checkout = () => {
     return (
         <div className="bg-gray-100 min-h-screen py-8">
             <div className="container mx-auto px-4 max-w-5xl">
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-4">
                     <h1 className="text-2xl font-medium">{t('checkout_title')}</h1>
                     <div className="text-gray-500 text-sm">{t('secure_payment')}</div>
+                </div>
+                <div className="flex flex-wrap gap-2 mb-6">
+                    <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full">{t('secure_payment')}</span>
+                    <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">Livraison locale</span>
+                    <span className="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-full">Support 7j/7</span>
                 </div>
 
                 {error && (
@@ -490,12 +495,14 @@ const Checkout = () => {
             </div>
 
             {/* Mobile sticky pay bar */}
-            {paymentMethod !== 'stripe' && paymentMethod !== 'paypal' && (
-                <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 z-50">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-600">{t('total_amount')}</span>
-                        <span className="text-lg font-bold text-red-700">{totalWithBump.toLocaleString()} G</span>
-                    </div>
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 z-50">
+                <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">{t('total_amount')}</span>
+                    <span className="text-lg font-bold text-red-700">{totalWithBump.toLocaleString()} G</span>
+                </div>
+                {paymentMethod === 'stripe' || paymentMethod === 'paypal' ? (
+                    <div className="text-center text-sm text-gray-600">{t('complete_payment_form')}</div>
+                ) : (
                     <button
                         onClick={handlePayment}
                         disabled={loading}
@@ -507,8 +514,8 @@ const Checkout = () => {
                                 paymentMethod === 'union_pay_3x' ? t('pay_with_union_pay_btn') :
                                     t('pay_now_btn')}
                     </button>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 };
