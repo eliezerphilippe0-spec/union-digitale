@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Package, Truck, CheckCircle, Clock } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import SEO from '../components/common/SEO';
 import TrackingMap from '../components/TrackingMap';
 
 const TrackingPage = () => {
@@ -76,6 +77,7 @@ const TrackingPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 pb-12">
+            <SEO title="Suivi de commande" description="Suivez vos livraisons Union Digitale en temps réel." />
             {/* Header */}
             <div className="bg-white shadow-sm sticky top-0 z-30">
                 <div className="container mx-auto px-4 py-4 flex items-center gap-4">

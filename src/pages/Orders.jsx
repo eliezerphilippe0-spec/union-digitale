@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Package, Download, CheckCircle, Clock } from 'lucide-react';
 import { products } from '../data/products';
 import { useLanguage } from '../contexts/LanguageContext';
+import SEO from '../components/common/SEO';
 
 const Orders = () => {
     const navigate = useNavigate();
@@ -28,6 +29,7 @@ const Orders = () => {
 
     return (
         <div className="bg-gray-100 min-h-screen py-8">
+            <SEO title="Mes commandes" description="Suivez et gérez vos commandes Union Digitale." />
             <div className="container mx-auto px-4 max-w-5xl">
                 <h1 className="text-2xl font-medium mb-6">{t('your_orders')}</h1>
 
