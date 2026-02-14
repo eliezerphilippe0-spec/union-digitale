@@ -17,9 +17,16 @@ const Hero = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchFocused, setSearchFocused] = useState(false);
+    const [loadSpline, setLoadSpline] = useState(false);
 
     // Popular searches for suggestions
     const popularSearches = ['iPhone', 'Café Haïtien', 'Panneau Solaire', 'MacBook', 'Vêtements'];
+
+    const trustBadges = [
+        { icon: Truck, text: t('hero_trust_delivery'), color: 'text-green-400' },
+        { icon: RefreshCcw, text: t('hero_trust_refund'), color: 'text-blue-400' },
+        { icon: Shield, text: t('hero_trust_secure'), color: 'text-purple-400' },
+    ];
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -37,6 +44,14 @@ const Hero = () => {
     }, []);
 
     useEffect(() => {
+        if (!isDesktop || shouldReduceAnimations || isSlowConnection) return;
+        const schedule = window.requestIdleCallback || ((cb) => setTimeout(cb, 1500));
+        const cancel = window.cancelIdleCallback || clearTimeout;
+        const id = schedule(() => setLoadSpline(true));
+        return () => cancel(id);
+    }, [isDesktop, shouldReduceAnimations, isSlowConnection]);
+
+    useEffect(() => {
         if (shouldReduceAnimations) return;
         const handleMouseMove = (e) => {
             setMousePosition({
@@ -49,11 +64,6 @@ const Hero = () => {
     }, [shouldReduceAnimations]);
 
     // Trust badges data
-    const trustBadges = [
-        { icon: Truck, text: 'Livraison gratuite dès 2000 HTG', color: 'text-green-400' },
-        { icon: RefreshCcw, text: 'Satisfait ou remboursé 30j', color: 'text-blue-400' },
-        { icon: Shield, text: 'Paiement 100% sécurisé', color: 'text-purple-400' },
-    ];
 
     return (
         <div className="relative min-h-[55vh] md:min-h-[50vh] lg:min-h-[60vh] overflow-hidden bg-[#0a0f1a]">
@@ -93,7 +103,7 @@ const Hero = () => {
             </div>
 
             {/* Spline 3D - Desktop Only */}
-            {isDesktop && !isSlowConnection && (
+            {loadSpline && (
                 <Suspense fallback={<div />}>
                     <SplineBackground className="absolute inset-y-0 -right-20 w-[600px] h-full z-10 opacity-20" />
                 </Suspense>
@@ -109,7 +119,7 @@ const Hero = () => {
                         <div className="inline-flex items-center gap-2 px-4 py-2 mb-4 rounded-full bg-white/5 backdrop-blur-xl border border-white/10">
                             <span className="text-2xl">🇭🇹</span>
                             <span className="text-sm text-gray-300 font-medium">
-                                La Marketplace #1 en Haïti
+                                {t('hero_marketplace')}
                             </span>
                             <span className="relative flex h-2 w-2 ml-2">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -127,7 +137,7 @@ const Hero = () => {
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     onFocus={() => setSearchFocused(true)}
                                     onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
-                                    placeholder="Rechercher un produit, une marque..."
+                                    placeholder={t('hero_search_placeholder')}
                                     className="w-full h-14 pl-12 pr-32 rounded-2xl bg-white/10 backdrop-blur-xl border-2 border-white/20 focus:border-gold-400/60 text-white placeholder-gray-400 outline-none transition-all duration-300 text-lg"
                                 />
                                 <button
@@ -135,13 +145,13 @@ const Hero = () => {
                                     className="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-primary-900 font-bold px-6 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2"
                                 >
                                     <Search className="w-4 h-4" />
-                                    <span className="hidden sm:inline">Chercher</span>
+                                    <span className="hidden sm:inline">{t('hero_search_btn')}</span>
                                 </button>
                             </div>
                             
                             {/* Popular searches */}
                             <div className="flex items-center gap-2 mt-3 flex-wrap">
-                                <span className="text-xs text-gray-500">Populaires:</span>
+                                <span className="text-xs text-gray-500">{t('hero_popular')}</span>
                                 {popularSearches.map((term, i) => (
                                     <button
                                         key={i}
@@ -196,7 +206,7 @@ const Hero = () => {
                                 className="group relative overflow-hidden bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-primary-900 font-bold shadow-[0_0_40px_rgba(212,175,55,0.3)] hover:shadow-[0_0_60px_rgba(212,175,55,0.4)] transition-all duration-300"
                             >
                                 <span className="relative z-10 flex items-center gap-2">
-                                    🔥 Voir les Promos (-50%)
+                                    {t('hero_deals_btn')}
                                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </span>
                             </Button>
@@ -206,7 +216,7 @@ const Hero = () => {
                                 onClick={() => window.location.href = '/catalog'}
                                 className="bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 text-white font-semibold transition-all duration-300"
                             >
-                                Explorer le Catalogue
+                                {t('hero_explore_btn')}
                             </Button>
                         </div>
 
