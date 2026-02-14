@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Zap, Phone, Droplet, Clock, TrendingUp, DollarSign } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import SEO from '../../components/common/SEO';
 
 const UtilitiesHub = () => {
     const navigate = useNavigate();
@@ -33,6 +34,7 @@ const UtilitiesHub = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 py-8">
+            <SEO title="Utilities" description="Payez vos factures et recharges en Haïti en quelques clics." />
             <div className="container mx-auto px-4 max-w-6xl">
                 {/* Header */}
                 <div className="mb-8">

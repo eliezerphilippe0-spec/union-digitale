@@ -4,6 +4,7 @@ import { db } from '../lib/firebase';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import SEO from '../components/common/SEO';
 
 const Travel = () => {
     const { t } = useLanguage();
@@ -71,6 +72,7 @@ const Travel = () => {
 
     return (
         <div className="bg-gray-50 min-h-screen pb-12">
+            <SEO title="Voyages" description="Trouvez vols et offres de voyage." />
             {/* Hero Section */}
             <div className="bg-blue-900 text-white py-16 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center"></div>

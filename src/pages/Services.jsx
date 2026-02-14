@@ -3,6 +3,7 @@ import { Search, Filter, Sparkles } from 'lucide-react';
 import ServicesGrid from '../components/ServicesGrid';
 import { serviceCategories, serviceBundles } from '../data/services-data';
 import { useLanguage } from '../contexts/LanguageContext';
+import SEO from '../components/common/SEO';
 import { ScrollFadeIn } from '../hooks/useScrollAnimation.jsx';
 
 const Services = () => {
@@ -12,6 +13,7 @@ const Services = () => {
 
     return (
         <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
+            <SEO title="Services" description="Découvrez des services locaux en Haïti." />
             {/* Hero Section - Compact */}
             <section className="relative min-h-[40vh] bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 overflow-hidden">
                 {/* Background effects */}

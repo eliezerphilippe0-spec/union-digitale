@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import SEO from '../../components/common/SEO';
 import { useNavigate } from 'react-router-dom';
 import { Zap, ArrowLeft, CreditCard } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -50,6 +51,7 @@ const ElectricityPayment = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 py-8">
+            <SEO title="Paiement électricité" description="Payez vos factures d’électricité en toute sécurité." />
             <div className="container mx-auto px-4 max-w-2xl">
                 {/* Header */}
                 <button
