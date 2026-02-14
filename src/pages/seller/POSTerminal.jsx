@@ -11,27 +11,27 @@ import {
 } from 'lucide-react';
 import { useProducts } from '../../hooks/useProducts';
 import { useToast } from '../../components/ui/Toast';
-
-// Mock categories for quick access
-const QUICK_CATEGORIES = [
-    { id: 'all', name: 'Tous', icon: '📦' },
-    { id: 'electronics', name: 'Électronique', icon: '📱' },
-    { id: 'clothing', name: 'Vêtements', icon: '👕' },
-    { id: 'food', name: 'Alimentation', icon: '🍎' },
-    { id: 'beauty', name: 'Beauté', icon: '💄' },
-    { id: 'home', name: 'Maison', icon: '🏠' },
-];
-
-// Payment methods
-const PAYMENT_METHODS = [
-    { id: 'cash', name: 'Espèces', icon: Banknote, color: 'bg-green-500' },
-    { id: 'moncash', name: 'MonCash', icon: Smartphone, color: 'bg-red-500' },
-    { id: 'card', name: 'Carte', icon: CreditCard, color: 'bg-blue-500' },
-];
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const POSTerminal = () => {
     const { products, loading } = useProducts();
     const toast = useToast();
+    const { t } = useLanguage();
+
+    const quickCategories = [
+        { id: 'all', name: t('pos_category_all'), icon: '📦' },
+        { id: 'electronics', name: t('pos_category_electronics'), icon: '📱' },
+        { id: 'clothing', name: t('pos_category_clothing'), icon: '👕' },
+        { id: 'food', name: t('pos_category_food'), icon: '🍎' },
+        { id: 'beauty', name: t('pos_category_beauty'), icon: '💄' },
+        { id: 'home', name: t('pos_category_home'), icon: '🏠' },
+    ];
+
+    const paymentMethods = [
+        { id: 'cash', name: t('pos_payment_cash'), icon: Banknote, color: 'bg-green-500' },
+        { id: 'moncash', name: t('pos_payment_moncash'), icon: Smartphone, color: 'bg-red-500' },
+        { id: 'card', name: t('pos_payment_card'), icon: CreditCard, color: 'bg-blue-500' },
+    ];
     
     const [cart, setCart] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -96,7 +96,7 @@ const POSTerminal = () => {
             }
             return [...prev, { ...product, quantity: 1 }];
         });
-        toast?.success(`${product.title} ajouté`);
+        toast?.success(`${product.title} ${t('pos_product_added_suffix')}`);
     };
 
     // Update quantity
@@ -125,12 +125,12 @@ const POSTerminal = () => {
     // Process payment
     const processPayment = () => {
         if (!selectedPayment) {
-            toast?.error('Sélectionnez un mode de paiement');
+            toast?.error(t('pos_payment_select_error'));
             return;
         }
 
         if (selectedPayment === 'cash' && parseFloat(cashReceived) < total) {
-            toast?.error('Montant insuffisant');
+            toast?.error(t('pos_cash_insufficient_error'));
             return;
         }
 
@@ -162,7 +162,7 @@ const POSTerminal = () => {
 
     // Print receipt (mock)
     const printReceipt = () => {
-        toast?.success('Ticket envoyé à l\'imprimante');
+        toast?.success(t('pos_receipt_printed'));
     };
 
     return (
@@ -175,7 +175,7 @@ const POSTerminal = () => {
                         <button className="p-2 hover:bg-gray-100 rounded-lg">
                             <ArrowLeft className="w-5 h-5" />
                         </button>
-                        <h1 className="text-xl font-bold text-gray-900">Point de Vente</h1>
+                        <h1 className="text-xl font-bold text-gray-900">{t('pos_title')}</h1>
                         <div className="flex-1" />
                         <div className="text-sm text-gray-500">
                             <Clock className="w-4 h-4 inline mr-1" />
@@ -194,7 +194,7 @@ const POSTerminal = () => {
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Rechercher un produit (F2)..."
+                                placeholder={t('pos_search_placeholder')}
                                 className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500"
                             />
                         </div>
@@ -218,7 +218,7 @@ const POSTerminal = () => {
                     </div>
                     
                     <div className="flex gap-2 overflow-x-auto pb-1">
-                        {QUICK_CATEGORIES.map(cat => (
+                        {quickCategories.map(cat => (
                             <button
                                 key={cat.id}
                                 onClick={() => setSelectedCategory(cat.id)}
@@ -280,7 +280,7 @@ const POSTerminal = () => {
                                     </div>
                                     <div className="flex-1 text-left">
                                         <h3 className="font-medium text-gray-900">{product.title}</h3>
-                                        <p className="text-sm text-gray-500">SKU: {product.id}</p>
+                                        <p className="text-sm text-gray-500">{t('pos_sku_prefix')}{product.id}</p>
                                     </div>
                                     <p className="text-gold-600 font-bold text-lg">
                                         {product.price.toLocaleString()} G
@@ -297,13 +297,13 @@ const POSTerminal = () => {
                 {/* Cart Header */}
                 <div className="p-4 border-b border-gray-200">
                     <div className="flex items-center justify-between">
-                        <h2 className="font-bold text-lg">Panier</h2>
+                        <h2 className="font-bold text-lg">{t('pos_cart_title')}</h2>
                         <button
                             onClick={clearCart}
                             disabled={cart.length === 0}
                             className="text-red-500 text-sm hover:text-red-600 disabled:opacity-50"
                         >
-                            Vider
+                            {t('pos_cart_clear')}
                         </button>
                     </div>
                     
@@ -314,7 +314,7 @@ const POSTerminal = () => {
                             type="text"
                             value={customerName}
                             onChange={(e) => setCustomerName(e.target.value)}
-                            placeholder="Nom du client (optionnel)"
+                            placeholder={t('pos_customer_placeholder')}
                             className="flex-1 text-sm border-none focus:outline-none"
                         />
                     </div>
@@ -325,8 +325,8 @@ const POSTerminal = () => {
                     {cart.length === 0 ? (
                         <div className="text-center py-12 text-gray-400">
                             <Receipt className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                            <p>Panier vide</p>
-                            <p className="text-sm">Scannez ou cliquez sur un produit</p>
+                            <p>{t('pos_cart_empty_title')}</p>
+                            <p className="text-sm">{t('pos_cart_empty_desc')}</p>
                         </div>
                     ) : (
                         cart.map(item => (
@@ -375,7 +375,7 @@ const POSTerminal = () => {
                             type="number"
                             value={discount.value || ''}
                             onChange={(e) => setDiscount({ ...discount, value: parseFloat(e.target.value) || 0 })}
-                            placeholder="Remise"
+                            placeholder={t('pos_discount_placeholder')}
                             className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2"
                         />
                         <select
@@ -391,17 +391,17 @@ const POSTerminal = () => {
                     {/* Totals */}
                     <div className="space-y-2 text-sm">
                         <div className="flex justify-between text-gray-500">
-                            <span>Sous-total</span>
+                            <span>{t('pos_subtotal_label')}</span>
                             <span>{subtotal.toLocaleString()} G</span>
                         </div>
                         {discountAmount > 0 && (
                             <div className="flex justify-between text-green-600">
-                                <span>Remise</span>
+                                <span>{t('pos_discount_label')}</span>
                                 <span>-{discountAmount.toLocaleString()} G</span>
                             </div>
                         )}
                         <div className="flex justify-between text-xl font-bold pt-2 border-t border-gray-200">
-                            <span>Total</span>
+                            <span>{t('pos_total_label')}</span>
                             <span className="text-gold-600">{total.toLocaleString()} G</span>
                         </div>
                     </div>
@@ -413,7 +413,7 @@ const POSTerminal = () => {
                         className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 disabled:from-gray-300 disabled:to-gray-400 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all"
                     >
                         <CreditCard className="w-5 h-5" />
-                        Payer (F4)
+                        {t('pos_pay_button')}
                     </button>
                 </div>
             </div>
@@ -423,19 +423,19 @@ const POSTerminal = () => {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-2xl w-full max-w-md p-6">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold">Paiement</h2>
+                            <h2 className="text-xl font-bold">{t('pos_payment_title')}</h2>
                             <button onClick={() => setShowPayment(false)}>
                                 <X className="w-6 h-6 text-gray-400" />
                             </button>
                         </div>
 
                         <div className="text-center mb-6">
-                            <p className="text-sm text-gray-500">Total à payer</p>
+                            <p className="text-sm text-gray-500">{t('pos_total_due')}</p>
                             <p className="text-4xl font-bold text-gold-600">{total.toLocaleString()} G</p>
                         </div>
 
                         <div className="grid grid-cols-3 gap-3 mb-6">
-                            {PAYMENT_METHODS.map(method => {
+                            {paymentMethods.map(method => {
                                 const Icon = method.icon;
                                 return (
                                     <button
@@ -458,7 +458,7 @@ const POSTerminal = () => {
 
                         {selectedPayment === 'cash' && (
                             <div className="mb-6">
-                                <label className="block text-sm text-gray-500 mb-2">Montant reçu</label>
+                                <label className="block text-sm text-gray-500 mb-2">{t('pos_cash_received_label')}</label>
                                 <input
                                     type="number"
                                     value={cashReceived}
@@ -469,7 +469,7 @@ const POSTerminal = () => {
                                 />
                                 {change > 0 && (
                                     <p className="text-center text-green-600 font-bold mt-2">
-                                        Monnaie: {change.toLocaleString()} G
+                                        {t('pos_change_label')}: {change.toLocaleString()} G
                                     </p>
                                 )}
                             </div>
@@ -480,7 +480,7 @@ const POSTerminal = () => {
                             disabled={!selectedPayment || (selectedPayment === 'cash' && parseFloat(cashReceived) < total)}
                             className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white font-bold py-4 rounded-xl transition-colors"
                         >
-                            Confirmer le paiement
+                            {t('pos_confirm_payment')}
                         </button>
                     </div>
                 </div>
@@ -493,22 +493,22 @@ const POSTerminal = () => {
                         <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <CheckCircle className="w-10 h-10 text-green-600" />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Paiement Réussi!</h2>
-                        <p className="text-gray-500 mb-4">Commande #{lastOrder.id}</p>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('pos_payment_success_title')}</h2>
+                        <p className="text-gray-500 mb-4">{t('pos_order_prefix')}{lastOrder.id}</p>
                         
                         <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left">
                             <div className="flex justify-between text-sm mb-2">
-                                <span className="text-gray-500">Total</span>
+                                <span className="text-gray-500">{t('pos_total_label')}</span>
                                 <span className="font-bold">{lastOrder.total.toLocaleString()} G</span>
                             </div>
                             {lastOrder.cashReceived && (
                                 <>
                                     <div className="flex justify-between text-sm mb-2">
-                                        <span className="text-gray-500">Reçu</span>
+                                        <span className="text-gray-500">{t('pos_amount_received_label')}</span>
                                         <span>{lastOrder.cashReceived.toLocaleString()} G</span>
                                     </div>
                                     <div className="flex justify-between text-sm text-green-600">
-                                        <span>Monnaie</span>
+                                        <span>{t('pos_change_label')}</span>
                                         <span className="font-bold">{lastOrder.change.toLocaleString()} G</span>
                                     </div>
                                 </>
@@ -521,13 +521,13 @@ const POSTerminal = () => {
                                 className="flex-1 flex items-center justify-center gap-2 py-3 border border-gray-200 rounded-xl hover:bg-gray-50"
                             >
                                 <Printer className="w-5 h-5" />
-                                Imprimer
+                                {t('pos_print_button')}
                             </button>
                             <button
                                 onClick={() => setShowReceipt(false)}
                                 className="flex-1 bg-gold-500 text-white py-3 rounded-xl hover:bg-gold-600"
                             >
-                                Nouvelle vente
+                                {t('pos_new_sale_button')}
                             </button>
                         </div>
                     </div>

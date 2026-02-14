@@ -26,7 +26,7 @@ const SellerDashboard = () => {
         nextLevel: 'Platinum',
         rating: 4.8,
         reviewCount: 342,
-        memberSince: 'Janvier 2024'
+        memberSince: t('seller_dashboard_member_since_value')
     });
 
     // Stats principales
@@ -34,7 +34,7 @@ const SellerDashboard = () => {
         totalRevenue: 2450000,
         pendingBalance: 185000,
         availableBalance: 890000,
-        nextPayout: '15 Jan 2025',
+        nextPayout: t('seller_dashboard_next_payout_value'),
         totalOrders: 485,
         pendingOrders: 12,
         shippedOrders: 8,
@@ -49,10 +49,10 @@ const SellerDashboard = () => {
 
     // Graphique revenus
     const revenueData = [
-        { name: 'Sem 1', revenue: 450000, orders: 85 },
-        { name: 'Sem 2', revenue: 520000, orders: 98 },
-        { name: 'Sem 3', revenue: 480000, orders: 91 },
-        { name: 'Sem 4', revenue: 610000, orders: 115 },
+        { name: t('seller_dashboard_week_1'), revenue: 450000, orders: 85 },
+        { name: t('seller_dashboard_week_2'), revenue: 520000, orders: 98 },
+        { name: t('seller_dashboard_week_3'), revenue: 480000, orders: 91 },
+        { name: t('seller_dashboard_week_4'), revenue: 610000, orders: 115 },
     ];
 
     // Top produits
@@ -65,16 +65,16 @@ const SellerDashboard = () => {
 
     // Commandes récentes
     const recentOrders = [
-        { id: '#UD-9842', product: 'iPhone 15 Pro', customer: 'Jean B.', amount: 125000, status: 'pending', time: 'Il y a 30min' },
-        { id: '#UD-9841', product: 'MacBook Air M2', customer: 'Marie C.', amount: 185000, status: 'shipped', time: 'Il y a 2h' },
-        { id: '#UD-9840', product: 'AirPods Pro', customer: 'Pierre L.', amount: 35000, status: 'delivered', time: 'Il y a 5h' },
+        { id: '#UD-9842', product: 'iPhone 15 Pro', customer: 'Jean B.', amount: 125000, status: 'pending', time: t('seller_dashboard_time_30m') },
+        { id: '#UD-9841', product: 'MacBook Air M2', customer: 'Marie C.', amount: 185000, status: 'shipped', time: t('seller_dashboard_time_2h') },
+        { id: '#UD-9840', product: 'AirPods Pro', customer: 'Pierre L.', amount: 35000, status: 'delivered', time: t('seller_dashboard_time_5h') },
     ];
 
     // Notifications
     const notifications = [
-        { id: 1, type: 'order', title: 'Nouvelle commande!', message: 'iPhone 15 Pro - 125,000 G', time: 'Il y a 30min', unread: true },
-        { id: 2, type: 'stock', title: 'Stock bas', message: 'AirPods Pro - 5 unités restantes', time: 'Il y a 2h', unread: true },
-        { id: 3, type: 'payout', title: 'Paiement effectué', message: '450,000 G envoyé sur MonCash', time: 'Hier', unread: false },
+        { id: 1, type: 'order', title: t('seller_dashboard_notif_new_order'), message: t('seller_dashboard_notif_new_order_msg'), time: t('seller_dashboard_time_30m'), unread: true },
+        { id: 2, type: 'stock', title: t('seller_dashboard_notif_low_stock'), message: t('seller_dashboard_notif_low_stock_msg'), time: t('seller_dashboard_time_2h'), unread: true },
+        { id: 3, type: 'payout', title: t('seller_dashboard_notif_payout_done'), message: t('seller_dashboard_notif_payout_done_msg'), time: t('seller_dashboard_time_yesterday'), unread: false },
     ];
 
     useEffect(() => {
@@ -107,7 +107,7 @@ const SellerDashboard = () => {
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <div className="text-center">
                     <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600 font-medium">Chargement de votre espace...</p>
+                    <p className="text-gray-600 font-medium">{t('seller_dashboard_loading')}</p>
                 </div>
             </div>
         );
@@ -135,10 +135,10 @@ const SellerDashboard = () => {
                                     <div className="flex items-center gap-1">
                                         <Star size={14} className="text-amber-400 fill-amber-400" />
                                         <span className="text-sm font-semibold text-gray-700">{vendorData.rating}</span>
-                                        <span className="text-xs text-gray-400">({vendorData.reviewCount} avis)</span>
+                                        <span className="text-xs text-gray-400">({vendorData.reviewCount} {t('reviews')})</span>
                                     </div>
                                     <span className="text-xs text-gray-400">•</span>
-                                    <span className="text-xs text-gray-500">Membre depuis {vendorData.memberSince}</span>
+                                    <span className="text-xs text-gray-500">{t('seller_dashboard_member_since')} {vendorData.memberSince}</span>
                                 </div>
                             </div>
                         </div>
@@ -148,9 +148,9 @@ const SellerDashboard = () => {
                                 onChange={(e) => setPeriod(e.target.value)}
                                 className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium"
                             >
-                                <option value="7">7 derniers jours</option>
-                                <option value="30">30 derniers jours</option>
-                                <option value="90">90 derniers jours</option>
+                                <option value="7">{t('seller_dashboard_period_7')}</option>
+                                <option value="30">{t('seller_dashboard_period_30')}</option>
+                                <option value="90">{t('seller_dashboard_period_90')}</option>
                             </select>
                             <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
                                 <Bell size={20} className="text-gray-600" />
@@ -167,7 +167,7 @@ const SellerDashboard = () => {
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
                                 <Target size={16} className="text-indigo-600" />
-                                <span className="text-sm font-semibold text-indigo-900">Progression vers {vendorData.nextLevel}</span>
+                                <span className="text-sm font-semibold text-indigo-900">{t('seller_dashboard_progress_to')} {vendorData.nextLevel}</span>
                             </div>
                             <span className="text-sm font-bold text-indigo-600">{vendorData.levelProgress}%</span>
                         </div>
@@ -177,7 +177,7 @@ const SellerDashboard = () => {
                                 style={{ width: `${vendorData.levelProgress}%` }}
                             ></div>
                         </div>
-                        <p className="text-xs text-indigo-600 mt-2">Encore 550,000 G de ventes pour atteindre le niveau {vendorData.nextLevel}!</p>
+                        <p className="text-xs text-indigo-600 mt-2">{t('seller_dashboard_sales_to_reach_prefix')} 550,000 G {t('seller_dashboard_sales_to_reach_suffix')} {vendorData.nextLevel}!</p>
                     </div>
                 </div>
             </header>
@@ -193,10 +193,10 @@ const SellerDashboard = () => {
                             <div>
                                 <div className="flex items-center gap-2 mb-2">
                                     <Package size={20} />
-                                    <span className="font-medium">Commandes à traiter</span>
+                                    <span className="font-medium">{t('seller_dashboard_orders_to_process')}</span>
                                 </div>
                                 <div className="text-4xl font-black">{stats.pendingOrders}</div>
-                                <p className="text-orange-100 text-sm mt-1">Expédier aujourd'hui</p>
+                                <p className="text-orange-100 text-sm mt-1">{t('seller_dashboard_ship_today')}</p>
                             </div>
                             <ChevronRight size={24} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                         </div>
@@ -209,10 +209,10 @@ const SellerDashboard = () => {
                             <div>
                                 <div className="flex items-center gap-2 mb-2">
                                     <AlertTriangle size={20} />
-                                    <span className="font-medium">Stock Critique</span>
+                                    <span className="font-medium">{t('seller_dashboard_low_stock')}</span>
                                 </div>
                                 <div className="text-4xl font-black">{stats.lowStockProducts}</div>
-                                <p className="text-red-100 text-sm mt-1">Produits à réapprovisionner</p>
+                                <p className="text-red-100 text-sm mt-1">{t('seller_dashboard_products_to_restock')}</p>
                             </div>
                             <ChevronRight size={24} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                         </div>
@@ -225,10 +225,10 @@ const SellerDashboard = () => {
                             <div>
                                 <div className="flex items-center gap-2 mb-2">
                                     <DollarSign size={20} />
-                                    <span className="font-medium">Disponible à retirer</span>
+                                    <span className="font-medium">{t('seller_dashboard_available_to_withdraw')}</span>
                                 </div>
                                 <div className="text-3xl font-black">{formatCurrency(stats.availableBalance)}</div>
-                                <p className="text-emerald-100 text-sm mt-1">Retirer sur MonCash →</p>
+                                <p className="text-emerald-100 text-sm mt-1">{t('seller_dashboard_withdraw_moncash')}</p>
                             </div>
                             <ChevronRight size={24} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                         </div>
@@ -245,12 +245,12 @@ const SellerDashboard = () => {
                                 <div className="p-2 bg-white/20 rounded-lg">
                                     <DollarSign size={18} />
                                 </div>
-                                <span className="text-sm text-emerald-100">Revenus Totaux</span>
+                                <span className="text-sm text-emerald-100">{t('seller_dashboard_total_revenue')}</span>
                             </div>
                             <div className="text-3xl font-bold mb-1">{formatCurrency(stats.totalRevenue)}</div>
                             <div className="flex items-center gap-1 text-emerald-200 text-xs">
                                 <ArrowUpRight size={12} />
-                                +18.5% ce mois
+                                {t('seller_dashboard_growth_this_month')}
                             </div>
                         </div>
                     </div>
@@ -261,11 +261,11 @@ const SellerDashboard = () => {
                             <div className="p-2 bg-blue-50 rounded-lg">
                                 <Wallet size={18} className="text-blue-600" />
                             </div>
-                            <span className="text-sm text-gray-500">Solde Disponible</span>
+                            <span className="text-sm text-gray-500">{t('seller_dashboard_available_balance')}</span>
                         </div>
                         <div className="text-2xl font-bold text-gray-900 mb-1">{formatCurrency(stats.availableBalance)}</div>
                         <button className="text-xs text-blue-600 font-semibold flex items-center gap-1 hover:underline">
-                            Retirer maintenant <ArrowRight size={12} />
+                            {t('seller_dashboard_withdraw_now')} <ArrowRight size={12} />
                         </button>
                     </div>
 
@@ -275,10 +275,10 @@ const SellerDashboard = () => {
                             <div className="p-2 bg-amber-50 rounded-lg">
                                 <Clock size={18} className="text-amber-600" />
                             </div>
-                            <span className="text-sm text-gray-500">En Attente</span>
+                            <span className="text-sm text-gray-500">{t('seller_dashboard_pending')}</span>
                         </div>
                         <div className="text-2xl font-bold text-gray-900 mb-1">{formatCurrency(stats.pendingBalance)}</div>
-                        <p className="text-xs text-gray-400">Libéré après livraison</p>
+                        <p className="text-xs text-gray-400">{t('seller_dashboard_released_after_delivery')}</p>
                     </div>
 
                     {/* Prochain Paiement */}
@@ -287,10 +287,10 @@ const SellerDashboard = () => {
                             <div className="p-2 bg-purple-50 rounded-lg">
                                 <Calendar size={18} className="text-purple-600" />
                             </div>
-                            <span className="text-sm text-gray-500">Prochain Paiement</span>
+                            <span className="text-sm text-gray-500">{t('seller_dashboard_next_payout')}</span>
                         </div>
                         <div className="text-2xl font-bold text-gray-900 mb-1">{stats.nextPayout}</div>
-                        <p className="text-xs text-gray-400">Via MonCash</p>
+                        <p className="text-xs text-gray-400">{t('seller_dashboard_via_moncash')}</p>
                     </div>
                 </div>
 
@@ -299,52 +299,52 @@ const SellerDashboard = () => {
                     <div className="bg-white rounded-xl p-4 border border-gray-100">
                         <div className="flex items-center gap-2 mb-2">
                             <ShoppingCart size={16} className="text-blue-500" />
-                            <span className="text-xs text-gray-500">Commandes</span>
+                            <span className="text-xs text-gray-500">{t('seller_dashboard_orders')}</span>
                         </div>
                         <div className="text-xl font-bold text-gray-900">{stats.totalOrders}</div>
                         <div className="flex items-center gap-1 mt-1">
-                            <span className="text-xs px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-semibold">{stats.pendingOrders} en attente</span>
+                            <span className="text-xs px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-semibold">{stats.pendingOrders} {t('seller_dashboard_pending_label')}</span>
                         </div>
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-gray-100">
                         <div className="flex items-center gap-2 mb-2">
                             <Truck size={16} className="text-indigo-500" />
-                            <span className="text-xs text-gray-500">Expédiées</span>
+                            <span className="text-xs text-gray-500">{t('seller_dashboard_shipped')}</span>
                         </div>
                         <div className="text-xl font-bold text-gray-900">{stats.shippedOrders}</div>
-                        <span className="text-xs text-gray-400">En transit</span>
+                        <span className="text-xs text-gray-400">{t('seller_dashboard_in_transit')}</span>
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-gray-100">
                         <div className="flex items-center gap-2 mb-2">
                             <CheckCircle2 size={16} className="text-emerald-500" />
-                            <span className="text-xs text-gray-500">Livrées</span>
+                            <span className="text-xs text-gray-500">{t('seller_dashboard_delivered')}</span>
                         </div>
                         <div className="text-xl font-bold text-gray-900">{stats.deliveredOrders}</div>
-                        <span className="text-xs text-emerald-600">95.8% succès</span>
+                        <span className="text-xs text-emerald-600">{t('seller_dashboard_success_rate')}</span>
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-gray-100">
                         <div className="flex items-center gap-2 mb-2">
                             <Package size={16} className="text-purple-500" />
-                            <span className="text-xs text-gray-500">Produits Actifs</span>
+                            <span className="text-xs text-gray-500">{t('seller_dashboard_active_products')}</span>
                         </div>
                         <div className="text-xl font-bold text-gray-900">{stats.activeProducts}</div>
-                        <span className="text-xs text-amber-600">{stats.lowStockProducts} stock bas</span>
+                        <span className="text-xs text-amber-600">{stats.lowStockProducts} {t('seller_dashboard_low_stock_label')}</span>
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-gray-100">
                         <div className="flex items-center gap-2 mb-2">
                             <Eye size={16} className="text-cyan-500" />
-                            <span className="text-xs text-gray-500">Vues</span>
+                            <span className="text-xs text-gray-500">{t('seller_dashboard_views')}</span>
                         </div>
                         <div className="text-xl font-bold text-gray-900">{stats.views.toLocaleString()}</div>
-                        <span className="text-xs text-emerald-600">+12% vs semaine der.</span>
+                        <span className="text-xs text-emerald-600">{t('seller_dashboard_vs_last_week')}</span>
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-gray-100">
                         <div className="flex items-center gap-2 mb-2">
                             <Target size={16} className="text-rose-500" />
-                            <span className="text-xs text-gray-500">Taux Conv.</span>
+                            <span className="text-xs text-gray-500">{t('seller_dashboard_conversion_rate')}</span>
                         </div>
                         <div className="text-xl font-bold text-gray-900">{stats.conversionRate}%</div>
-                        <span className="text-xs text-gray-400">Panier moy: {formatCurrency(stats.avgOrderValue)}</span>
+                        <span className="text-xs text-gray-400">{t('seller_dashboard_avg_basket')} {formatCurrency(stats.avgOrderValue)}</span>
                     </div>
                 </div>
 
@@ -354,17 +354,17 @@ const SellerDashboard = () => {
                     <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h3 className="font-bold text-gray-900">Évolution des Revenus</h3>
-                                <p className="text-sm text-gray-500">4 dernières semaines</p>
+                                <h3 className="font-bold text-gray-900">{t('seller_dashboard_revenue_evolution')}</h3>
+                                <p className="text-sm text-gray-500">{t('seller_dashboard_last_4_weeks')}</p>
                             </div>
                             <div className="flex items-center gap-4 text-xs">
                                 <span className="flex items-center gap-1">
                                     <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
-                                    Revenus
+                                    {t('seller_dashboard_legend_revenue')}
                                 </span>
                                 <span className="flex items-center gap-1">
                                     <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-                                    Commandes
+                                    {t('seller_dashboard_legend_orders')}
                                 </span>
                             </div>
                         </div>
@@ -382,7 +382,7 @@ const SellerDashboard = () => {
                                     <YAxis stroke="#9ca3af" fontSize={12} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
                                     <Tooltip
                                         contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
-                                        formatter={(value) => [formatCurrency(value), 'Revenus']}
+                                        formatter={(value) => [formatCurrency(value), t('seller_dashboard_legend_revenue')]}
                                     />
                                     <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" />
                                 </AreaChart>
@@ -395,10 +395,10 @@ const SellerDashboard = () => {
                         <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <Bell size={18} className="text-gray-600" />
-                                <h3 className="font-bold text-gray-900">Notifications</h3>
+                                <h3 className="font-bold text-gray-900">{t('seller_dashboard_notifications')}</h3>
                                 <span className="w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">2</span>
                             </div>
-                            <button className="text-indigo-600 text-xs font-medium hover:underline">Tout voir</button>
+                            <button className="text-indigo-600 text-xs font-medium hover:underline">{t('seller_dashboard_view_all')}</button>
                         </div>
                         <div className="divide-y divide-gray-50 max-h-72 overflow-y-auto">
                             {notifications.map((notif) => (
@@ -432,12 +432,12 @@ const SellerDashboard = () => {
                                     <Star size={18} className="text-amber-600" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-gray-900">Top Produits</h3>
-                                    <p className="text-xs text-gray-500">Par ventes ce mois</p>
+                                    <h3 className="font-bold text-gray-900">{t('seller_dashboard_top_products')}</h3>
+                                    <p className="text-xs text-gray-500">{t('seller_dashboard_top_products_subtitle')}</p>
                                 </div>
                             </div>
                             <button className="text-indigo-600 text-sm font-medium flex items-center gap-1 hover:underline">
-                                Gérer <ChevronRight size={14} />
+                                {t('seller_dashboard_manage')} <ChevronRight size={14} />
                             </button>
                         </div>
                         <div className="divide-y divide-gray-50">
@@ -449,10 +449,10 @@ const SellerDashboard = () => {
                                     <div className="flex-1 min-w-0">
                                         <div className="font-semibold text-gray-900 text-sm truncate">{product.name}</div>
                                         <div className="flex items-center gap-2 mt-0.5">
-                                            <span className="text-xs text-gray-500">{product.sales} ventes</span>
+                                            <span className="text-xs text-gray-500">{product.sales} {t('seller_dashboard_sales')}</span>
                                             <span className="text-xs text-gray-400">•</span>
                                             <span className={`text-xs ${product.stock < 10 ? 'text-amber-600' : 'text-gray-400'}`}>
-                                                {product.stock} en stock
+                                                {product.stock} {t('seller_dashboard_in_stock')}
                                             </span>
                                         </div>
                                     </div>
@@ -476,12 +476,12 @@ const SellerDashboard = () => {
                                     <ShoppingCart size={18} className="text-blue-600" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-gray-900">Commandes Récentes</h3>
-                                    <p className="text-xs text-gray-500">À traiter</p>
+                                    <h3 className="font-bold text-gray-900">{t('seller_dashboard_recent_orders')}</h3>
+                                    <p className="text-xs text-gray-500">{t('seller_dashboard_to_process')}</p>
                                 </div>
                             </div>
                             <button className="text-indigo-600 text-sm font-medium flex items-center gap-1 hover:underline">
-                                Tout voir <ChevronRight size={14} />
+                                {t('seller_dashboard_view_all')} <ChevronRight size={14} />
                             </button>
                         </div>
                         <div className="divide-y divide-gray-50">
@@ -490,8 +490,8 @@ const SellerDashboard = () => {
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="font-mono text-xs text-gray-500">{order.id}</span>
                                         <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
-                                            {order.status === 'pending' ? 'EN ATTENTE' :
-                                             order.status === 'shipped' ? 'EXPÉDIÉE' : 'LIVRÉE'}
+                                            {order.status === 'pending' ? t('seller_dashboard_status_pending') :
+                                             order.status === 'shipped' ? t('seller_dashboard_status_shipped') : t('seller_dashboard_status_delivered')}
                                         </span>
                                     </div>
                                     <div className="flex items-center justify-between">
@@ -506,7 +506,7 @@ const SellerDashboard = () => {
                                     </div>
                                     {order.status === 'pending' && (
                                         <button className="mt-3 w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition-colors">
-                                            Traiter la commande
+                                            {t('seller_dashboard_process_order')}
                                         </button>
                                     )}
                                 </div>
@@ -521,10 +521,10 @@ const SellerDashboard = () => {
                         <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12"></div>
                         <div className="relative z-10">
                             <Zap size={24} className="text-amber-300 mb-3" />
-                            <h3 className="font-bold text-lg mb-2">Boostez vos ventes!</h3>
-                            <p className="text-indigo-200 text-sm mb-4">Activez les promotions sur vos 3 meilleurs produits pour augmenter vos conversions de 25%.</p>
+                            <h3 className="font-bold text-lg mb-2">{t('seller_dashboard_boost_sales')}</h3>
+                            <p className="text-indigo-200 text-sm mb-4">{t('seller_dashboard_boost_sales_desc')}</p>
                             <button className="px-4 py-2 bg-white text-indigo-700 text-sm font-bold rounded-lg hover:bg-indigo-50 transition-colors">
-                                Créer une promo
+                                {t('seller_dashboard_create_promo')}
                             </button>
                         </div>
                     </div>
@@ -535,22 +535,22 @@ const SellerDashboard = () => {
                                 <AlertTriangle size={20} className="text-amber-600" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-gray-900">Alertes Stock</h3>
-                                <p className="text-xs text-gray-500">{stats.lowStockProducts} produits à réapprovisionner</p>
+                                <h3 className="font-bold text-gray-900">{t('seller_dashboard_stock_alerts')}</h3>
+                                <p className="text-xs text-gray-500">{stats.lowStockProducts} {t('seller_dashboard_products_to_restock')}</p>
                             </div>
                         </div>
                         <div className="space-y-2">
                             <div className="flex items-center justify-between p-2 bg-amber-50 rounded-lg">
                                 <span className="text-sm text-gray-700">AirPods Pro 2</span>
-                                <span className="text-xs font-bold text-amber-700">5 restants</span>
+                                <span className="text-xs font-bold text-amber-700">5 {t('seller_dashboard_remaining')}</span>
                             </div>
                             <div className="flex items-center justify-between p-2 bg-red-50 rounded-lg">
                                 <span className="text-sm text-gray-700">iPhone 15 Case</span>
-                                <span className="text-xs font-bold text-red-700">Rupture!</span>
+                                <span className="text-xs font-bold text-red-700">{t('seller_dashboard_out_of_stock')}</span>
                             </div>
                         </div>
                         <button className="mt-4 w-full py-2 border border-gray-200 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors">
-                            Gérer le stock
+                            {t('seller_dashboard_manage_stock')}
                         </button>
                     </div>
 
@@ -560,21 +560,21 @@ const SellerDashboard = () => {
                                 <HelpCircle size={20} className="text-emerald-600" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-gray-900">Besoin d'aide?</h3>
-                                <p className="text-xs text-gray-500">Support vendeur disponible</p>
+                                <h3 className="font-bold text-gray-900">{t('seller_dashboard_need_help')}</h3>
+                                <p className="text-xs text-gray-500">{t('seller_dashboard_support_available')}</p>
                             </div>
                         </div>
                         <div className="space-y-3">
                             <button className="w-full py-2 px-3 text-left bg-gray-50 rounded-lg text-sm text-gray-700 hover:bg-gray-100 transition-colors flex items-center justify-between">
-                                Guide du vendeur
+                                {t('seller_dashboard_seller_guide')}
                                 <ChevronRight size={16} className="text-gray-400" />
                             </button>
                             <button className="w-full py-2 px-3 text-left bg-gray-50 rounded-lg text-sm text-gray-700 hover:bg-gray-100 transition-colors flex items-center justify-between">
-                                Contacter le support
+                                {t('seller_dashboard_contact_support')}
                                 <ChevronRight size={16} className="text-gray-400" />
                             </button>
                             <button className="w-full py-2 px-3 text-left bg-gray-50 rounded-lg text-sm text-gray-700 hover:bg-gray-100 transition-colors flex items-center justify-between">
-                                FAQ Vendeurs
+                                {t('seller_dashboard_seller_faq')}
                                 <ChevronRight size={16} className="text-gray-400" />
                             </button>
                         </div>
