@@ -3,6 +3,7 @@ import { BookOpen, ShieldCheck, Scale, AlertCircle, Printer, Download } from 'lu
 import { OFFICIAL_POLICIES } from '../../data/legal/official_policies';
 import { db } from '../../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import SEO from '../../components/common/SEO';
 
 const PoliciesPage = () => {
     const [policies, setPolicies] = useState(OFFICIAL_POLICIES.policies);
@@ -31,6 +32,7 @@ const PoliciesPage = () => {
 
     return (
         <div className="bg-gray-50 min-h-screen py-12 px-4 sm:px-6 lg:px-8 font-sans">
+            <SEO title="Politiques" description="Politiques et conditions officielles Union Digitale." />
             <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden print:shadow-none">
                 {/* Header */}
                 <div className="bg-gray-900 text-white p-8 print:bg-white print:text-black print:border-b">
