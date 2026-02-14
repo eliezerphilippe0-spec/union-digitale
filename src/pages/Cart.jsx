@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import SEO from '../components/common/SEO';
 
 import FreeShippingProgress from '../components/marketing/FreeShippingProgress';
 
@@ -43,6 +44,7 @@ const Cart = () => {
 
     return (
         <div className="bg-gray-100 min-h-screen py-8">
+            <SEO title="Panier" description="Vérifiez votre panier et passez à la caisse." />
             <div className="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
                 {/* Cart Items (Left) */}

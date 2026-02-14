@@ -7,6 +7,7 @@ import { paymentService } from '../services/paymentService';
 import { useNavigate } from 'react-router-dom';
 import { Loader, AlertCircle, Wallet } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import SEO from '../components/common/SEO';
 import { useAffiliation } from '../contexts/AffiliationContext';
 import logger from '../utils/logger';
 
@@ -212,6 +213,7 @@ const Checkout = () => {
 
     return (
         <div className="bg-gray-100 min-h-screen py-8">
+            <SEO title="Checkout" description="Finalisez votre commande Union Digitale en toute sécurité." />
             <div className="container mx-auto px-4 max-w-5xl">
                 <div className="flex items-center justify-between mb-4">
                     <h1 className="text-2xl font-medium">{t('checkout_title')}</h1>
