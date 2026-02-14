@@ -145,6 +145,13 @@ const ProductDetails = () => {
                             <span className="text-blue-600 text-sm hover:underline cursor-pointer">{product.reviews} {t('ratings_count')}</span>
                         </div>
 
+                        {/* Proof social */}
+                        <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full mb-3">
+                            <span>🔥 12 achetés cette semaine</span>
+                            <span className="text-emerald-400">•</span>
+                            <span>👀 8 personnes regardent</span>
+                        </div>
+
                         {/* ⭐ REVIEWS SUMMARY - P3 FIX: Visible immédiatement */}
                         <div className="flex items-center gap-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl mb-4">
                             <div className="text-center px-3 border-r border-green-200">

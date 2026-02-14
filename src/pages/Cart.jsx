@@ -47,6 +47,15 @@ const Cart = () => {
                 <div className="lg:col-span-9 bg-white p-5 md:p-6 rounded-xl shadow-sm border border-gray-100">
                     <h1 className="text-2xl font-medium mb-4 border-b pb-2">{t('your_cart')}</h1>
 
+                    {/* Cart Upsell */}
+                    <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start justify-between gap-3">
+                        <div>
+                            <div className="text-sm font-semibold text-amber-800">Protection 2 ans</div>
+                            <div className="text-xs text-amber-700">Ajoutez une garantie étendue pour 500 G</div>
+                        </div>
+                        <button className="text-xs bg-amber-600 text-white px-3 py-1.5 rounded-lg">Ajouter</button>
+                    </div>
+
                     <FreeShippingProgress currentAmount={cartTotal} />
 
                     <div className="space-y-6">

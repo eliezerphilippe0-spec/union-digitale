@@ -14,7 +14,7 @@ const Catalog = ({ predefinedFilter }) => {
     const { products, loading, error } = useProducts({ useCache: false });
     const [priceRange, setPriceRange] = useState(75000);
     const [selectedRating, setSelectedRating] = useState(0);
-    const [selectedCategory, setSelectedCategory] = useState(category || 'All');
+    const [selectedCategory, setSelectedCategory] = useState(category || 'all');
     const [sortBy, setSortBy] = useState('featured');
     const [showMobileFilters, setShowMobileFilters] = useState(false);
     const [viewMode, setViewMode] = useState('grid');
@@ -51,7 +51,7 @@ const Catalog = ({ predefinedFilter }) => {
             // Fallback to title search if no metadata match
             if (!matchesCategory) matchesCategory = product.title.toLowerCase().includes(category.toLowerCase());
         } else {
-            matchesCategory = selectedCategory === 'All' || product.title.includes(selectedCategory);
+            matchesCategory = selectedCategory === 'all' || product.title.includes(selectedCategory);
         }
 
         return matchesPrice && matchesRating && matchesCategory;
@@ -94,7 +94,7 @@ const Catalog = ({ predefinedFilter }) => {
             <div>
                 <h3 className="font-bold mb-4 text-lg text-gray-900 dark:text-white">{t('filters_categories') || 'Catégories'}</h3>
                 <ul className="space-y-2 text-sm">
-                    {['All', 'electronics', 'local', 'energy', 'education', 'clothing', 'furniture', 'food', 'crafts'].map(cat => (
+                    {['all', 'electronics', 'local', 'energy', 'education', 'clothing', 'furniture', 'food', 'crafts'].map(cat => (
                         <li key={cat}>
                             <label className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-200 hover:text-secondary dark:hover:text-secondary">
                                 <input
@@ -107,7 +107,7 @@ const Catalog = ({ predefinedFilter }) => {
                                     }}
                                     className="text-secondary focus:ring-secondary"
                                 />
-                                {cat === 'All' ? (t('all') || 'Tout') : (t(cat) || cat)}
+                                {cat === 'all' ? (t('all') || 'Tout') : (t(cat) || cat)}
                             </label>
                         </li>
                     ))}
@@ -156,7 +156,7 @@ const Catalog = ({ predefinedFilter }) => {
             {/* Clear Filters */}
             <button
                 onClick={() => {
-                    setSelectedCategory('All');
+                    setSelectedCategory('all');
                     setPriceRange(75000);
                     setSelectedRating(0);
                     setShowMobileFilters(false);
@@ -236,7 +236,7 @@ const Catalog = ({ predefinedFilter }) => {
                             </select>
                             
                             {/* Quick category chips */}
-                            {['All', 'electronics', 'local', 'fashion'].map(cat => (
+                            {['all', 'electronics', 'local', 'fashion'].map(cat => (
                                 <button
                                     key={cat}
                                     onClick={() => setSelectedCategory(cat)}
@@ -246,14 +246,14 @@ const Catalog = ({ predefinedFilter }) => {
                                             : 'bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300'
                                     }`}
                                 >
-                                    {cat === 'All' ? 'Tout' : cat === 'electronics' ? '📱 High-Tech' : cat === 'local' ? '🇭🇹 Local' : '👗 Mode'}
+                                    {cat === 'all' ? t('catalog_all_label') : cat === 'electronics' ? t('catalog_hightech') : cat === 'local' ? t('catalog_local') : t('catalog_fashion')}
                                 </button>
                             ))}
                             
                             {/* Active filters indicator */}
-                            {(selectedRating > 0 || priceRange < 75000 || selectedCategory !== 'All') && (
+                            {(selectedRating > 0 || priceRange < 75000 || selectedCategory !== 'all') && (
                                 <button
-                                    onClick={() => { setSelectedCategory('All'); setPriceRange(75000); setSelectedRating(0); }}
+                                    onClick={() => { setSelectedCategory('all'); setPriceRange(75000); setSelectedRating(0); }}
                                     className="flex-shrink-0 px-3 py-2 bg-red-100 text-red-700 rounded-full text-sm font-medium"
                                 >
                                     ✕ Effacer
@@ -263,6 +263,13 @@ const Catalog = ({ predefinedFilter }) => {
                     </div>
 
                     {/* Header with filters, sort, and view toggle */}
+                    <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
+                        <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full">
+                            <span>🔥 32 achats aujourd'hui</span>
+                            <span className="text-emerald-400">•</span>
+                            <span>👀 120 en ligne</span>
+                        </div>
+                    </div>
                     <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
                         <div className="flex items-center gap-3">
                             <h1 className="text-xl sm:text-2xl font-bold">
@@ -315,12 +322,12 @@ const Catalog = ({ predefinedFilter }) => {
                     </div>
 
                     {/* Active Filters Tags */}
-                    {(selectedCategory !== 'All' || selectedRating > 0 || priceRange < 75000) && (
+                    {(selectedCategory !== 'all' || selectedRating > 0 || priceRange < 75000) && (
                         <div className="flex flex-wrap gap-2 mb-4">
                             {selectedCategory !== 'All' && (
                                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-secondary/10 text-secondary rounded-full text-sm">
                                     {t(selectedCategory) || selectedCategory}
-                                    <button onClick={() => setSelectedCategory('All')} className="hover:text-secondary-hover">
+                                    <button onClick={() => setSelectedCategory('all')} className="hover:text-secondary-hover">
                                         <X className="w-3 h-3" />
                                     </button>
                                 </span>
@@ -372,7 +379,7 @@ const Catalog = ({ predefinedFilter }) => {
                             </p>
                             <button
                                 onClick={() => {
-                                    setSelectedCategory('All');
+                                    setSelectedCategory('all');
                                     setPriceRange(75000);
                                     setSelectedRating(0);
                                 }}
