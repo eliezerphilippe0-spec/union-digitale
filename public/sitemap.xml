@@ -145,13 +145,6 @@
 
   <!-- Static Pages -->
   <url>
-    <loc>https://uniondigitale.ht/about-us</loc>
-    <lastmod>2026-01-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-  <url>
     <loc>https://uniondigitale.ht/customer-service</loc>
     <lastmod>2026-01-12</lastmod>
     <changefreq>monthly</changefreq>
@@ -170,20 +163,6 @@
     <lastmod>2026-01-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
-  </url>
-
-  <url>
-    <loc>https://uniondigitale.ht/careers</loc>
-    <lastmod>2026-01-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-  <url>
-    <loc>https://uniondigitale.ht/sustainability</loc>
-    <lastmod>2026-01-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
   </url>
 
   <!-- 
