@@ -71,14 +71,23 @@ const ProductCard = ({ product, onQuickView }) => {
                 cursor-pointer
             "
         >
-            {/* Image Container - P1 FIX: Hauteur réduite sur mobile */}
-            <div className="relative h-32 sm:h-40 md:h-48 bg-neutral-100 overflow-hidden aspect-square group-hover:bg-neutral-50 transition-colors duration-500">
-                {/* Placeholder Image with lazy loading */}
-                <div className="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-700" loading="lazy">
-                    <span className="text-neutral-300 text-6xl font-bold opacity-20">
-                        {product.title?.charAt(0) || 'P'}
-                    </span>
-                </div>
+            {/* Image Container */}
+            <div className="relative h-36 sm:h-44 md:h-52 bg-neutral-100 overflow-hidden aspect-square group-hover:bg-neutral-50 transition-colors duration-500">
+                {/* Product Image */}
+                {((product.images && product.images[0]) || product.image) ? (
+                    <img
+                        src={(product.images && product.images[0]) || product.image}
+                        alt={product.title}
+                        loading="lazy"
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                ) : (
+                    <div className="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-700">
+                        <span className="text-neutral-300 text-6xl font-bold opacity-20">
+                            {product.title?.charAt(0) || 'P'}
+                        </span>
+                    </div>
+                )}
 
                 {/* Shimmer Effect Overlay */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
@@ -134,11 +143,11 @@ const ProductCard = ({ product, onQuickView }) => {
                     />
                 </button>
 
-                {/* Quick Actions Overlay */}
+                {/* Quick Actions Overlay (desktop hover) */}
                 <div className="
                     absolute inset-0
                     bg-gradient-to-t from-black/70 via-black/30 to-transparent
-                    flex items-end justify-center gap-2
+                    hidden sm:flex items-end justify-center gap-2
                     pb-4 px-4
                     opacity-0 group-hover:opacity-100
                     transition-all duration-500
@@ -188,6 +197,15 @@ const ProductCard = ({ product, onQuickView }) => {
                         {t('add') || 'Ajouter'}
                     </button>
                 </div>
+
+                {/* Mobile primary action */}
+                <button
+                    onClick={handleAddToCart}
+                    className="sm:hidden absolute bottom-3 left-3 right-3 bg-accent-600 hover:bg-accent-700 text-white text-sm font-semibold py-2 rounded-lg shadow-md"
+                    aria-label="Ajouter au panier"
+                >
+                    {t('add') || 'Ajouter'}
+                </button>
             </div>
 
             {/* Content */}

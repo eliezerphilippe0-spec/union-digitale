@@ -36,47 +36,47 @@ const Home = () => {
             label: 'High-Tech',
             icon: '📱',
             gradient: 'from-violet-500 via-purple-500 to-indigo-500',
-            count: '2,500+ produits',
+            count: '2,5k',
             trending: true,
-            badge: '🔥 Populaire'
+            badge: '🔥 Top'
         },
         {
             key: 'local',
             label: 'Produits Locaux',
             icon: '🇭🇹',
             gradient: 'from-green-500 via-emerald-500 to-teal-500',
-            count: '100% Ayisyen',
-            badge: '⭐ Authentique'
+            count: '100% HT',
+            badge: '⭐ Local'
         },
         {
             key: 'energy',
             label: 'Énergie & Solaire',
             icon: '⚡',
             gradient: 'from-yellow-400 via-amber-500 to-orange-500',
-            count: 'Solutions Durables',
-            badge: '💡 Économique'
+            count: 'Solaire',
+            badge: '💡 Éco'
         },
         {
             key: 'fashion',
             label: 'Mode & Beauté',
             icon: '👗',
             gradient: 'from-pink-400 via-rose-500 to-red-500',
-            count: '1,200+ articles',
-            badge: '✨ Tendance'
+            count: '1,2k',
+            badge: '✨ Trend'
         },
         {
             key: 'home',
             label: 'Maison & Jardin',
             icon: '🏠',
             gradient: 'from-blue-400 via-cyan-500 to-teal-500',
-            count: '800+ produits'
+            count: '800+',
         },
         {
             key: 'education',
             label: 'Éducation',
             icon: '📚',
             gradient: 'from-indigo-400 via-blue-500 to-cyan-500',
-            count: 'Livres & Formations'
+            count: 'Livres',
         },
     ];
 
@@ -106,13 +106,38 @@ const Home = () => {
             <FlashSaleCountdown />
             
             {/* Hero Section - Clear Value Proposition */}
-            <Hero />
+            <div className="md:hidden px-4 pt-6 pb-4">
+                <div className="rounded-2xl bg-white shadow-sm border border-gray-100 p-5">
+                    <h1 className="text-2xl font-bold text-gray-900">{t('hero_title_prefix')} {t('hero_title_suffix')}</h1>
+                    <p className="text-gray-600 mt-2">{t('hero_desc')}</p>
+                    <div className="mt-4 flex gap-2">
+                        <Button onClick={() => window.location.href='/catalog'}>{t('hero_cta')}</Button>
+                        <Button variant="outline" onClick={() => window.location.href='/seller/register'}>{t('hero_cta_seller')}</Button>
+                    </div>
+                </div>
+            </div>
+            <div className="hidden md:block">
+                <Hero />
+            </div>
 
             {/* Trust Signals - Immediately After Hero */}
             <TrustedBy />
 
             {/* Main Content */}
             <div className="container mx-auto px-4 py-8">
+
+                {/* Quick picks */}
+                <section className="mb-10">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">{t('best_sellers')}</h2>
+                        <Button variant="ghost" onClick={() => window.location.href='/catalog'} className="text-sm">{t('see_all')}</Button>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {products.slice(0,4).map((product) => (
+                            <ProductCard key={product.id} product={product} />
+                        ))}
+                    </div>
+                </section>
 
                 {/* Categories - Bento Grid */}
                 <section className="mb-12">

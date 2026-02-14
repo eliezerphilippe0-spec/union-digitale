@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLoyalty } from '../contexts/LoyaltyContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Check, Shirt, Loader, ThumbsUp } from 'lucide-react';
 import { useProducts } from '../hooks/useProducts';
@@ -36,7 +37,18 @@ const ProductDetails = () => {
     const { products, loading } = useProducts();
     const { t } = useLanguage();
     const { addToCart } = useCart();
+    const { getTierInfo, loyaltyData } = useLoyalty();
     const toast = useToast();
+
+    const cashbackRateMap = {
+        bronze: 0.01,
+        silver: 0.02,
+        gold: 0.03,
+        platinum: 0.05,
+        diamond: 0.07,
+    };
+    const cashbackRate = cashbackRateMap[loyaltyData?.tier] || 0.02;
+    const tierInfo = getTierInfo(loyaltyData?.tier);
     const [showFittingRoom, setShowFittingRoom] = useState(false);
     const [selectedVariants, setSelectedVariants] = useState({});
     const [showDigitalPreview, setShowDigitalPreview] = useState(false);
@@ -85,7 +97,7 @@ const ProductDetails = () => {
                     {/* Left Column: Image Gallery (5 cols) */}
                     <div className="lg:col-span-5 flex gap-4">
                         {/* Thumbnails */}
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-2 max-h-[380px] overflow-y-auto pr-1">
                             {(product.images && product.images.length > 0 ? product.images : [product.image]).map((img, idx) => (
                                 <div
                                     key={idx}
@@ -108,7 +120,7 @@ const ProductDetails = () => {
                                 src={(product.images && product.images[activeImage]) || product.image}
                                 alt={product.title}
                                 placeholder={product.title?.charAt(0) || '📦'}
-                                className="min-h-[400px] border border-gray-100"
+                                className="min-h-[280px] md:min-h-[400px] border border-gray-100"
                             />
 
                             {product.type === 'digital' && (
@@ -122,7 +134,7 @@ const ProductDetails = () => {
                     {/* Middle Column: Product Info (4 cols) */}
                     <div className="lg:col-span-4">
                         <h1 className="text-2xl font-medium text-gray-900 mb-1">{product.title}</h1>
-                        <a href="#" className="text-blue-600 text-sm hover:underline mb-2 block">{t('visit_store')} {product.brand}</a>
+                        <a href={product.storeSlug ? `/store/${product.storeSlug}` : '#'} className="text-blue-600 text-sm hover:underline mb-2 block">{t('visit_store')} {product.brand}</a>
 
                         <div className="flex items-center gap-2 mb-3">
                             <div className="flex text-secondary">
@@ -146,9 +158,9 @@ const ProductDetails = () => {
                             <div className="flex-1 text-sm">
                                 <div className="flex items-center gap-2 text-green-700 font-semibold">
                                     <ThumbsUp className="w-4 h-4" />
-                                    <span>94% recommandent ce produit</span>
+                                    <span>{t('product_recommend_rate')}</span>
                                 </div>
-                                <p className="text-green-600 text-xs mt-0.5">{product.reviews || 0} avis vérifiés</p>
+                                <p className="text-green-600 text-xs mt-0.5">{product.reviews || 0} {t('verified_reviews')}</p>
                             </div>
                         </div>
 
@@ -176,11 +188,14 @@ const ProductDetails = () => {
                             <div className="flex flex-wrap gap-3 mb-3">
                                 <div className="flex items-center gap-1.5 text-sm bg-green-50 text-green-700 px-3 py-1.5 rounded-full">
                                     <span className="text-base">💰</span>
-                                    <span className="font-semibold">+{Math.floor(product.price * 0.02).toLocaleString()} HTG cashback</span>
+                                    <span className="font-semibold">+{Math.floor(product.price * cashbackRate).toLocaleString()} HTG cashback</span>
+                                    {tierInfo?.name && (
+                                        <span className="ml-1 text-xs text-green-600">({tierInfo.name})</span>
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-1.5 text-sm bg-orange-50 text-orange-700 px-3 py-1.5 rounded-full">
                                     <span className="text-base">⭐</span>
-                                    <span className="font-semibold">+{Math.floor(product.price / 100)} points fidélité</span>
+                                    <span className="font-semibold">+{Math.floor(product.price / 100)} {t('loyalty_points_label')}</span>
                                 </div>
                             </div>
 
