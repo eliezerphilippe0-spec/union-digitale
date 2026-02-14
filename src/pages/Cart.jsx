@@ -3,12 +3,14 @@ import { Trash2, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 
 import FreeShippingProgress from '../components/marketing/FreeShippingProgress';
 
 const Cart = () => {
-    const { cartItems, removeFromCart, cartTotal } = useCart();
+    const { cartItems, removeFromCart, cartTotal, addToCart } = useCart();
     const { t } = useLanguage();
+    const { currentUser } = useAuth();
 
     if (cartItems.length === 0) {
         return (
@@ -53,8 +55,19 @@ const Cart = () => {
                             <div className="text-sm font-semibold text-amber-800">Protection 2 ans</div>
                             <div className="text-xs text-amber-700">Ajoutez une garantie étendue pour 500 G</div>
                         </div>
-                        <button className="text-xs bg-amber-600 text-white px-3 py-1.5 rounded-lg">Ajouter</button>
+                        <button
+                            onClick={() => addToCart({ id: 'warranty-2y', title: 'Garantie Étendue (2 ans)', price: 500, quantity: 1, type: 'service' })}
+                            className="text-xs bg-amber-600 text-white px-3 py-1.5 rounded-lg"
+                        >
+                            Ajouter
+                        </button>
                     </div>
+
+                    {!currentUser && (
+                        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">
+                            Connectez-vous pour sauvegarder votre panier et recevoir un rappel en cas d’abandon.
+                        </div>
+                    )}
 
                     <FreeShippingProgress currentAmount={cartTotal} />
 
@@ -114,6 +127,30 @@ const Cart = () => {
 
                     <div className="text-right mt-4 text-lg">
                         {t('subtotal_items')} ({cartItems.length} {t('items_count')}) : <span className="font-bold">{cartTotal.toLocaleString()} G</span>
+                    </div>
+
+                    {/* Bundle suggestions */}
+                    <div className="mt-6 border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Souvent achetés ensemble</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {[
+                                { id: 'bundle-cable', title: 'Câble USB‑C premium', price: 650 },
+                                { id: 'bundle-case', title: 'Étui de protection', price: 950 },
+                            ].map((item) => (
+                                <div key={item.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                                    <div>
+                                        <div className="text-sm font-medium text-gray-900">{item.title}</div>
+                                        <div className="text-xs text-gray-500">{item.price.toLocaleString()} G</div>
+                                    </div>
+                                    <button
+                                        onClick={() => addToCart({ ...item, quantity: 1 })}
+                                        className="text-xs bg-gray-900 text-white px-3 py-1.5 rounded-lg"
+                                    >
+                                        Ajouter
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
