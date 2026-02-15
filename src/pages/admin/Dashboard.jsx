@@ -10,6 +10,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { db } from '../../lib/firebase';
 import { collection, query, where, getDocs, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { appApiClient } from '../../services/apiClient';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart as RechartsPie, Pie, Cell, BarChart, Bar, Legend
@@ -21,6 +22,8 @@ const AdminDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [dateRange, setDateRange] = useState('30');
     const [currency, setCurrency] = useState('HTG');
+    const [commissionSummary, setCommissionSummary] = useState({ totalCommission: 0, totalOrders: 0, topStores: [] });
+    const [commissionLoading, setCommissionLoading] = useState(false);
 
     // KPI States
     const [stats, setStats] = useState({
@@ -89,6 +92,22 @@ const AdminDashboard = () => {
     useEffect(() => {
         // Simuler le chargement des données
         setTimeout(() => setLoading(false), 1000);
+    }, []);
+
+    useEffect(() => {
+        const fetchCommissions = async () => {
+            try {
+                setCommissionLoading(true);
+                const res = await appApiClient.get('/stores/admin/commissions/summary');
+                setCommissionSummary(res.data || { totalCommission: 0, totalOrders: 0, topStores: [] });
+            } catch (error) {
+                console.error('Commission summary error:', error);
+            } finally {
+                setCommissionLoading(false);
+            }
+        };
+
+        fetchCommissions();
     }, []);
 
     const formatCurrency = (value) => {
@@ -230,6 +249,40 @@ const AdminDashboard = () => {
                         <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin_orders')}</p>
                         <div className="text-2xl font-bold text-gray-900 mt-1">{stats.orders.toLocaleString()}</div>
                         <p className="text-xs text-gray-400 mt-1">{t('admin_avg_basket', { amount: formatCurrency(stats.avgBasket) })}</p>
+                    </div>
+
+                    {/* Commissions */}
+                    <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm lg:col-span-4">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
+                                <Wallet size={20} />
+                            </div>
+                            <a
+                                href="/api/stores/admin/commissions/export"
+                                className="text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-1 rounded-full hover:underline"
+                            >
+                                Export CSV
+                            </a>
+                        </div>
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Commissions</p>
+                        <div className="text-2xl font-bold text-gray-900 mt-1">
+                            {commissionLoading ? '...' : `${commissionSummary.totalCommission.toLocaleString()} G`}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">
+                            {commissionLoading ? '' : `${commissionSummary.totalOrders.toLocaleString()} commandes`}
+                        </p>
+                        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-2">
+                            {(commissionSummary.topStores || []).slice(0, 4).map((entry) => (
+                                <div key={entry.store.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                                    <div className="text-sm font-medium text-gray-900 truncate">
+                                        {entry.store.name}
+                                    </div>
+                                    <div className="text-xs text-gray-600">
+                                        {entry.amount.toLocaleString()} G
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
