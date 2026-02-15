@@ -41,7 +41,14 @@ model User {
   // Loyalty
   loyaltyPoints Int        @default(0)
   loyaltyTier   String     @default("bronze")
+
+  // Cashback
+  cashbackBalance  Float   @default(0)
+  cashbackLifetime Float   @default(0)
   
+  // Points Wallet
+  pointsWallet PointsWallet?
+
   // Timestamps
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
@@ -55,6 +62,8 @@ model User {
   favorites     Favorite[]
   cart          CartItem[]
   notifications Notification[]
+  cashbackTransactions CashbackTransaction[]
+  pointsLedger PointsLedger[]
   
   @@index([email])
   @@index([phone])
@@ -294,6 +303,11 @@ model Order {
   // Payment Info
   paymentId       String?       // External payment ID
   paidAt          DateTime?
+
+  // Commission
+  commissionRate   Float        @default(0.10)
+  commissionAmount Float        @default(0)
+  sellerNetAmount  Float        @default(0)
   
   // Shipping
   shippingMethod  String?
@@ -308,6 +322,13 @@ model Order {
   // Loyalty
   pointsEarned    Int           @default(0)
   pointsUsed      Int           @default(0)
+
+  // Points (frozen at initialize)
+  pointsApplied              Int  @default(0)
+  pointsDiscountHtg          Int  @default(0)
+  pointsValueHtgAtRedemption Int  @default(10)
+  pointsMaxPercent           Int  @default(20)
+  pointsEligibleSubtotalHtg  Int  @default(0)
   
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
@@ -445,4 +466,80 @@ model Notification {
   
   @@index([userId])
   @@index([isRead])
+}
+
+// ============== CASHBACK ==============
+
+enum CashbackStatus {
+  AVAILABLE
+  REDEEMED
+  EXPIRED
+}
+
+model CashbackTransaction {
+  id        String         @id @default(uuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId   String?
+  amount    Float
+  status    CashbackStatus @default(AVAILABLE)
+  createdAt DateTime       @default(now())
+  expiresAt DateTime
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+// ============== POINTS ==============
+
+enum PointsTxType {
+  EARN
+  REDEEM
+  ADJUST
+  REFUND
+  EXPIRE
+}
+
+enum PointsTxStatus {
+  PENDING
+  COMMITTED
+  CANCELED
+  EXPIRED
+}
+
+model PointsWallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance   Int      @default(0)
+  version   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ledger    PointsLedger[]
+}
+
+model PointsLedger {
+  id             String        @id @default(cuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  walletId       String
+  wallet         PointsWallet  @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  type           PointsTxType
+  status         PointsTxStatus @default(PENDING)
+  points         Int
+  amountHtg      Int?
+  orderId        String?
+  paymentId      String?
+  reason         String?
+  meta           Json?
+  idempotencyKey String?       @unique
+  expiresAt      DateTime?
+  createdAt      DateTime      @default(now())
+  committedAt    DateTime?
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([status])
 }
