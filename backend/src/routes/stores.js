@@ -167,6 +167,91 @@ router.get('/admin/commissions/summary', authenticate, requireAdmin, async (req,
   }
 });
 
+// Admin commission export (CSV)
+router.get('/admin/commissions/export', authenticate, requireAdmin, async (req, res, next) => {
+  try {
+    const { from, to } = req.query;
+    const dateFilter = {};
+    if (from) dateFilter.gte = new Date(from);
+    if (to) dateFilter.lte = new Date(to);
+
+    const where = Object.keys(dateFilter).length ? { createdAt: dateFilter } : {};
+
+    const rows = await prisma.commissionLedger.findMany({
+      where,
+      include: { store: { select: { name: true, slug: true } }, order: { select: { orderNumber: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const header = 'orderNumber,storeName,storeSlug,rate,amount,status,createdAt';
+    const lines = rows.map(r => [
+      r.order?.orderNumber || '',
+      (r.store?.name || '').replace(/,/g, ' '),
+      r.store?.slug || '',
+      r.rate,
+      r.amount,
+      r.status,
+      r.createdAt.toISOString(),
+    ].join(','));
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="commissions.csv"');
+    res.send([header, ...lines].join('\n'));
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Seller commission summary
+router.get('/me/commissions/summary', authenticate, requireSeller, async (req, res, next) => {
+  try {
+    const store = await prisma.store.findUnique({ where: { userId: req.user.id } });
+    if (!store) throw new AppError('Boutique non trouvée', 404);
+
+    const totalAgg = await prisma.commissionLedger.aggregate({
+      _sum: { amount: true },
+      _count: { _all: true },
+      where: { storeId: store.id },
+    });
+
+    res.json({
+      totalCommission: totalAgg._sum.amount || 0,
+      totalOrders: totalAgg._count._all || 0,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Seller commission export (CSV)
+router.get('/me/commissions/export', authenticate, requireSeller, async (req, res, next) => {
+  try {
+    const store = await prisma.store.findUnique({ where: { userId: req.user.id } });
+    if (!store) throw new AppError('Boutique non trouvée', 404);
+
+    const rows = await prisma.commissionLedger.findMany({
+      where: { storeId: store.id },
+      include: { order: { select: { orderNumber: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const header = 'orderNumber,rate,amount,status,createdAt';
+    const lines = rows.map(r => [
+      r.order?.orderNumber || '',
+      r.rate,
+      r.amount,
+      r.status,
+      r.createdAt.toISOString(),
+    ].join(','));
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="my-commissions.csv"');
+    res.send([header, ...lines].join('\n'));
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.put('/me/store', authenticate, requireSeller, validate(updateStoreRules), async (req, res, next) => {
   try {
     const {
