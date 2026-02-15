@@ -3,12 +3,23 @@
  */
 
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../lib/prisma');
 const { authenticate, requireSeller, requireAdmin } = require('../middleware/auth');
 const { AppError } = require('../middleware/errorHandler');
+const validate = require('../middleware/validate');
+const { body } = require('express-validator');
 
 const router = express.Router();
-const prisma = new PrismaClient();
+
+const updateStoreRules = [
+  body('name').optional().isString().isLength({ min: 2 }).withMessage('Nom invalide'),
+  body('description').optional().isString().isLength({ min: 5 }).withMessage('Description invalide'),
+  body('email').optional().isEmail().withMessage('Email invalide'),
+  body('phone').optional().isString().isLength({ min: 6 }).withMessage('Téléphone invalide'),
+  body('whatsapp').optional().isString().isLength({ min: 6 }).withMessage('WhatsApp invalide'),
+  body('city').optional().isString().isLength({ min: 2 }).withMessage('Ville invalide'),
+  body('department').optional().isString().isLength({ min: 2 }).withMessage('Département invalide'),
+];
 
 // Get all stores (public)
 router.get('/', async (req, res, next) => {
@@ -108,7 +119,55 @@ router.get('/me/store', authenticate, requireSeller, async (req, res, next) => {
 });
 
 // Update my store (seller)
-router.put('/me/store', authenticate, requireSeller, async (req, res, next) => {
+// Admin commission summary
+router.get('/admin/commissions/summary', authenticate, requireAdmin, async (req, res, next) => {
+  try {
+    const { from, to } = req.query;
+    const dateFilter = {};
+    if (from) dateFilter.gte = new Date(from);
+    if (to) dateFilter.lte = new Date(to);
+
+    const where = Object.keys(dateFilter).length ? { createdAt: dateFilter } : {};
+
+    const totalAgg = await prisma.commissionLedger.aggregate({
+      _sum: { amount: true },
+      _count: { _all: true },
+      where,
+    });
+
+    const grouped = await prisma.commissionLedger.groupBy({
+      by: ['storeId'],
+      _sum: { amount: true },
+      _count: { _all: true },
+      where,
+      orderBy: { _sum: { amount: 'desc' } },
+      take: 10,
+    });
+
+    const storeIds = grouped.map(g => g.storeId);
+    const stores = await prisma.store.findMany({
+      where: { id: { in: storeIds } },
+      select: { id: true, name: true, slug: true },
+    });
+    const storeMap = Object.fromEntries(stores.map(s => [s.id, s]));
+
+    const topStores = grouped.map(g => ({
+      store: storeMap[g.storeId] || { id: g.storeId, name: 'Unknown', slug: null },
+      amount: g._sum.amount || 0,
+      count: g._count._all || 0,
+    }));
+
+    res.json({
+      totalCommission: totalAgg._sum.amount || 0,
+      totalOrders: totalAgg._count._all || 0,
+      topStores,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put('/me/store', authenticate, requireSeller, validate(updateStoreRules), async (req, res, next) => {
   try {
     const {
       name, description, logo, banner, email, phone, whatsapp,
@@ -154,12 +213,7 @@ router.get('/me/stats', authenticate, requireSeller, async (req, res, next) => {
         _sum: { total: true },
       }),
       prisma.product.count({ where: { storeId: store.id } }),
-      prisma.product.count({
-        where: {
-          storeId: store.id,
-          stock: { lte: prisma.product.fields.lowStockThreshold },
-        },
-      }),
+      prisma.$queryRaw`SELECT COUNT(*)::int AS count FROM "Product" WHERE "storeId" = ${store.id} AND "stock" <= "lowStockThreshold"`,
     ]);
 
     res.json({
@@ -168,7 +222,7 @@ router.get('/me/stats', authenticate, requireSeller, async (req, res, next) => {
         pendingOrders,
         totalRevenue: totalRevenue._sum.total || 0,
         totalProducts,
-        lowStockProducts,
+        lowStockProducts: (lowStockProducts[0]?.count || 0),
         rating: store.rating,
         reviewCount: store.reviewCount,
       },

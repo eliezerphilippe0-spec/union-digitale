@@ -476,6 +476,28 @@ enum CashbackStatus {
   EXPIRED
 }
 
+enum CommissionStatus {
+  PENDING
+  COMMITTED
+}
+
+model CommissionLedger {
+  id          String            @id @default(uuid())
+  orderId     String            @unique
+  order       Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  storeId     String
+  store       Store             @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  rate        Float
+  amount      Float
+  status      CommissionStatus  @default(PENDING)
+  committedAt DateTime?
+  createdAt   DateTime          @default(now())
+
+  @@index([storeId])
+  @@index([status])
+}
+
 model CashbackTransaction {
   id        String         @id @default(uuid())
   userId    String
