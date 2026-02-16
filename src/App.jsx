@@ -61,6 +61,7 @@ const AdminUsers = React.lazy(() => import('./pages/admin/Users'));
 const AdminSettings = React.lazy(() => import('./pages/admin/Settings'));
 const AdminPayouts = React.lazy(() => import('./pages/admin/Payouts'));
 const AdminSubscription = React.lazy(() => import('./pages/admin/Subscription'));
+const RiskMonitoring = React.lazy(() => import('./pages/admin/RiskMonitoring'));
 
 // Seller - lazy loaded
 const DashboardUltimate = React.lazy(() => import('./pages/seller/DashboardUltimate'));
@@ -285,6 +286,7 @@ function App() {
                                     <Route path="admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
                                     <Route path="admin/payouts" element={<AdminLayout><AdminPayouts /></AdminLayout>} />
                                     <Route path="admin/subscription" element={<AdminLayout><AdminSubscription /></AdminLayout>} />
+                                    <Route path="admin/risk-monitoring" element={<AdminLayout><RiskMonitoring /></AdminLayout>} />
 
                                     {/* General Routes */}
                                     <Route path="best-shops" element={<BestShops />} />
