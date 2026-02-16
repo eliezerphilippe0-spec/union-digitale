@@ -245,6 +245,9 @@ service cloud.firestore {
       allow create: if isAuthenticated() &&
         request.resource.data.eventName == 'buyer_suborders_fallback_used' &&
         request.resource.data.buyerId == request.auth.uid &&
+        request.resource.data.orderId is string &&
+        request.resource.data.reason in ['query_error', 'index_missing'] &&
+        request.resource.data.keys().hasOnly(['eventName', 'buyerId', 'orderId', 'reason', 'createdAt']) &&
         request.resource.data.createdAt is timestamp;
       allow read, update, delete: if false;
     }
