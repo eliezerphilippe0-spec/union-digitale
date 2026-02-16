@@ -114,7 +114,11 @@ const buildBatchRunner = (prismaClient, cfg) => {
           report.totalHTG += fresh.availableHTG;
         });
       } catch (error) {
-        report.errors.push({ storeId: balance.storeId, error: error.message });
+        if (error.code === 'P2002') {
+          report.skipped.push({ storeId: balance.storeId, reason: 'ALREADY_CREATED' });
+        } else {
+          report.errors.push({ storeId: balance.storeId, error: error.message });
+        }
       }
     }
 

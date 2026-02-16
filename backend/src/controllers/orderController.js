@@ -688,6 +688,8 @@ exports.updateOrderStatus = async (req, res, next) => {
 
           await assertNoDuplicateLedger(tx, { type: 'REFUND', orderId: updatedOrder.id, storeId: updatedOrder.storeId });
 
+          await assertNoDuplicateLedger(tx, { type: 'REFUND', orderId: updatedOrder.id, storeId: updatedOrder.storeId });
+
           await tx.financialLedger.create({
             data: {
               type: 'REFUND',
@@ -700,6 +702,7 @@ exports.updateOrderStatus = async (req, res, next) => {
         });
 
         console.log(JSON.stringify({ event: 'refund_after_release', orderId: updatedOrder.id, storeId: updatedOrder.storeId, amountHTG: updatedOrder.sellerNetHTG || 0 }));
+        console.log(JSON.stringify({ event: 'metric', name: 'refund_spike_count', value: 1 }));
       }
     }
 
