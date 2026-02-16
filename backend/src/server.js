@@ -8,6 +8,7 @@ const prisma = require('./lib/prisma');
 const cron = require('node-cron');
 const { runWeeklyPayoutBatch } = require('./jobs/payoutBatch');
 const { runDailyRiskEval } = require('./jobs/riskDailyEval');
+const { runDailyTrustRecompute } = require('./jobs/trustDailyRecompute');
 
 async function main() {
   try {
@@ -34,6 +35,16 @@ async function main() {
           await runDailyRiskEval({ dryRun: false });
         } catch (error) {
           console.error('Risk daily cron error:', error);
+        }
+      }, { timezone: 'UTC' });
+    }
+
+    if (config.TRUST_CRON_ENABLED) {
+      cron.schedule(config.TRUST_CRON_SCHEDULE, async () => {
+        try {
+          await runDailyTrustRecompute({ dryRun: false });
+        } catch (error) {
+          console.error('Trust daily cron error:', error);
         }
       }, { timezone: 'UTC' });
     }

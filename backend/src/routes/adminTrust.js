@@ -2,7 +2,8 @@ const express = require('express');
 const prisma = require('../lib/prisma');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 const { recomputeTrustForStore, TRUST_BENEFITS } = require('../services/trustEngine');
-const { query } = require('express-validator');
+const { runDailyTrustRecompute, getTrustJobStatus } = require('../jobs/trustDailyRecompute');
+const { query, body } = require('express-validator');
 const validate = require('../middleware/validate');
 
 const router = express.Router();
@@ -54,6 +55,28 @@ router.post('/stores/:storeId/trust/recompute', authenticate, requireAdmin, asyn
   try {
     const result = await recomputeTrustForStore(req.params.storeId);
     res.json({ result });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/trust/jobs/daily-recompute/run', authenticate, requireAdmin, validate([
+  query('DRY_RUN').optional().isBoolean().toBoolean(),
+  body('DRY_RUN').optional().isBoolean().toBoolean(),
+]), async (req, res, next) => {
+  try {
+    const dryRun = String(req.query.DRY_RUN || req.body?.DRY_RUN || '').toLowerCase() === 'true';
+    const report = await runDailyTrustRecompute({ dryRun });
+    res.json(report);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/trust/jobs/daily-recompute/status', authenticate, requireAdmin, async (req, res, next) => {
+  try {
+    const status = await getTrustJobStatus();
+    res.json({ status });
   } catch (error) {
     next(error);
   }

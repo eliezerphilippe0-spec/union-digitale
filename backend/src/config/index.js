@@ -79,4 +79,9 @@ module.exports = {
   RISK_CRON_ENABLED: process.env.RISK_CRON_ENABLED === 'true',
   RISK_CRON_SCHEDULE: process.env.RISK_CRON_SCHEDULE || '30 3 * * *',
   RISK_CRON_BATCH_SIZE: parseInt(process.env.RISK_CRON_BATCH_SIZE || '200', 10),
+
+  // Trust cron
+  TRUST_CRON_ENABLED: process.env.TRUST_CRON_ENABLED === 'true',
+  TRUST_CRON_SCHEDULE: process.env.TRUST_CRON_SCHEDULE || '0 4 * * *',
+  TRUST_CRON_BATCH_SIZE: parseInt(process.env.TRUST_CRON_BATCH_SIZE || '200', 10),
 };
