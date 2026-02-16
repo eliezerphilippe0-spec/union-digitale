@@ -16,6 +16,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { usageStatsService } from '../../services/usageStatsService';
 import { useSellerTrust } from '../../hooks/useSellerTrust';
 import TrustNavIndicator from '../../components/seller/trust/TrustNavIndicator';
+import { trackSellerEvent } from '../../services/sellerAnalytics';
 
 // Utility for formatting currency
 // const formatCurrency = (amount) => {
@@ -751,7 +752,20 @@ export default function DashboardUltimate() {
                         <div className="text-xs font-bold text-slate-500 uppercase px-4 mb-2 tracking-wider">{t('management')}</div>
                         <SidebarItem icon={LayoutDashboard} label={t('dashboard')} active={activeTab === 'dashboard'} onClick={() => { setActiveTab('dashboard'); setSidebarOpen(false); }} />
                         <SidebarItem icon={FileText} label={t('finance_payme')} active={activeTab === 'finance'} onClick={() => { setActiveTab('finance'); setSidebarOpen(false); }} />
-                        <SidebarItem icon={ShieldCheck} label={<TrustNavIndicator tier={trustData?.tier} />} active={false} onClick={() => { navigate('/seller/trust'); setSidebarOpen(false); }} />
+                        <SidebarItem
+                            icon={ShieldCheck}
+                            label={<TrustNavIndicator tier={trustData?.tier} />}
+                            active={false}
+                            onClick={() => {
+                                trackSellerEvent('seller_trust_nav_click', {
+                                    sourceDashboard: 'DashboardUltimate',
+                                    path: '/seller/trust',
+                                    trustTier: trustData?.tier,
+                                });
+                                navigate('/seller/trust');
+                                setSidebarOpen(false);
+                            }}
+                        />
                         <SidebarItem icon={Megaphone} label={t('marketing_campaign')} active={activeTab === 'marketing'} onClick={() => { setActiveTab('marketing'); setSidebarOpen(false); }} badge={t('badge_new')} />
                         <div className="my-2 border-t border-gray-100"></div>
                         <SidebarItem icon={Home} label={t('real_estate')} active={false} onClick={() => navigate('/seller/real-estate/new')} badge={t('badge_new')} />

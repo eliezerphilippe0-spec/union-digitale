@@ -8,6 +8,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useSellerTrust } from '../../hooks/useSellerTrust';
 import TrustNavIndicator from '../../components/seller/trust/TrustNavIndicator';
+import { trackSellerEvent } from '../../services/sellerAnalytics';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { appApiClient } from '../../services/apiClient';
@@ -177,7 +178,14 @@ const SellerDashboard = () => {
                                 <option value="90">{t('seller_dashboard_period_90')}</option>
                             </select>
                             <button
-                                onClick={() => navigate('/seller/trust')}
+                                onClick={() => {
+                                    trackSellerEvent('seller_trust_nav_click', {
+                                        sourceDashboard: 'SellerDashboard',
+                                        path: '/seller/trust',
+                                        trustTier: trustData?.tier,
+                                    });
+                                    navigate('/seller/trust');
+                                }}
                                 className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50"
                             >
                                 <ShieldCheck size={18} className="text-gray-600" />

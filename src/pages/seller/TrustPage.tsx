@@ -1,13 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSellerTrust } from '../../hooks/useSellerTrust';
 import TrustHeader from '../../components/seller/trust/TrustHeader';
 import TrustInfluenceSection from '../../components/seller/trust/TrustInfluenceSection';
 import TrustTimeline from '../../components/seller/trust/TrustTimeline';
 import TrustBenefits from '../../components/seller/trust/TrustBenefits';
 import TrustImprovementTips from '../../components/seller/trust/TrustImprovementTips';
+import { trackSellerEvent } from '../../services/sellerAnalytics';
 
 const TrustPage = () => {
   const { data, loading, error } = useSellerTrust();
+
+  useEffect(() => {
+    if (!data) return;
+    trackSellerEvent('seller_trust_page_view', {
+      sourceDashboard: 'TrustPage',
+      path: '/seller/trust',
+      trustTier: data.tier,
+    });
+  }, [data]);
 
   if (loading) {
     return <div className="p-6">Chargement...</div>;
@@ -21,7 +31,7 @@ const TrustPage = () => {
     <div className="p-6 space-y-6">
       <TrustHeader tier={data.tier} updatedAt={data.updatedAt} />
       <TrustInfluenceSection positives={data.positives || []} warnings={data.warnings || []} />
-      <TrustTimeline timeline={data.timeline || []} />
+      <TrustTimeline timeline={data.timeline || []} trustTier={data.tier} />
       <TrustBenefits payoutDelayHours={data.benefits?.payoutDelayHours} listingBoostFactor={data.benefits?.listingBoostFactor} tier={data.tier} />
       <TrustImprovementTips tier={data.tier} warnings={data.warnings || []} />
     </div>

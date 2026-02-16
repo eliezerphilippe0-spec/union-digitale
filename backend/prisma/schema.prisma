@@ -276,6 +276,20 @@ model TrustEvent {
   @@index([storeId, createdAt])
 }
 
+model SellerAnalyticsEvent {
+  id          String   @id @default(cuid())
+  sellerId    String
+  storeId     String
+  eventName   String
+  eventVersion String @default("v1")
+  metadata    Json
+  createdAt   DateTime @default(now())
+
+  @@index([storeId, createdAt])
+  @@index([sellerId, createdAt])
+  @@index([eventName, createdAt])
+}
+
 // ============== PRODUCTS ==============
 
 enum ProductStatus {

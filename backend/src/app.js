@@ -28,6 +28,7 @@ const uploadRoutes = require('./routes/upload');
 const adminRiskRoutes = require('./routes/adminRisk');
 const adminTrustRoutes = require('./routes/adminTrust');
 const sellerTrustRoutes = require('./routes/sellerTrust');
+const { router: sellerAnalyticsRoutes } = require('./routes/sellerAnalytics');
 
 const app = express();
 
@@ -157,6 +158,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/admin', adminRiskRoutes);
 app.use('/api/admin', adminTrustRoutes);
 app.use('/api/seller', sellerTrustRoutes);
+app.use('/api/seller', sellerAnalyticsRoutes);
 
 // 404 handler
 app.use((req, res) => {
