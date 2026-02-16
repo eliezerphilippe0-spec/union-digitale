@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSellerTrust } from '../../hooks/useSellerTrust';
 import TrustNavIndicator from '../../components/seller/trust/TrustNavIndicator';
 import { trackSellerEvent } from '../../services/sellerAnalytics';
+import { collection, getDocs, limit, orderBy, query, where } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { appApiClient } from '../../services/apiClient';
@@ -72,12 +74,11 @@ const SellerDashboard = () => {
         { id: 4, name: 'Apple Watch Series 9', sales: 34, revenue: 204000, stock: 15, trend: 'up' },
     ];
 
-    // Commandes récentes
-    const recentOrders = [
+    const [recentOrders, setRecentOrders] = useState([
         { id: '#UD-9842', product: 'iPhone 15 Pro', customer: 'Jean B.', amount: 125000, status: 'pending', time: t('seller_dashboard_time_30m') },
         { id: '#UD-9841', product: 'MacBook Air M2', customer: 'Marie C.', amount: 185000, status: 'shipped', time: t('seller_dashboard_time_2h') },
         { id: '#UD-9840', product: 'AirPods Pro', customer: 'Pierre L.', amount: 35000, status: 'delivered', time: t('seller_dashboard_time_5h') },
-    ];
+    ]);
 
     // Notifications
     const notifications = [
@@ -89,6 +90,39 @@ const SellerDashboard = () => {
     useEffect(() => {
         setTimeout(() => setLoading(false), 800);
     }, []);
+
+    useEffect(() => {
+        const enabled = import.meta.env.VITE_SUBORDERS_READ_ENABLED === 'true';
+        if (!enabled || !currentUser?.uid) return;
+
+        const loadSubs = async () => {
+            try {
+                const q = query(
+                    collection(db, 'orderSubs'),
+                    where('vendorId', '==', currentUser.uid),
+                    orderBy('createdAt', 'desc'),
+                    limit(3)
+                );
+                const snap = await getDocs(q);
+                const items = snap.docs.map((doc) => {
+                    const data = doc.data();
+                    return {
+                        id: data.orderId ? `#${String(data.orderId).slice(0, 8)}` : `#${doc.id.slice(0, 8)}`,
+                        product: t('seller_dashboard_order_multi_items') || 'Commande multi‑articles',
+                        customer: data.buyerId ? String(data.buyerId).slice(0, 6) : 'Client',
+                        amount: data.subtotalAmount || 0,
+                        status: data.status || 'pending',
+                        time: data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : '',
+                    };
+                });
+                if (items.length > 0) setRecentOrders(items);
+            } catch (e) {
+                // fallback to static
+            }
+        };
+
+        loadSubs();
+    }, [currentUser, t]);
 
     useEffect(() => {
         const fetchCommissions = async () => {

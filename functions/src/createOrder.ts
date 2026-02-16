@@ -79,13 +79,27 @@ export const createOrder = onCall(async (request) => {
 
         const subOrderIds: string[] = [];
 
+        const defaultBps = Number(process.env.PLATFORM_COMMISSION_BPS || 800);
+        const vendorRefs = vendorIds.map((vid) => db.doc(`vendors/${vid}`));
+        const vendorSnaps = await db.getAll(...vendorRefs);
+        const vendorBpsMap = new Map<string, number>();
+        vendorSnaps.forEach((snap) => {
+            if (!snap.exists) return;
+            const data: any = snap.data();
+            const bps = data?.commissionBps != null
+                ? Number(data.commissionBps)
+                : (data?.commissionRate != null ? Math.round(Number(data.commissionRate) * 10000) : defaultBps);
+            vendorBpsMap.set(snap.id, Number.isFinite(bps) ? bps : defaultBps);
+        });
+
         for (const vendorId of vendorIds) {
             const subRef = db.collection('orderSubs').doc();
             subOrderIds.push(subRef.id);
 
             const subItems = lineItems.filter((li) => li.vendorId === vendorId);
             const subtotalAmount = subItems.reduce((s, i) => s + i.lineTotal, 0);
-            const commissionAmount = 0;
+            const commissionBps = vendorBpsMap.get(vendorId) ?? defaultBps;
+            const commissionAmount = Math.round((subtotalAmount * commissionBps) / 10000);
             const sellerNetAmount = Math.max(subtotalAmount - commissionAmount, 0);
 
             batch.set(subRef, {
@@ -94,6 +108,7 @@ export const createOrder = onCall(async (request) => {
                 buyerId: userId,
                 vendorId,
                 subtotalAmount,
+                commissionBps,
                 commissionAmount,
                 sellerNetAmount,
                 status: 'pending',
