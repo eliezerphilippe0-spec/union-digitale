@@ -156,6 +156,47 @@ const RiskMonitoring = () => {
         <KPICards kpis={kpis} />
       </div>
 
+      <div className="mb-4 flex flex-wrap gap-2">
+        {[
+          { key: 'ALL', label: `All (${summary?.counts?.flaggedTotal ?? '-'})` },
+          { key: 'WATCH', label: `WATCH (${summary?.counts?.watch ?? '-'})` },
+          { key: 'HIGH', label: `HIGH (${summary?.counts?.high ?? '-'})` },
+          { key: 'FROZEN', label: `FROZEN (${summary?.counts?.frozen ?? '-'})` },
+          { key: 'PAYOUTS', label: `Payouts Frozen (${summary?.counts?.payoutsFrozen ?? '-'})` },
+        ].map((chip) => {
+          const isActive = chip.key === 'ALL'
+            ? !filters.level
+            : chip.key === 'PAYOUTS'
+              ? filters.frozen && filters.level === 'HIGH,FROZEN'
+              : filters.level === chip.key;
+
+          const classes = isActive
+            ? 'bg-black text-white'
+            : 'bg-white border text-gray-700 hover:bg-gray-50';
+
+          return (
+            <button
+              key={chip.key}
+              className={`px-3 py-1.5 text-xs rounded-full ${classes}`}
+              onClick={() => {
+                if (chip.key === 'ALL') {
+                  setFilters({ ...filters, level: '', frozen: false });
+                  setCursor(null);
+                } else if (chip.key === 'PAYOUTS') {
+                  setFilters({ ...filters, level: 'HIGH,FROZEN', frozen: true });
+                  setCursor(null);
+                } else {
+                  setFilters({ ...filters, level: chip.key, frozen: false });
+                  setCursor(null);
+                }
+              }}
+            >
+              {chip.label}
+            </button>
+          );
+        })}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <div className="lg:col-span-2">
           <div className="flex items-center gap-2 mb-3">
