@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../lib/firebase';
-import { collection, query, orderBy, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs, limit, startAfter } from 'firebase/firestore';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { DollarSign, CheckCircle, Clock, AlertCircle, CreditCard, Banknote } from 'lucide-react';
 
@@ -8,6 +8,10 @@ const AdminPayouts = () => {
     const { t } = useLanguage();
     const [payouts, setPayouts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [cursor, setCursor] = useState(null);
+    const [hasMore, setHasMore] = useState(true);
+    const [useMock, setUseMock] = useState(false);
+    const PAGE_SIZE = 20;
 
     // Mock initial data if Firestore empty (for demo)
     const mockPayouts = [
@@ -17,29 +21,41 @@ const AdminPayouts = () => {
     ];
 
     useEffect(() => {
-        const fetchPayouts = async () => {
-            setLoading(true);
-            try {
-                // In a real app, calculate payouts from Wallet transactions
-                // For now, we use a dedicated 'payouts' collection or fallback to mock
-                const q = query(collection(db, 'payouts'), orderBy('created_at', 'desc'));
-                const snapshot = await getDocs(q);
-
-                if (snapshot.empty) {
-                    setPayouts(mockPayouts);
-                } else {
-                    setPayouts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-                }
-            } catch (error) {
-                console.error("Error fetching payouts:", error);
-                setPayouts(mockPayouts); // Fallback
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchPayouts();
+        fetchPayouts(true);
     }, []);
+
+    const fetchPayouts = async (reset = false) => {
+        setLoading(true);
+        try {
+            let q = query(collection(db, 'payouts'), orderBy('created_at', 'desc'), limit(PAGE_SIZE));
+            if (!reset && cursor) {
+                q = query(collection(db, 'payouts'), orderBy('created_at', 'desc'), startAfter(cursor), limit(PAGE_SIZE));
+            }
+            const snapshot = await getDocs(q);
+
+            if (snapshot.empty && reset) {
+                setUseMock(true);
+                setHasMore(false);
+                setCursor(null);
+                setPayouts(mockPayouts);
+            } else {
+                setUseMock(false);
+                const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const nextCursor = snapshot.docs[snapshot.docs.length - 1] || null;
+                setCursor(nextCursor);
+                setHasMore(snapshot.docs.length === PAGE_SIZE);
+                setPayouts(prev => reset ? docs : [...prev, ...docs]);
+            }
+        } catch (error) {
+            console.error("Error fetching payouts:", error);
+            setUseMock(true);
+            setHasMore(false);
+            setCursor(null);
+            setPayouts(mockPayouts); // Fallback
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleProcess = async (id) => {
         if (!window.confirm(t('confirm_payout'))) return;
@@ -134,6 +150,17 @@ const AdminPayouts = () => {
                     </tbody>
                 </table>
             </div>
+
+            {!useMock && hasMore && !loading && (
+                <div className="flex justify-center">
+                    <button
+                        onClick={() => fetchPayouts(false)}
+                        className="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 rounded"
+                    >
+                        {t('load_more')}
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

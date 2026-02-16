@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../lib/firebase';
-import { collection, query, orderBy, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs, updateDoc, doc, limit, startAfter } from 'firebase/firestore';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { User, Shield, Ban, CheckCircle, Search, Mail } from 'lucide-react';
 
@@ -10,21 +10,37 @@ const AdminUsers = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filter, setFilter] = useState('all'); // all, admin, seller, buyer
+    const [cursor, setCursor] = useState(null);
+    const [hasMore, setHasMore] = useState(true);
+    const PAGE_SIZE = 20;
 
     useEffect(() => {
-        fetchUsers();
+        fetchUsers(true);
     }, []);
 
-    const fetchUsers = async () => {
+    useEffect(() => {
+        setCursor(null);
+        setUsers([]);
+        setHasMore(true);
+        fetchUsers(true);
+    }, [filter, searchTerm]);
+
+    const fetchUsers = async (reset = false) => {
         setLoading(true);
         try {
-            const q = query(collection(db, 'users'), orderBy('created_at', 'desc'));
+            let q = query(collection(db, 'users'), orderBy('created_at', 'desc'), limit(PAGE_SIZE));
+            if (!reset && cursor) {
+                q = query(collection(db, 'users'), orderBy('created_at', 'desc'), startAfter(cursor), limit(PAGE_SIZE));
+            }
             const snapshot = await getDocs(q);
             const fetchedUsers = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
-            setUsers(fetchedUsers);
+            const nextCursor = snapshot.docs[snapshot.docs.length - 1] || null;
+            setCursor(nextCursor);
+            setHasMore(snapshot.docs.length === PAGE_SIZE);
+            setUsers(prev => reset ? fetchedUsers : [...prev, ...fetchedUsers]);
         } catch (error) {
             console.error("Error fetching users:", error);
         } finally {
@@ -171,6 +187,17 @@ const AdminUsers = () => {
                     </table>
                 </div>
             </div>
+
+            {hasMore && !loading && (
+                <div className="flex justify-center">
+                    <button
+                        onClick={() => fetchUsers(false)}
+                        className="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 rounded"
+                    >
+                        {t('load_more')}
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

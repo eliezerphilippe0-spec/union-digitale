@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../lib/firebase';
-import { collection, query, onSnapshot, orderBy, where } from 'firebase/firestore';
+import { collection, query, orderBy, where, getDocs, limit, startAfter, onSnapshot } from 'firebase/firestore';
 import { adminService } from '../../services/adminService';
 import { AlertTriangle, Ban, CheckCircle, Search, FileText, Trash2, Eye, UserPlus } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -9,6 +9,11 @@ const StoreModeration = () => {
     const { t } = useLanguage();
     const [stores, setStores] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [cursor, setCursor] = useState(null);
+    const [hasMore, setHasMore] = useState(true);
+    const [pendingCursor, setPendingCursor] = useState(null);
+    const [pendingHasMore, setPendingHasMore] = useState(true);
+    const PAGE_SIZE = 20;
     const [filter, setFilter] = useState('all'); // all, active, suspended, under_investigation
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedStore, setSelectedStore] = useState(null);
@@ -20,14 +25,15 @@ const StoreModeration = () => {
 
     // Fetch Stores
     useEffect(() => {
-        const q = query(collection(db, 'stores'), orderBy('createdAt', 'desc'));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const fetchedStores = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setStores(fetchedStores);
-            setLoading(false);
-        });
-        return () => unsubscribe();
+        fetchStores(true);
     }, []);
+
+    useEffect(() => {
+        setCursor(null);
+        setStores([]);
+        setHasMore(true);
+        fetchStores(true);
+    }, [filter, searchTerm]);
 
     // Fetch Audit Logs for selected store
     useEffect(() => {
@@ -49,16 +55,58 @@ const StoreModeration = () => {
     // Fetch Pending Sellers
     const [pendingSellers, setPendingSellers] = useState([]);
     useEffect(() => {
-        const q = query(
-            collection(db, 'users'),
-            where('role', '==', 'seller'),
-            where('verificationStatus', '==', 'pending')
-        );
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            setPendingSellers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        });
-        return () => unsubscribe();
+        fetchPendingSellers(true);
     }, []);
+
+    const fetchStores = async (reset = false) => {
+        setLoading(true);
+        try {
+            let q = query(collection(db, 'stores'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
+            if (!reset && cursor) {
+                q = query(collection(db, 'stores'), orderBy('createdAt', 'desc'), startAfter(cursor), limit(PAGE_SIZE));
+            }
+            const snapshot = await getDocs(q);
+            const fetchedStores = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const nextCursor = snapshot.docs[snapshot.docs.length - 1] || null;
+            setCursor(nextCursor);
+            setHasMore(snapshot.docs.length === PAGE_SIZE);
+            setStores(prev => reset ? fetchedStores : [...prev, ...fetchedStores]);
+        } catch (error) {
+            console.error('Error fetching stores:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchPendingSellers = async (reset = false) => {
+        try {
+            let q = query(
+                collection(db, 'users'),
+                where('role', '==', 'seller'),
+                where('verificationStatus', '==', 'pending'),
+                orderBy('created_at', 'desc'),
+                limit(PAGE_SIZE)
+            );
+            if (!reset && pendingCursor) {
+                q = query(
+                    collection(db, 'users'),
+                    where('role', '==', 'seller'),
+                    where('verificationStatus', '==', 'pending'),
+                    orderBy('created_at', 'desc'),
+                    startAfter(pendingCursor),
+                    limit(PAGE_SIZE)
+                );
+            }
+            const snapshot = await getDocs(q);
+            const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const nextCursor = snapshot.docs[snapshot.docs.length - 1] || null;
+            setPendingCursor(nextCursor);
+            setPendingHasMore(snapshot.docs.length === PAGE_SIZE);
+            setPendingSellers(prev => reset ? docs : [...prev, ...docs]);
+        } catch (error) {
+            console.error('Error fetching pending sellers:', error);
+        }
+    };
 
     const handleAction = async () => {
         if (!reason && modalAction !== 'reactivate' && modalAction !== 'approve') {
@@ -210,6 +258,16 @@ const StoreModeration = () => {
                                 )}
                             </tbody>
                         </table>
+                        {pendingHasMore && (
+                            <div className="p-4 flex justify-center">
+                                <button
+                                    onClick={() => fetchPendingSellers(false)}
+                                    className="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 rounded"
+                                >
+                                    {t('load_more')}
+                                </button>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="flex-1 bg-white rounded-lg shadow overflow-hidden">
@@ -259,6 +317,16 @@ const StoreModeration = () => {
                                 )}
                             </tbody>
                         </table>
+                        {hasMore && !loading && (
+                            <div className="p-4 flex justify-center">
+                                <button
+                                    onClick={() => fetchStores(false)}
+                                    className="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 rounded"
+                                >
+                                    {t('load_more')}
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
 

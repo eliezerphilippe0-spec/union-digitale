@@ -3,34 +3,44 @@ import { Eye, Truck, CheckCircle } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 import { db } from '../../lib/firebase';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs, limit, startAfter } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 
 const AdminOrders = () => {
     const { t } = useLanguage();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [cursor, setCursor] = useState(null);
+    const [hasMore, setHasMore] = useState(true);
+    const PAGE_SIZE = 20;
 
     useEffect(() => {
-        // Real-time listener for orders
-        const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+        fetchOrders(true);
+    }, []);
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
+    const fetchOrders = async (reset = false) => {
+        setLoading(true);
+        try {
+            let q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
+            if (!reset && cursor) {
+                q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), startAfter(cursor), limit(PAGE_SIZE));
+            }
+            const snapshot = await getDocs(q);
             const ordersData = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
-                // Handle timestamps safely
                 date: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate().toLocaleDateString() : 'N/A'
             }));
-            setOrders(ordersData);
-            setLoading(false);
-        }, (error) => {
+            const nextCursor = snapshot.docs[snapshot.docs.length - 1] || null;
+            setCursor(nextCursor);
+            setHasMore(snapshot.docs.length === PAGE_SIZE);
+            setOrders(prev => reset ? ordersData : [...prev, ...ordersData]);
+        } catch (error) {
             console.error("Error fetching orders:", error);
+        } finally {
             setLoading(false);
-        });
-
-        return () => unsubscribe();
-    }, []);
+        }
+    };
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -94,6 +104,17 @@ const AdminOrders = () => {
                     </tbody>
                 </table>
             </div>
+
+            {hasMore && !loading && (
+                <div className="p-4 flex justify-center">
+                    <button
+                        onClick={() => fetchOrders(false)}
+                        className="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 rounded"
+                    >
+                        {t('load_more')}
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

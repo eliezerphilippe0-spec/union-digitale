@@ -2,12 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Edit, Trash2, Plus, X, Loader, Plane } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { collection, getDocs, addDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc, serverTimestamp, query, orderBy, limit, startAfter } from 'firebase/firestore';
 
 const AdminProducts = () => {
     const { t } = useLanguage();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [productCursor, setProductCursor] = useState(null);
+    const [flightCursor, setFlightCursor] = useState(null);
+    const [hasMoreProducts, setHasMoreProducts] = useState(true);
+    const [hasMoreFlights, setHasMoreFlights] = useState(true);
+    const PAGE_SIZE = 20;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newItem, setNewItem] = useState({
         title: '',
@@ -26,12 +31,22 @@ const AdminProducts = () => {
     });
 
     // Fetch All Items (Products + Flights)
-    const fetchItems = async () => {
+    const fetchItems = async (reset = false) => {
         setLoading(true);
         try {
+            let productsQ = query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
+            let flightsQ = query(collection(db, 'flights'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
+
+            if (!reset && productCursor) {
+                productsQ = query(collection(db, 'products'), orderBy('createdAt', 'desc'), startAfter(productCursor), limit(PAGE_SIZE));
+            }
+            if (!reset && flightCursor) {
+                flightsQ = query(collection(db, 'flights'), orderBy('createdAt', 'desc'), startAfter(flightCursor), limit(PAGE_SIZE));
+            }
+
             const [productsSnap, flightsSnap] = await Promise.all([
-                getDocs(collection(db, 'products')),
-                getDocs(collection(db, 'flights'))
+                getDocs(productsQ),
+                getDocs(flightsQ)
             ]);
 
             const productsData = productsSnap.docs.map(doc => ({
@@ -50,7 +65,15 @@ const AdminProducts = () => {
                 collection: 'flights'
             }));
 
-            setItems([...productsData, ...flightsData]);
+            const nextProductCursor = productsSnap.docs[productsSnap.docs.length - 1] || null;
+            const nextFlightCursor = flightsSnap.docs[flightsSnap.docs.length - 1] || null;
+            setProductCursor(nextProductCursor);
+            setFlightCursor(nextFlightCursor);
+            setHasMoreProducts(productsSnap.docs.length === PAGE_SIZE);
+            setHasMoreFlights(flightsSnap.docs.length === PAGE_SIZE);
+
+            const nextItems = [...productsData, ...flightsData];
+            setItems(prev => reset ? nextItems : [...prev, ...nextItems]);
         } catch (error) {
             console.error("Error fetching items:", error);
         } finally {
@@ -59,7 +82,7 @@ const AdminProducts = () => {
     };
 
     useEffect(() => {
-        fetchItems();
+        fetchItems(true);
     }, []);
 
     // Add Item
@@ -192,6 +215,17 @@ const AdminProducts = () => {
                     </table>
                 )}
             </div>
+
+            {(hasMoreProducts || hasMoreFlights) && !loading && (
+                <div className="p-4 flex justify-center">
+                    <button
+                        onClick={() => fetchItems(false)}
+                        className="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 rounded"
+                    >
+                        {t('load_more')}
+                    </button>
+                </div>
+            )}
 
             {/* Add Item Modal */}
             {isModalOpen && (
