@@ -7,6 +7,7 @@ const { AppError } = require('../middleware/errorHandler');
 const validate = require('../middleware/validate');
 const config = require('../config');
 const { computeRiskLevel } = require('../services/riskEngine');
+const { runDailyRiskEval, getJobStatus } = require('../jobs/riskDailyEval');
 
 const router = express.Router();
 
@@ -26,7 +27,10 @@ router.patch('/stores/:storeId/risk-level', authenticate, requireAdmin, validate
   body('reason').isString().isLength({ min: 5, max: 500 }).withMessage('reason invalide'),
   body('note').optional().isString().isLength({ max: 2000 }),
   body('payoutsFrozen').optional().isBoolean(),
-  body('expiresAt').optional().isISO8601().toDate(),
+  body('expiresAt').optional().isISO8601().toDate().custom((value) => {
+    if (value && value <= new Date()) throw new Error('expiresAt doit être futur');
+    return true;
+  }),
 ]), async (req, res, next) => {
   try {
     const { storeId } = req.params;
@@ -53,6 +57,7 @@ router.patch('/stores/:storeId/risk-level', authenticate, requireAdmin, validate
           riskLevel,
           payoutsFrozen: nextFrozen,
           riskFlag: nextFrozen,
+          freezeExpiresAt: nextFrozen ? (expiresAt || null) : null,
           lastRiskEvaluated: new Date(),
         },
       });
@@ -111,6 +116,7 @@ router.post('/stores/:storeId/unfreeze', authenticate, requireAdmin, validate([
         data: {
           payoutsFrozen: false,
           riskFlag: false,
+          freezeExpiresAt: null,
           lastRiskEvaluated: new Date(),
         },
       });
@@ -278,6 +284,28 @@ router.post('/stores/:storeId/risk-evaluate', authenticate, requireAdmin, evalLi
 
     const decision = await computeRiskLevel(storeId, { dryRun, adminId: req.user.id });
     res.json({ decision, dryRun });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/risk/jobs/daily-eval/run', authenticate, requireAdmin, evalLimiter, validate([
+  query('DRY_RUN').optional().isBoolean().toBoolean(),
+  body('DRY_RUN').optional().isBoolean().toBoolean(),
+]), async (req, res, next) => {
+  try {
+    const dryRun = String(req.query.DRY_RUN || req.body?.DRY_RUN || '').toLowerCase() === 'true';
+    const report = await runDailyRiskEval({ dryRun });
+    res.json(report);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/risk/jobs/daily-eval/status', authenticate, requireAdmin, async (req, res, next) => {
+  try {
+    const status = await getJobStatus();
+    res.json({ status });
   } catch (error) {
     next(error);
   }

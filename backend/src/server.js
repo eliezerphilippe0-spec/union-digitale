@@ -7,6 +7,7 @@ const config = require('./config');
 const prisma = require('./lib/prisma');
 const cron = require('node-cron');
 const { runWeeklyPayoutBatch } = require('./jobs/payoutBatch');
+const { runDailyRiskEval } = require('./jobs/riskDailyEval');
 
 async function main() {
   try {
@@ -26,6 +27,16 @@ async function main() {
         console.error('Payout batch cron error:', error);
       }
     });
+
+    if (config.RISK_CRON_ENABLED) {
+      cron.schedule(config.RISK_CRON_SCHEDULE, async () => {
+        try {
+          await runDailyRiskEval({ dryRun: false });
+        } catch (error) {
+          console.error('Risk daily cron error:', error);
+        }
+      }, { timezone: 'UTC' });
+    }
 
     // Start server
     app.listen(config.PORT, () => {
