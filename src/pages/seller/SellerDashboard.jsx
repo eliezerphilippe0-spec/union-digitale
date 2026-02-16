@@ -3,8 +3,11 @@ import {
     DollarSign, Package, ShoppingCart, TrendingUp, TrendingDown, ArrowUpRight,
     Star, Bell, Clock, Wallet, CreditCard, Eye, AlertTriangle, CheckCircle2,
     Truck, RefreshCw, ChevronRight, Award, Target, Gift, Zap, BarChart3,
-    Calendar, Download, Settings, HelpCircle, ArrowRight
+    Calendar, Download, Settings, HelpCircle, ArrowRight, ShieldCheck
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useSellerTrust } from '../../hooks/useSellerTrust';
+import TrustNavIndicator from '../../components/seller/trust/TrustNavIndicator';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { appApiClient } from '../../services/apiClient';
@@ -16,6 +19,8 @@ import {
 const SellerDashboard = () => {
     const { t } = useLanguage();
     const { currentUser } = useAuth();
+    const navigate = useNavigate();
+    const { data: trustData } = useSellerTrust();
     const [loading, setLoading] = useState(true);
     const [period, setPeriod] = useState('30');
     const [commissionSummary, setCommissionSummary] = useState({ totalCommission: 0, totalOrders: 0 });
@@ -171,6 +176,13 @@ const SellerDashboard = () => {
                                 <option value="30">{t('seller_dashboard_period_30')}</option>
                                 <option value="90">{t('seller_dashboard_period_90')}</option>
                             </select>
+                            <button
+                                onClick={() => navigate('/seller/trust')}
+                                className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                            >
+                                <ShieldCheck size={18} className="text-gray-600" />
+                                <TrustNavIndicator tier={trustData?.tier} label="Confiance" />
+                            </button>
                             <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
                                 <Bell size={20} className="text-gray-600" />
                                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
