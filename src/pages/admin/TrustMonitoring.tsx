@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import TrustKPICards from '../../components/admin/trust/TrustKPICards';
 import TrustFilters from '../../components/admin/trust/TrustFilters';
 import TrustTable from '../../components/admin/trust/TrustTable';
@@ -10,8 +11,11 @@ const TrustMonitoring = () => {
   const api = useAdminTrustApi();
   const [summary, setSummary] = useState<any>(null);
   const [jobStatus, setJobStatus] = useState<any>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [filter, setFilter] = useState('ALL');
   const [payoutDelayOnly, setPayoutDelayOnly] = useState(false);
+  const [query, setQuery] = useState(searchParams.get('q') || '');
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
 
   const [topItems, setTopItems] = useState<any[]>([]);
   const [topCursor, setTopCursor] = useState<string | null>(null);
@@ -55,6 +59,7 @@ const TrustMonitoring = () => {
       sort: 'score',
       direction: 'desc',
       payoutDelayNot72: payoutDelayOnly,
+      q: debouncedQuery,
     });
 
     const items = (response.items || []).map(enrichReasons);
@@ -76,6 +81,7 @@ const TrustMonitoring = () => {
       sort: 'score',
       direction: 'asc',
       payoutDelayNot72: payoutDelayOnly,
+      q: debouncedQuery,
     });
 
     const items = (response.items || []).map(enrichReasons);
@@ -100,6 +106,19 @@ const TrustMonitoring = () => {
   };
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (debouncedQuery) params.set('q', debouncedQuery);
+    setSearchParams(params, { replace: true });
+  }, [debouncedQuery, setSearchParams]);
+
+  useEffect(() => {
     loadSummary();
     loadJobStatus();
   }, []);
@@ -109,7 +128,7 @@ const TrustMonitoring = () => {
     setRiskCursor(null);
     loadTop(true);
     loadRisk(true);
-  }, [filter, payoutDelayOnly]);
+  }, [filter, payoutDelayOnly, debouncedQuery]);
 
   return (
     <div className="space-y-6">
@@ -122,6 +141,8 @@ const TrustMonitoring = () => {
             onChange={setFilter}
             payoutDelayOnly={payoutDelayOnly}
             onTogglePayoutDelay={() => setPayoutDelayOnly(!payoutDelayOnly)}
+            query={query}
+            onQueryChange={setQuery}
           />
         </div>
         <TrustJobStatusCard

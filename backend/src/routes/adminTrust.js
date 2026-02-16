@@ -48,6 +48,7 @@ router.get('/trust/stores', authenticate, requireAdmin, validate([
   query('sort').optional().isIn(['score','updatedAt']).default('score'),
   query('direction').optional().isIn(['asc','desc']).default('desc'),
   query('payoutDelayNot72').optional().isBoolean().toBoolean(),
+  query('q').optional().isString(),
 ]), async (req, res, next) => {
   try {
     const tiers = req.query.tier ? req.query.tier.split(',').map(t => t.trim()).filter(Boolean) : null;
@@ -59,6 +60,13 @@ router.get('/trust/stores', authenticate, requireAdmin, validate([
     const where = {
       ...(tiers && tiers.length ? { trustTier: { in: tiers } } : {}),
       ...(req.query.payoutDelayNot72 ? { payoutDelayHours: { not: 72 } } : {}),
+      ...(req.query.q ? {
+        OR: [
+          { name: { contains: req.query.q, mode: 'insensitive' } },
+          { slug: { contains: req.query.q, mode: 'insensitive' } },
+          { id: { contains: req.query.q, mode: 'insensitive' } },
+        ],
+      } : {}),
     };
 
     const orderBy = sortField === 'updatedAt'
@@ -73,6 +81,7 @@ router.get('/trust/stores', authenticate, requireAdmin, validate([
       select: {
         id: true,
         name: true,
+        slug: true,
         trustScore: true,
         trustTier: true,
         trustUpdatedAt: true,
