@@ -5,7 +5,7 @@ import {
     MoreHorizontal, Play, CheckCircle2, TrendingUp, DollarSign,
     Bell, Search, FileText, PieChart, ArrowUpRight, ArrowDownRight,
     Plus, Download, Package, Truck, Tag, Filter, Megaphone,
-    Sparkles, AlertTriangle, ChevronRight, Wallet, LogOut, Share2, Smartphone, Briefcase, Target, RefreshCw
+    Sparkles, AlertTriangle, ChevronRight, Wallet, LogOut, Share2, Smartphone, Briefcase, Target, RefreshCw, ShieldCheck
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -14,6 +14,7 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 import { getFirestore, doc, onSnapshot } from 'firebase/firestore';
 import { useNavigate, Link } from 'react-router-dom';
 import { usageStatsService } from '../../services/usageStatsService';
+import { useSellerTrust } from '../../hooks/useSellerTrust';
 
 // Utility for formatting currency
 // const formatCurrency = (amount) => {
@@ -28,7 +29,7 @@ const inventoryData = [
 
 // --- UI COMPONENTS ---
 
-const SidebarItem = ({ icon: Icon, label, active, onClick, badge, className }) => (
+const SidebarItem = ({ icon: Icon, label, active, onClick, badge, className, statusColor }) => (
     <button
         onClick={onClick}
         className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group ${active
@@ -44,6 +45,9 @@ const SidebarItem = ({ icon: Icon, label, active, onClick, badge, className }) =
             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${active ? 'bg-white/20 text-white' : 'bg-red-500 text-white'}`}>
                 {badge}
             </span>
+        )}
+        {statusColor && (
+            <span className={`w-2 h-2 rounded-full ${statusColor}`} />
         )}
     </button>
 );
@@ -603,9 +607,19 @@ export default function DashboardUltimate() {
 
     const { t, language } = useLanguage();
     const { currentUser } = useAuth();
+    const { data: trustData } = useSellerTrust();
     const functions = getFunctions();
     const db = getFirestore();
     const navigate = useNavigate();
+    const trustStatusColor = trustData?.tier === 'ELITE' || trustData?.tier === 'TRUSTED'
+        ? 'bg-emerald-400'
+        : trustData?.tier === 'WATCH'
+            ? 'bg-amber-400'
+            : trustData?.tier === 'RESTRICTED'
+                ? 'bg-rose-500'
+                : trustData?.tier
+                    ? 'bg-slate-400'
+                    : null;
 
     useEffect(() => {
         if (!currentUser) {
@@ -748,6 +762,7 @@ export default function DashboardUltimate() {
                         <div className="text-xs font-bold text-slate-500 uppercase px-4 mb-2 tracking-wider">{t('management')}</div>
                         <SidebarItem icon={LayoutDashboard} label={t('dashboard')} active={activeTab === 'dashboard'} onClick={() => { setActiveTab('dashboard'); setSidebarOpen(false); }} />
                         <SidebarItem icon={FileText} label={t('finance_payme')} active={activeTab === 'finance'} onClick={() => { setActiveTab('finance'); setSidebarOpen(false); }} />
+                        <SidebarItem icon={ShieldCheck} label="Confiance" active={false} onClick={() => { navigate('/seller/trust'); setSidebarOpen(false); }} statusColor={trustStatusColor} />
                         <SidebarItem icon={Megaphone} label={t('marketing_campaign')} active={activeTab === 'marketing'} onClick={() => { setActiveTab('marketing'); setSidebarOpen(false); }} badge={t('badge_new')} />
                         <div className="my-2 border-t border-gray-100"></div>
                         <SidebarItem icon={Home} label={t('real_estate')} active={false} onClick={() => navigate('/seller/real-estate/new')} badge={t('badge_new')} />
