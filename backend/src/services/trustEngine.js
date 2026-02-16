@@ -193,12 +193,12 @@ const computeTrustScore = async (storeId) => {
 
 const tierRank = (tier) => {
   switch (tier) {
-    case 'RESTRICTED': return 0;
-    case 'WATCH': return 1;
-    case 'STANDARD': return 2;
-    case 'TRUSTED': return 3;
-    case 'ELITE': return 4;
-    default: return 2;
+    case 'RESTRICTED': return 1;
+    case 'WATCH': return 2;
+    case 'STANDARD': return 3;
+    case 'TRUSTED': return 4;
+    case 'ELITE': return 5;
+    default: return 3;
   }
 };
 
@@ -213,6 +213,7 @@ const applyTrustTierTransition = async ({ storeId, prevTier, prevScore, nextTier
         trustUpdatedAt: new Date(),
         trustReasonSummary: summary,
         trustScoreStableDays: nextScore >= prevScore ? { increment: 1 } : 0,
+        trustTierRank: tierRank(prevTier),
         ...TRUST_BENEFITS[nextTier],
       },
     });
@@ -232,6 +233,7 @@ const applyTrustTierTransition = async ({ storeId, prevTier, prevScore, nextTier
           trustReasonSummary: summary,
           trustScoreStableDays: 0,
           trustLastTierChangeAt: new Date(),
+          trustTierRank: tierRank(nextTier),
           ...TRUST_BENEFITS[nextTier],
         },
       });
@@ -255,6 +257,7 @@ const applyTrustTierTransition = async ({ storeId, prevTier, prevScore, nextTier
         trustUpdatedAt: new Date(),
         trustReasonSummary: summary,
         trustScoreStableDays: stableDays + 1,
+        trustTierRank: tierRank(prevTier),
         ...TRUST_BENEFITS[prevTier],
       },
     });
@@ -271,6 +274,7 @@ const applyTrustTierTransition = async ({ storeId, prevTier, prevScore, nextTier
         trustReasonSummary: summary,
         trustScoreStableDays: 0,
         trustLastTierChangeAt: new Date(),
+        trustTierRank: tierRank(nextTier),
         ...TRUST_BENEFITS[nextTier],
       },
     });

@@ -136,6 +136,7 @@ model Store {
 
   trustScore         Int        @default(100)
   trustTier          TrustTier  @default(STANDARD)
+  trustTierRank      Int        @default(3)
   trustUpdatedAt     DateTime?
   trustReasonSummary Json?
   trustScoreStableDays Int      @default(0)

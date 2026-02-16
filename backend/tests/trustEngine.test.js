@@ -71,7 +71,9 @@ describe('trust engine', () => {
       nextScore: 40,
       summary: {},
     });
-    expect(prisma.store.update).toHaveBeenCalled();
+    expect(prisma.store.update).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ trustTierRank: 2 }),
+    }));
   });
 
   test('upgrade requires stable days', async () => {
@@ -84,7 +86,9 @@ describe('trust engine', () => {
       nextScore: 78,
       summary: {},
     });
-    expect(prisma.store.update).toHaveBeenCalled();
+    expect(prisma.store.update).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ trustTierRank: 3 }),
+    }));
   });
 
   test('benefits applied', async () => {
@@ -98,7 +102,10 @@ describe('trust engine', () => {
       summary: {},
     });
     expect(prisma.store.update).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining(TRUST_BENEFITS.TRUSTED),
+      data: expect.objectContaining({
+        ...TRUST_BENEFITS.TRUSTED,
+        trustTierRank: 4,
+      }),
     }));
   });
 });

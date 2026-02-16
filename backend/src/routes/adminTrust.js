@@ -67,11 +67,11 @@ router.get('/trust/stores', authenticate, requireAdmin, validate([
       } : {}),
     };
 
-    let orderBy = { trustScore: 'desc' };
-    if (sortParam === 'updated_desc') orderBy = { trustUpdatedAt: 'desc' };
-    if (sortParam === 'score_asc') orderBy = { trustScore: 'asc' };
-    if (sortParam === 'tier_desc') orderBy = { trustTier: 'desc' };
-    if (sortParam === 'tier_asc') orderBy = { trustTier: 'asc' };
+    let orderBy = [{ trustScore: 'desc' }];
+    if (sortParam === 'updated_desc') orderBy = [{ trustUpdatedAt: 'desc' }, { trustScore: 'desc' }];
+    if (sortParam === 'score_asc') orderBy = [{ trustScore: 'asc' }];
+    if (sortParam === 'tier_desc') orderBy = [{ trustTierRank: 'desc' }, { trustScore: 'desc' }, { trustUpdatedAt: 'desc' }];
+    if (sortParam === 'tier_asc') orderBy = [{ trustTierRank: 'asc' }, { trustScore: 'asc' }];
 
     const items = await prisma.store.findMany({
       where,
