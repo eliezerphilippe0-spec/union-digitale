@@ -71,4 +71,7 @@ module.exports = {
   // Pagination
   DEFAULT_PAGE_SIZE: 20,
   MAX_PAGE_SIZE: 100,
+
+  // Admin
+  SUPER_ADMIN_EMAILS: (process.env.SUPER_ADMIN_EMAILS || '').split(',').map(s => s.trim()).filter(Boolean),
 };

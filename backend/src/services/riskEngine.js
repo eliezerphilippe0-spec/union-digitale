@@ -104,7 +104,7 @@ const countRapidPayoutPattern = async (storeId, since) => {
   return Math.min(rapidDeliveries, payoutRequests);
 };
 
-const computeRiskLevel = async (storeId) => {
+const computeRiskLevel = async (storeId, options = {}) => {
   const [store, configs] = await Promise.all([
     prisma.store.findUnique({ where: { id: storeId }, select: { id: true, riskLevel: true } }),
     prisma.riskRuleConfig.findMany({ where: { enabled: true } }),
@@ -214,6 +214,10 @@ const computeRiskLevel = async (storeId) => {
   const nextLevel = levelFromScore(score);
 
   const decision = { storeId, prevLevel, nextLevel, score, reasons };
+
+  if (options.dryRun) {
+    return decision;
+  }
 
   await prisma.$transaction(async (tx) => {
     const payoutsFrozen = nextLevel === 'HIGH' || nextLevel === 'FROZEN';
