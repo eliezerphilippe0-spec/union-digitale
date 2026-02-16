@@ -2,11 +2,11 @@ import React from 'react';
 import RiskLevelBadge from './RiskLevelBadge';
 import SeverityBadge from './SeverityBadge';
 
-const FlaggedStoresTable = ({ items, onSelect, onFreeze, onUnfreeze, onSetLevel }: any) => {
+const FlaggedStoresTable = ({ items, loading, onSelect, onFreeze, onUnfreeze, onSetLevel }: any) => {
   return (
     <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
       <table className="w-full text-sm">
-        <thead className="bg-gray-50">
+        <thead className="bg-gray-50 sticky top-0">
           <tr>
             <th className="text-left px-4 py-3">Store</th>
             <th className="text-left px-4 py-3">Risk</th>
@@ -17,6 +17,11 @@ const FlaggedStoresTable = ({ items, onSelect, onFreeze, onUnfreeze, onSetLevel 
           </tr>
         </thead>
         <tbody>
+          {loading && items.length === 0 && (
+            <tr>
+              <td className="px-4 py-6 text-center text-gray-400" colSpan={6}>Chargement…</td>
+            </tr>
+          )}
           {items.map((store: any) => (
             <tr key={store.storeId} className="border-t">
               <td className="px-4 py-3">
@@ -47,7 +52,7 @@ const FlaggedStoresTable = ({ items, onSelect, onFreeze, onUnfreeze, onSetLevel 
               </td>
             </tr>
           ))}
-          {items.length === 0 && (
+          {!loading && items.length === 0 && (
             <tr>
               <td className="px-4 py-6 text-center text-gray-500" colSpan={6}>Aucun store</td>
             </tr>

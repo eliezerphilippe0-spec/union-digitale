@@ -46,6 +46,8 @@ export const useAdminRiskApi = () => {
     body: JSON.stringify({ DRY_RUN: dryRun }),
   });
 
+  const getRiskSummary = (window = '24h') => adminFetch(`/api/admin/risk/summary?window=${window}`);
+
   return {
     getFlaggedStores,
     getRiskEvents,
@@ -55,5 +57,6 @@ export const useAdminRiskApi = () => {
     riskEvaluate,
     getDailyEvalStatus,
     runDailyEval,
+    getRiskSummary,
   };
 };

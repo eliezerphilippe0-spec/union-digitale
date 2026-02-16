@@ -311,4 +311,67 @@ router.get('/risk/jobs/daily-eval/status', authenticate, requireAdmin, async (re
   }
 });
 
+router.get('/risk/summary', authenticate, requireAdmin, validate([
+  query('window').optional().isIn(['24h','7d','30d']),
+]), async (req, res, next) => {
+  try {
+    const window = req.query.window || '24h';
+    const now = new Date();
+    const since = new Date(now.getTime() - (window === '7d' ? 7 : window === '30d' ? 30 : 1) * 24 * 60 * 60 * 1000);
+
+    const [
+      high,
+      frozen,
+      watch,
+      payoutsFrozen,
+      flaggedTotal,
+      jobStatus,
+      signals,
+    ] = await Promise.all([
+      prisma.store.count({ where: { riskLevel: 'HIGH' } }),
+      prisma.store.count({ where: { riskLevel: 'FROZEN' } }),
+      prisma.store.count({ where: { riskLevel: 'WATCH' } }),
+      prisma.store.count({ where: { payoutsFrozen: true } }),
+      prisma.store.count({ where: { riskLevel: { in: ['WATCH', 'HIGH', 'FROZEN'] } } }),
+      getJobStatus(),
+      prisma.riskEvent.groupBy({
+        by: ['type'],
+        _count: { type: true },
+        where: { createdAt: { gte: since } },
+      }),
+    ]);
+
+    const signalMap = {
+      refundSpike: 0,
+      refundAfterRelease: 0,
+      chargebacks: 0,
+      payoutPendingGrowth: 0,
+      paymentVelocity: 0,
+      rapidPayoutPattern: 0,
+    };
+
+    for (const row of signals) {
+      switch (row.type) {
+        case 'REFUND_SPIKE': signalMap.refundSpike = row._count.type; break;
+        case 'REFUND_AFTER_RELEASE_SPIKE': signalMap.refundAfterRelease = row._count.type; break;
+        case 'CHARGEBACK_SPIKE': signalMap.chargebacks = row._count.type; break;
+        case 'PAYOUT_PENDING_GROWTH': signalMap.payoutPendingGrowth = row._count.type; break;
+        case 'PAYMENT_VELOCITY': signalMap.paymentVelocity = row._count.type; break;
+        case 'RAPID_PAYOUT_PATTERN': signalMap.rapidPayoutPattern = row._count.type; break;
+        default: break;
+      }
+    }
+
+    const locked = jobStatus?.expiresAt ? jobStatus.expiresAt > now : false;
+
+    res.json({
+      counts: { high, frozen, payoutsFrozen, watch, flaggedTotal },
+      jobs: { dailyEval: { locked, lockedBy: jobStatus?.lockedBy || null, expiresAt: jobStatus?.expiresAt || null, lastReport: jobStatus?.lastReport || null } },
+      signals24h: signalMap,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

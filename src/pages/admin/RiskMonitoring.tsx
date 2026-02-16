@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import KPICards from '../../components/admin/risk/KPICards';
 import FlaggedStoresTable from '../../components/admin/risk/FlaggedStoresTable';
 import StoreRiskDrawer from '../../components/admin/risk/StoreRiskDrawer';
@@ -14,12 +15,18 @@ const RiskMonitoring = () => {
   const [selected, setSelected] = useState<any>(null);
   const [cursor, setCursor] = useState<string | null>(null);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [filters, setFilters] = useState({ level: 'HIGH,FROZEN', frozen: true, search: '' });
   const [loading, setLoading] = useState(false);
   const [jobStatus, setJobStatus] = useState<any>(null);
+  const [summary, setSummary] = useState<any>(null);
   const [showSetLevel, setShowSetLevel] = useState(false);
   const [showFreeze, setShowFreeze] = useState(false);
   const [showUnfreeze, setShowUnfreeze] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [filters, setFilters] = useState({
+    level: searchParams.get('level') || 'HIGH,FROZEN',
+    frozen: (searchParams.get('frozen') || '1') === '1',
+    search: searchParams.get('q') || '',
+  });
 
   const loadStores = async (reset = false) => {
     setLoading(true);
@@ -33,7 +40,7 @@ const RiskMonitoring = () => {
     const filtered = filters.search
       ? items.filter((s: any) => s.name?.toLowerCase().includes(filters.search.toLowerCase()) || s.storeId?.includes(filters.search))
       : items;
-    setStores(reset ? filtered : filtered);
+    setStores(reset ? filtered : [...stores, ...filtered]);
     setNextCursor(response.nextCursor || null);
     setLoading(false);
   };
@@ -48,24 +55,44 @@ const RiskMonitoring = () => {
     setJobStatus(response.status);
   };
 
+  const loadSummary = async () => {
+    const response = await api.getRiskSummary('24h');
+    setSummary(response);
+  };
+
   useEffect(() => {
-    loadStores(true);
+    const params = new URLSearchParams();
+    params.set('level', filters.level);
+    params.set('frozen', filters.frozen ? '1' : '0');
+    if (filters.search) params.set('q', filters.search);
+    setSearchParams(params, { replace: true });
+  }, [filters, setSearchParams]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setStores([]);
+      setCursor(null);
+      loadStores(true);
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [filters.level, filters.frozen, filters.search]);
+
+  useEffect(() => {
     loadJobStatus();
-  }, [filters.level, filters.frozen]);
+    loadSummary();
+  }, []);
 
   const kpis = useMemo(() => {
-    const high = stores.filter(s => s.riskLevel === 'HIGH').length;
-    const frozen = stores.filter(s => s.riskLevel === 'FROZEN').length;
-    const payoutsFrozen = stores.filter(s => s.payoutsFrozen).length;
-    const lastReport = jobStatus?.lastReport || {};
+    const counts = summary?.counts || {};
+    const lastReport = summary?.jobs?.dailyEval?.lastReport || jobStatus?.lastReport || {};
     return [
-      { label: 'HIGH', value: high },
-      { label: 'FROZEN', value: frozen },
-      { label: 'payoutsFrozen', value: payoutsFrozen },
+      { label: 'HIGH', value: counts.high ?? '-' },
+      { label: 'FROZEN', value: counts.frozen ?? '-' },
+      { label: 'payoutsFrozen', value: counts.payoutsFrozen ?? '-' },
       { label: 'Changed (last)', value: lastReport.changed ?? '-' },
       { label: 'Errors (last)', value: lastReport.errors ?? '-' },
     ];
-  }, [stores, jobStatus]);
+  }, [summary, jobStatus]);
 
   const handleSelect = async (store: any) => {
     setSelected(store);
@@ -75,6 +102,7 @@ const RiskMonitoring = () => {
   const runDaily = async (dryRun: boolean) => {
     await api.runDailyEval(dryRun);
     await loadJobStatus();
+    await loadSummary();
   };
 
   const applySetLevel = async (payload: any) => {
@@ -131,6 +159,7 @@ const RiskMonitoring = () => {
           </div>
           <FlaggedStoresTable
             items={stores}
+            loading={loading}
             onSelect={handleSelect}
             onSetLevel={(s: any) => { setSelected(s); setShowSetLevel(true); }}
             onFreeze={(s: any) => { setSelected(s); setShowFreeze(true); }}
@@ -138,10 +167,25 @@ const RiskMonitoring = () => {
           />
           <div className="flex justify-end gap-2 mt-3">
             <button className="px-3 py-1.5 text-xs border rounded" onClick={() => loadStores(true)} disabled={loading}>Refresh</button>
-            {nextCursor && <button className="px-3 py-1.5 text-xs border rounded" onClick={() => { setCursor(nextCursor); loadStores(); }}>Next</button>}
+            {nextCursor && <button className="px-3 py-1.5 text-xs border rounded" onClick={() => { setCursor(nextCursor); loadStores(); }}>Load more</button>}
           </div>
         </div>
-        <JobStatusCard status={jobStatus} onRun={() => runDaily(false)} onDryRun={() => runDaily(true)} loading={false} />
+        <div className="space-y-4">
+          <JobStatusCard status={jobStatus} onRun={() => runDaily(false)} onDryRun={() => runDaily(true)} loading={false} />
+          {summary?.signals24h && (
+            <div className="bg-white border rounded-lg p-4 shadow-sm text-xs">
+              <div className="text-sm font-semibold mb-2">Top reasons (24h)</div>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.entries(summary.signals24h).map(([key, val]: any) => (
+                  <div key={key} className="flex justify-between">
+                    <span>{key}</span>
+                    <span className="font-semibold">{val}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <StoreRiskDrawer
