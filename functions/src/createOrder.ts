@@ -53,27 +53,75 @@ export const createOrder = onCall(async (request) => {
     });
 
     const vendorIds = Array.from(new Set(lineItems.map((li) => li.vendorId).filter(Boolean)));
-    if (vendorIds.length !== 1) {
-        throw new HttpsError('failed-precondition', 'multi_vendor_not_supported_yet');
-    }
 
     const totalPrice = lineItems.reduce((sum, item) => sum + item.lineTotal, 0);
 
-    const orderData = {
-        userId,
-        vendorId: vendorIds[0],
-        items: lineItems.map(({ productId, qty, unitPrice }) => ({ productId, qty, price: unitPrice })),
-        totalPrice,
-        status: 'pending',
-        paymentStatus: 'pending',
-        customerDetails,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        type: 'digital_checkout'
-    };
-
     try {
-        const orderRef = await db.collection('orders').add(orderData);
-        return { orderId: orderRef.id, totalPrice };
+        const orderRef = db.collection('orders').doc();
+        const orderId = orderRef.id;
+
+        const orderData = {
+            orderId,
+            buyerId: userId,
+            userId,
+            totalAmount: totalPrice,
+            status: 'pending',
+            paymentStatus: 'pending',
+            customerDetails,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            currency: 'HTG',
+            subOrderIds: [],
+            type: 'digital_checkout'
+        };
+
+        const batch = db.batch();
+        batch.set(orderRef, orderData);
+
+        const subOrderIds: string[] = [];
+
+        for (const vendorId of vendorIds) {
+            const subRef = db.collection('orderSubs').doc();
+            subOrderIds.push(subRef.id);
+
+            const subItems = lineItems.filter((li) => li.vendorId === vendorId);
+            const subtotalAmount = subItems.reduce((s, i) => s + i.lineTotal, 0);
+            const commissionAmount = 0;
+            const sellerNetAmount = Math.max(subtotalAmount - commissionAmount, 0);
+
+            batch.set(subRef, {
+                subOrderId: subRef.id,
+                orderId,
+                buyerId: userId,
+                vendorId,
+                subtotalAmount,
+                commissionAmount,
+                sellerNetAmount,
+                status: 'pending',
+                escrowStatus: 'PENDING',
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
+
+            for (const item of subItems) {
+                const itemRef = db.collection('orderItems').doc();
+                batch.set(itemRef, {
+                    itemId: itemRef.id,
+                    subOrderId: subRef.id,
+                    orderId,
+                    buyerId: userId,
+                    vendorId,
+                    productId: item.productId,
+                    qty: item.qty,
+                    unitPrice: item.unitPrice,
+                    lineTotal: item.lineTotal,
+                    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                });
+            }
+        }
+
+        batch.update(orderRef, { subOrderIds });
+
+        await batch.commit();
+        return { orderId, totalPrice };
     } catch (error) {
         console.error("Order creation error:", error);
         throw new HttpsError('internal', 'Failed to create order');
