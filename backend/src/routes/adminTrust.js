@@ -170,6 +170,62 @@ router.get('/trust/jobs/daily-recompute/status', authenticate, requireAdmin, asy
   }
 });
 
+router.get('/trust/insights/summary', authenticate, requireAdmin, validate([
+  query('window').optional().isString(),
+]), async (req, res, next) => {
+  try {
+    const windowParam = req.query.window || '24h';
+    const hours = Number(String(windowParam).replace('h', '')) || 24;
+    const since = new Date(Date.now() - hours * 60 * 60 * 1000);
+
+    const baseWhere = { createdAt: { gte: since } };
+
+    const navClicks = await prisma.sellerAnalyticsEvent.count({
+      where: { ...baseWhere, eventName: 'seller_trust_nav_click' },
+    });
+    const pageViews = await prisma.sellerAnalyticsEvent.count({
+      where: { ...baseWhere, eventName: 'seller_trust_page_view' },
+    });
+    const timelineExpands = await prisma.sellerAnalyticsEvent.count({
+      where: { ...baseWhere, eventName: 'seller_trust_timeline_expand' },
+    });
+
+    const uniqueRows = await prisma.sellerAnalyticsEvent.findMany({
+      where: baseWhere,
+      distinct: ['sellerId'],
+      select: { sellerId: true },
+    });
+
+    const uniqueSellers = uniqueRows.length;
+
+    res.json({
+      navClicks,
+      pageViews,
+      timelineExpands,
+      uniqueSellers,
+      navToPageRate: navClicks ? Number((pageViews / navClicks).toFixed(2)) : 0,
+      pageToTimelineRate: pageViews ? Number((timelineExpands / pageViews).toFixed(2)) : 0,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/trust/insights/events', authenticate, requireAdmin, validate([
+  query('limit').optional().isInt({ min: 1, max: 200 }).toInt(),
+]), async (req, res, next) => {
+  try {
+    const limit = req.query.limit || 100;
+    const items = await prisma.sellerAnalyticsEvent.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+    res.json({ items });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get('/stores/:slug/trust', async (req, res, next) => {
   try {
     const store = await prisma.store.findUnique({
