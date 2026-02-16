@@ -24,6 +24,8 @@ const AdminDashboard = () => {
     const [currency, setCurrency] = useState('HTG');
     const [commissionSummary, setCommissionSummary] = useState({ totalCommission: 0, totalOrders: 0, topStores: [] });
     const [commissionLoading, setCommissionLoading] = useState(false);
+    const [payoutRequests, setPayoutRequests] = useState([]);
+    const [payoutLoading, setPayoutLoading] = useState(false);
 
     // KPI States
     const [stats, setStats] = useState({
@@ -107,7 +109,20 @@ const AdminDashboard = () => {
             }
         };
 
+        const fetchPayouts = async () => {
+            try {
+                setPayoutLoading(true);
+                const res = await appApiClient.get('/payouts/admin');
+                setPayoutRequests(res.data?.requests || []);
+            } catch (error) {
+                console.error('Payout requests error:', error);
+            } finally {
+                setPayoutLoading(false);
+            }
+        };
+
         fetchCommissions();
+        fetchPayouts();
     }, []);
 
     const formatCurrency = (value) => {
@@ -282,6 +297,71 @@ const AdminDashboard = () => {
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    </div>
+
+                    {/* Payout Requests */}
+                    <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm lg:col-span-4">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl">
+                                <CreditCard size={20} />
+                            </div>
+                            <span className="text-xs font-semibold text-blue-600">Payouts</span>
+                        </div>
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Demandes de payout</p>
+                        <div className="mt-3 space-y-2">
+                            {payoutLoading ? (
+                                <div className="text-sm text-gray-500">Chargement...</div>
+                            ) : payoutRequests.length === 0 ? (
+                                <div className="text-sm text-gray-500">Aucune demande</div>
+                            ) : (
+                                payoutRequests.slice(0, 5).map((req) => (
+                                    <div key={req.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                                        <div className="text-sm font-medium text-gray-900 truncate">
+                                            {req.store?.name || 'Boutique'}
+                                        </div>
+                                        <div className="text-xs text-gray-600">{req.amountHTG.toLocaleString()} G</div>
+                                        <div className="flex gap-2">
+                                            {req.status === 'REQUESTED' && (
+                                                <>
+                                                    <button
+                                                        onClick={async () => {
+                                                            await appApiClient.post(`/payouts/admin/${req.id}/approve`);
+                                                            const res = await appApiClient.get('/payouts/admin');
+                                                            setPayoutRequests(res.data?.requests || []);
+                                                        }}
+                                                        className="text-xs bg-emerald-600 text-white px-2 py-1 rounded"
+                                                    >
+                                                        Approve
+                                                    </button>
+                                                    <button
+                                                        onClick={async () => {
+                                                            await appApiClient.post(`/payouts/admin/${req.id}/reject`);
+                                                            const res = await appApiClient.get('/payouts/admin');
+                                                            setPayoutRequests(res.data?.requests || []);
+                                                        }}
+                                                        className="text-xs bg-red-600 text-white px-2 py-1 rounded"
+                                                    >
+                                                        Reject
+                                                    </button>
+                                                </>
+                                            )}
+                                            {req.status === 'APPROVED' && (
+                                                <button
+                                                    onClick={async () => {
+                                                        await appApiClient.post(`/payouts/admin/${req.id}/paid`);
+                                                        const res = await appApiClient.get('/payouts/admin');
+                                                        setPayoutRequests(res.data?.requests || []);
+                                                    }}
+                                                    className="text-xs bg-blue-600 text-white px-2 py-1 rounded"
+                                                >
+                                                    Mark paid
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </div>
                 </div>

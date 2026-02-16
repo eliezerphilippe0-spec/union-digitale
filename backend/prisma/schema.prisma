@@ -493,6 +493,8 @@ enum FinancialLedgerType {
   ESCROW_RELEASE
   REFUND
   REVERSAL
+  PAYOUT_LOCK
+  PAYOUT_PAID
 }
 
 enum FinancialLedgerStatus {
@@ -506,6 +508,7 @@ model SellerBalance {
   store                   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
   availableHTG            Float   @default(0)
   escrowHTG               Float   @default(0)
+  payoutPendingHTG        Float   @default(0)
   lifetimeEarnedHTG       Float   @default(0)
   lifetimeCommissionPaidHTG Float @default(0)
   updatedAt               DateTime @updatedAt
@@ -519,12 +522,34 @@ model FinancialLedger {
   order     Order?                @relation(fields: [orderId], references: [id], onDelete: Cascade)
   storeId   String?
   store     Store?                @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  payoutRequestId String?
   amountHTG Float
   createdAt DateTime              @default(now())
 
   @@index([orderId])
   @@index([storeId])
   @@index([type])
+}
+
+enum PayoutRequestStatus {
+  REQUESTED
+  APPROVED
+  PAID
+  REJECTED
+  CANCELED
+}
+
+model PayoutRequest {
+  id         String               @id @default(uuid())
+  storeId    String
+  store      Store                @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  amountHTG  Float
+  method     String
+  status     PayoutRequestStatus  @default(REQUESTED)
+  createdAt  DateTime             @default(now())
+  approvedBy String?
+  paidAt     DateTime?
+  reference  String?
 }
 
 model CashbackTransaction {

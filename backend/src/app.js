@@ -23,6 +23,7 @@ const cartRoutes = require('./routes/cart');
 const storeRoutes = require('./routes/stores');
 const reviewRoutes = require('./routes/reviews');
 const paymentRoutes = require('./routes/payments');
+const payoutRoutes = require('./routes/payouts');
 const uploadRoutes = require('./routes/upload');
 
 const app = express();
@@ -148,6 +149,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/stores', storeRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/payouts', payoutRoutes);
 app.use('/api/upload', uploadRoutes);
 
 // 404 handler
