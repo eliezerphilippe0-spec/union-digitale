@@ -5,7 +5,7 @@ import { products } from '../data/products';
 import { useLanguage } from '../contexts/LanguageContext';
 import SEO from '../components/common/SEO';
 import { useAuth } from '../contexts/AuthContext';
-import { addDoc, collection, getDocs, limit, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
+import { collection, getDocs, limit, orderBy, query, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 const Orders = () => {
@@ -42,40 +42,17 @@ const Orders = () => {
                     limit(20)
                 );
                 const snap = await getDocs(q);
-                const items = await Promise.all(snap.docs.map(async (doc) => {
+                const items = snap.docs.map((doc) => {
                     const data = doc.data();
-                    let suborders = [];
-                    try {
-                        const subsQ = query(
-                            collection(db, 'orderSubs'),
-                            where('buyerId', '==', currentUser.uid),
-                            where('orderId', '==', doc.id)
-                        );
-                        const subsSnap = await getDocs(subsQ);
-                        suborders = subsSnap.docs.map((s) => s.data());
-                    } catch (e: any) {
-                        try {
-                            const reason = String(e?.message || '').includes('index') ? 'index_missing' : 'query_error';
-                            await addDoc(collection(db, 'system_events'), {
-                                eventName: 'buyer_suborders_fallback_used',
-                                buyerId: currentUser.uid,
-                                orderId: doc.id,
-                                reason,
-                                createdAt: serverTimestamp(),
-                            });
-                        } catch (err) {
-                            // silent
-                        }
-                    }
                     return {
                         id: data.orderNumber || doc.id,
                         date: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
                         total: data.totalAmount || data.total || 0,
                         status: data.status || t('pending'),
                         items: data.items || [],
-                        suborders,
+                        suborders: [],
                     };
-                }));
+                });
                 if (items.length > 0) setOrders(items);
             } catch (e) {
                 // fallback to mock
