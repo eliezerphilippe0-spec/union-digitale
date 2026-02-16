@@ -141,6 +141,8 @@ model Store {
   trustReasonSummary Json?
   trustScoreStableDays Int      @default(0)
   trustLastTierChangeAt DateTime?
+  trustFormulaVersion String    @default("v1")
+  trustFormulaUpdatedAt DateTime?
   listingBoostFactor Float      @default(1.0)
   payoutDelayHours   Int        @default(72)
   
@@ -270,6 +272,7 @@ model TrustEvent {
   nextScore Int
   prevTier  TrustTier
   nextTier  TrustTier
+  formulaVersion String @default("v1")
   details   Json
   createdAt DateTime  @default(now())
 

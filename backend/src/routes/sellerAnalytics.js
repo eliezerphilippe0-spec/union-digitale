@@ -1,8 +1,6 @@
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../lib/prisma');
 const { authenticate, requireSeller } = require('../middleware/auth');
-
-const prisma = new PrismaClient();
 const router = express.Router();
 
 const ALLOWED_EVENTS = new Set([

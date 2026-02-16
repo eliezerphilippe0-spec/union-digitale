@@ -99,6 +99,8 @@ const isCleanStreak = async (storeId, since) => {
   return refunds === 0 && chargebacks === 0 && critical === 0;
 };
 
+const TRUST_FORMULA_VERSION = 'v1';
+
 const computeTrustScore = async (storeId) => {
   const now = new Date();
   const since7d = daysAgo(7);
@@ -167,7 +169,7 @@ const computeTrustScore = async (storeId) => {
   const nextTier = tierFromScore(finalScore);
 
   const summary = {
-    version: 'v1',
+    version: TRUST_FORMULA_VERSION,
     signals: {
       orders7d,
       orders30d,
@@ -188,7 +190,7 @@ const computeTrustScore = async (storeId) => {
     computedAt: now.toISOString(),
   };
 
-  return { storeId, finalScore, nextTier, summary, prevTier: store.trustTier, prevScore: store.trustScore };
+  return { storeId, finalScore, nextTier, summary, prevTier: store.trustTier, prevScore: store.trustScore, formulaVersion: TRUST_FORMULA_VERSION };
 };
 
 const tierRank = (tier) => {
@@ -202,7 +204,7 @@ const tierRank = (tier) => {
   }
 };
 
-const applyTrustTierTransition = async ({ storeId, prevTier, prevScore, nextTier, nextScore, summary }) => {
+const applyTrustTierTransition = async ({ storeId, prevTier, prevScore, nextTier, nextScore, summary, formulaVersion = TRUST_FORMULA_VERSION }) => {
   const UPGRADE_STABLE_DAYS = 7;
 
   if (nextTier === prevTier) {
@@ -214,6 +216,8 @@ const applyTrustTierTransition = async ({ storeId, prevTier, prevScore, nextTier
         trustReasonSummary: summary,
         trustScoreStableDays: nextScore >= prevScore ? { increment: 1 } : 0,
         trustTierRank: tierRank(prevTier),
+        trustFormulaVersion: formulaVersion,
+        trustFormulaUpdatedAt: new Date(),
         ...TRUST_BENEFITS[nextTier],
       },
     });
@@ -234,12 +238,14 @@ const applyTrustTierTransition = async ({ storeId, prevTier, prevScore, nextTier
           trustScoreStableDays: 0,
           trustLastTierChangeAt: new Date(),
           trustTierRank: tierRank(nextTier),
+          trustFormulaVersion: formulaVersion,
+          trustFormulaUpdatedAt: new Date(),
           ...TRUST_BENEFITS[nextTier],
         },
       });
 
       await tx.trustEvent.create({
-        data: { storeId, prevScore, nextScore, prevTier, nextTier, details: { summary } },
+        data: { storeId, prevScore, nextScore, prevTier, nextTier, formulaVersion, details: { summary } },
       });
 
       return { changed: true, tier: nextTier };
@@ -258,6 +264,8 @@ const applyTrustTierTransition = async ({ storeId, prevTier, prevScore, nextTier
         trustReasonSummary: summary,
         trustScoreStableDays: stableDays + 1,
         trustTierRank: tierRank(prevTier),
+        trustFormulaVersion: formulaVersion,
+        trustFormulaUpdatedAt: new Date(),
         ...TRUST_BENEFITS[prevTier],
       },
     });
@@ -275,12 +283,14 @@ const applyTrustTierTransition = async ({ storeId, prevTier, prevScore, nextTier
         trustScoreStableDays: 0,
         trustLastTierChangeAt: new Date(),
         trustTierRank: tierRank(nextTier),
+        trustFormulaVersion: formulaVersion,
+        trustFormulaUpdatedAt: new Date(),
         ...TRUST_BENEFITS[nextTier],
       },
     });
 
     await tx.trustEvent.create({
-      data: { storeId, prevScore, nextScore, prevTier, nextTier, details: { summary, stableDaysRequired: UPGRADE_STABLE_DAYS } },
+      data: { storeId, prevScore, nextScore, prevTier, nextTier, formulaVersion, details: { summary, stableDaysRequired: UPGRADE_STABLE_DAYS } },
     });
 
     return { changed: true, tier: nextTier };
@@ -288,11 +298,12 @@ const applyTrustTierTransition = async ({ storeId, prevTier, prevScore, nextTier
 };
 
 const recomputeTrustForStore = async (storeId) => {
-  const { finalScore, nextTier, summary, prevTier, prevScore } = await computeTrustScore(storeId);
-  return applyTrustTierTransition({ storeId, prevTier, prevScore, nextTier, nextScore: finalScore, summary });
+  const { finalScore, nextTier, summary, prevTier, prevScore, formulaVersion } = await computeTrustScore(storeId);
+  return applyTrustTierTransition({ storeId, prevTier, prevScore, nextTier, nextScore: finalScore, summary, formulaVersion });
 };
 
 module.exports = {
+  TRUST_FORMULA_VERSION,
   TRUST_BENEFITS,
   tierFromScore,
   computeTrustScore,

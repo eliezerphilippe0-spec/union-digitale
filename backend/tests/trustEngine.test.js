@@ -14,7 +14,7 @@ jest.mock('../src/lib/prisma', () => {
 });
 
 const prisma = require('../src/lib/prisma');
-const { computeTrustScore, applyTrustTierTransition, tierFromScore, TRUST_BENEFITS } = require('../src/services/trustEngine');
+const { computeTrustScore, applyTrustTierTransition, tierFromScore, TRUST_BENEFITS, TRUST_FORMULA_VERSION } = require('../src/services/trustEngine');
 
 describe('trust engine', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -72,7 +72,7 @@ describe('trust engine', () => {
       summary: {},
     });
     expect(prisma.store.update).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({ trustTierRank: 2 }),
+      data: expect.objectContaining({ trustTierRank: 2, trustFormulaVersion: TRUST_FORMULA_VERSION }),
     }));
   });
 
@@ -87,7 +87,7 @@ describe('trust engine', () => {
       summary: {},
     });
     expect(prisma.store.update).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({ trustTierRank: 3 }),
+      data: expect.objectContaining({ trustTierRank: 3, trustFormulaVersion: TRUST_FORMULA_VERSION }),
     }));
   });
 
@@ -105,6 +105,7 @@ describe('trust engine', () => {
       data: expect.objectContaining({
         ...TRUST_BENEFITS.TRUSTED,
         trustTierRank: 4,
+        trustFormulaVersion: TRUST_FORMULA_VERSION,
       }),
     }));
   });

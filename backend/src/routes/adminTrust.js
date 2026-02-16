@@ -110,6 +110,8 @@ router.get('/stores/:storeId/trust', authenticate, requireAdmin, async (req, res
         trustTier: true,
         trustUpdatedAt: true,
         trustReasonSummary: true,
+        trustFormulaVersion: true,
+        trustFormulaUpdatedAt: true,
         payoutDelayHours: true,
         listingBoostFactor: true,
       },
