@@ -56,6 +56,20 @@ export const createOrder = onCall(async (request) => {
 
     const totalPrice = lineItems.reduce((sum, item) => sum + item.lineTotal, 0);
 
+    const vendorTotals = vendorIds.map((vendorId) => {
+        const subtotalAmount = lineItems
+            .filter((li) => li.vendorId === vendorId)
+            .reduce((s, i) => s + i.lineTotal, 0);
+        return { vendorId, subtotalAmount };
+    });
+
+    const subSummary = {
+        subCount: vendorIds.length,
+        vendorCount: vendorIds.length,
+        vendorsPreview: vendorTotals.slice(0, 5),
+        hasMultiVendor: vendorIds.length > 1,
+    };
+
     try {
         const orderRef = db.collection('orders').doc();
         const orderId = orderRef.id;
@@ -71,7 +85,8 @@ export const createOrder = onCall(async (request) => {
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             currency: 'HTG',
             subOrderIds: [],
-            type: 'digital_checkout'
+            type: 'digital_checkout',
+            subSummary,
         };
 
         const batch = db.batch();

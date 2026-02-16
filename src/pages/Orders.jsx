@@ -53,6 +53,7 @@ const Orders = () => {
                     status: data.status || t('pending'),
                     items: data.items || [],
                     suborders: [],
+                    subSummary: data.subSummary || null,
                 };
             });
             if (items.length > 0) setOrders(items);
@@ -119,6 +120,14 @@ const Orders = () => {
                                         <div className="uppercase text-xs font-bold mb-1">{t('order_number')}</div>
                                         <div>{order.id}</div>
                                     </div>
+                                    {order.subSummary?.vendorCount != null && (
+                                        <div>
+                                            <div className="uppercase text-xs font-bold mb-1">Vendeurs</div>
+                                            <div>
+                                                {order.subSummary.vendorCount} {order.subSummary.vendorCount > 1 ? 'vendeurs' : 'vendeur'}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="text-right">
                                     <a href="#" className="text-blue-600 hover:underline">{t('view_invoice')}</a>
