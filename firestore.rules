@@ -242,13 +242,23 @@ service cloud.firestore {
     
     // System events (silent observability)
     match /system_events/{eventId} {
-      allow create: if isAuthenticated() &&
-        request.resource.data.eventName == 'buyer_suborders_fallback_used' &&
-        request.resource.data.buyerId == request.auth.uid &&
-        request.resource.data.orderId is string &&
-        request.resource.data.reason in ['query_error', 'index_missing'] &&
-        request.resource.data.keys().hasOnly(['eventName', 'buyerId', 'orderId', 'reason', 'createdAt']) &&
-        request.resource.data.createdAt is timestamp;
+      allow create: if isAuthenticated() && (
+        (
+          request.resource.data.eventName == 'buyer_suborders_fallback_used' &&
+          request.resource.data.buyerId == request.auth.uid &&
+          request.resource.data.orderId is string &&
+          request.resource.data.reason in ['query_error', 'index_missing'] &&
+          request.resource.data.keys().hasOnly(['eventName', 'buyerId', 'orderId', 'reason', 'createdAt']) &&
+          request.resource.data.createdAt is timestamp
+        ) || (
+          request.resource.data.eventName == 'firestore_index_missing' &&
+          request.resource.data.reason == 'index_missing' &&
+          request.resource.data.page is string &&
+          request.resource.data.collection is string &&
+          request.resource.data.keys().hasOnly(['eventName', 'page', 'collection', 'reason', 'createdAt']) &&
+          request.resource.data.createdAt is timestamp
+        )
+      );
       allow read, update, delete: if false;
     }
 

@@ -5,7 +5,7 @@ import { products } from '../data/products';
 import { useLanguage } from '../contexts/LanguageContext';
 import SEO from '../components/common/SEO';
 import { useAuth } from '../contexts/AuthContext';
-import { collection, getDocs, limit, orderBy, query, where } from 'firebase/firestore';
+import { addDoc, collection, getDocs, limit, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 const Orders = () => {
@@ -28,37 +28,58 @@ const Orders = () => {
             items: [products[2]]
         }
     ]);
+    const [indexError, setIndexError] = useState(false);
+    const [lastIndexLogAt, setLastIndexLogAt] = useState(0);
 
-    useEffect(() => {
+    const loadOrders = async () => {
         const enabled = import.meta.env.VITE_SUBORDERS_BUYER_VIEW_ENABLED === 'true';
         if (!enabled || !currentUser?.uid) return;
 
-        const loadOrders = async () => {
-            try {
-                const q = query(
-                    collection(db, 'orders'),
-                    where('buyerId', '==', currentUser.uid),
-                    orderBy('createdAt', 'desc'),
-                    limit(20)
-                );
-                const snap = await getDocs(q);
-                const items = snap.docs.map((doc) => {
-                    const data = doc.data();
-                    return {
-                        id: data.orderNumber || doc.id,
-                        date: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
-                        total: data.totalAmount || data.total || 0,
-                        status: data.status || t('pending'),
-                        items: data.items || [],
-                        suborders: [],
-                    };
-                });
-                if (items.length > 0) setOrders(items);
-            } catch (e) {
-                // fallback to mock
+        try {
+            setIndexError(false);
+            const q = query(
+                collection(db, 'orders'),
+                where('buyerId', '==', currentUser.uid),
+                orderBy('createdAt', 'desc'),
+                limit(20)
+            );
+            const snap = await getDocs(q);
+            const items = snap.docs.map((doc) => {
+                const data = doc.data();
+                return {
+                    id: data.orderNumber || doc.id,
+                    date: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
+                    total: data.totalAmount || data.total || 0,
+                    status: data.status || t('pending'),
+                    items: data.items || [],
+                    suborders: [],
+                };
+            });
+            if (items.length > 0) setOrders(items);
+        } catch (e) {
+            const message = String(e?.message || '');
+            if (message.includes('requires an index')) {
+                setIndexError(true);
+                if (Date.now() - lastIndexLogAt > 60000) {
+                    setLastIndexLogAt(Date.now());
+                    try {
+                        await addDoc(collection(db, 'system_events'), {
+                            eventName: 'firestore_index_missing',
+                            page: 'buyer_orders',
+                            collection: 'orders',
+                            reason: 'index_missing',
+                            createdAt: serverTimestamp(),
+                        });
+                    } catch (err) {
+                        // silent
+                    }
+                }
             }
-        };
+            // fallback to mock
+        }
+    };
 
+    useEffect(() => {
         loadOrders();
     }, [currentUser, t]);
 
@@ -67,6 +88,18 @@ const Orders = () => {
             <SEO title="Mes commandes" description="Suivez et gérez vos commandes Union Digitale." />
             <div className="container mx-auto px-4 max-w-5xl">
                 <h1 className="text-2xl font-medium mb-6">{t('your_orders')}</h1>
+
+                {indexError && (
+                    <div className="mb-4 px-4 py-3 bg-blue-50 text-blue-700 text-sm flex items-center justify-between rounded">
+                        <span>Index en cours de construction. Réessayez dans quelques minutes.</span>
+                        <button
+                            onClick={() => loadOrders()}
+                            className="px-3 py-1 text-xs font-medium bg-blue-100 hover:bg-blue-200 rounded"
+                        >
+                            {t('retry') || 'Réessayer'}
+                        </button>
+                    </div>
+                )}
 
                 <div className="space-y-6">
                     {orders.map(order => (
