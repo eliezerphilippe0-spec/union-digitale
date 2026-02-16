@@ -6,7 +6,7 @@ const prisma = require('../lib/prisma');
 const { AppError } = require('../middleware/errorHandler');
 const { v4: uuidv4 } = require('uuid');
 const config = require('../config');
-const { assertNonNegative } = require('../utils/financeGuards');
+const { assertNonNegative, assertNoDuplicateLedger } = require('../utils/financeGuards');
 
 const calculateTier = (points = 0) => {
   if (points >= 50000) return 'diamond';
@@ -541,6 +541,9 @@ exports.updateOrderStatus = async (req, res, next) => {
           },
         });
 
+        await assertNoDuplicateLedger(tx, { type: 'ESCROW_RELEASE', orderId: updatedOrder.id, storeId: updatedOrder.storeId });
+        await assertNoDuplicateLedger(tx, { type: 'SELLER_EARN', orderId: updatedOrder.id, storeId: updatedOrder.storeId });
+
         await tx.financialLedger.create({
           data: {
             type: 'ESCROW_RELEASE',
@@ -568,6 +571,7 @@ exports.updateOrderStatus = async (req, res, next) => {
       });
 
       console.log(JSON.stringify({ event: 'escrow_release', orderId: updatedOrder.id, storeId: updatedOrder.storeId, amountHTG: updatedOrder.sellerNetHTG || 0 }));
+      console.log(JSON.stringify({ event: 'metric', name: 'escrow_release_totalHTG', value: updatedOrder.sellerNetHTG || 0 }));
     }
 
     if (status === 'DELIVERED') {
@@ -635,6 +639,9 @@ exports.updateOrderStatus = async (req, res, next) => {
             },
           });
 
+          await assertNoDuplicateLedger(tx, { type: 'REVERSAL', orderId: updatedOrder.id, storeId: updatedOrder.storeId });
+          await assertNoDuplicateLedger(tx, { type: 'REFUND', orderId: updatedOrder.id, storeId: updatedOrder.storeId });
+
           await tx.financialLedger.create({
             data: {
               type: 'REVERSAL',
@@ -662,6 +669,7 @@ exports.updateOrderStatus = async (req, res, next) => {
         });
 
         console.log(JSON.stringify({ event: 'escrow_reversal', orderId: updatedOrder.id, storeId: updatedOrder.storeId, amountHTG: updatedOrder.sellerNetHTG || 0 }));
+        console.log(JSON.stringify({ event: 'metric', name: 'refund_spike_count', value: 1 }));
         console.log(JSON.stringify({ event: 'alert', name: 'refundSpike', value: updatedOrder.sellerNetHTG || 0 }));
       }
 
@@ -677,6 +685,8 @@ exports.updateOrderStatus = async (req, res, next) => {
               availableHTG: { decrement: updatedOrder.sellerNetHTG || 0 },
             },
           });
+
+          await assertNoDuplicateLedger(tx, { type: 'REFUND', orderId: updatedOrder.id, storeId: updatedOrder.storeId });
 
           await tx.financialLedger.create({
             data: {

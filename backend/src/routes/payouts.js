@@ -7,7 +7,7 @@ const router = express.Router();
 const { runWeeklyPayoutBatch } = require('../jobs/payoutBatch');
 const { body, query } = require('express-validator');
 const validate = require('../middleware/validate');
-const { assertNonNegative } = require('../utils/financeGuards');
+const { assertNonNegative, assertNoDuplicateLedger } = require('../utils/financeGuards');
 
 // Admin run payout batch
 router.post('/batch/run', authenticate, requireAdmin, validate([
@@ -113,6 +113,8 @@ router.post('/admin/:id/approve', authenticate, requireAdmin, async (req, res, n
         },
       });
 
+      await assertNoDuplicateLedger(tx, { type: 'PAYOUT_LOCK', payoutRequestId: request.id, storeId: request.storeId });
+
       await tx.financialLedger.create({
         data: {
           type: 'PAYOUT_LOCK',
@@ -181,6 +183,8 @@ router.post('/admin/:id/paid', authenticate, requireAdmin, async (req, res, next
           payoutPendingHTG: { decrement: request.amountHTG },
         },
       });
+
+      await assertNoDuplicateLedger(tx, { type: 'PAYOUT_PAID', payoutRequestId: request.id, storeId: request.storeId });
 
       await tx.financialLedger.create({
         data: {

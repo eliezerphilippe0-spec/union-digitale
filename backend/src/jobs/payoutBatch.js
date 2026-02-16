@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const prisma = require('../lib/prisma');
 const config = require('../config');
+const { assertNonNegative, assertNoDuplicateLedger } = require('../utils/financeGuards');
 
 const getWeekStartUTC = (date = new Date()) => {
   const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
@@ -86,6 +87,8 @@ const buildBatchRunner = (prismaClient, cfg) => {
             },
           });
 
+          await assertNoDuplicateLedger(tx, { type: 'PAYOUT_LOCK', payoutRequestId: request.id, storeId: balance.storeId });
+
           await tx.financialLedger.create({
             data: {
               type: 'PAYOUT_LOCK',
@@ -95,6 +98,9 @@ const buildBatchRunner = (prismaClient, cfg) => {
               amountHTG: -fresh.availableHTG,
             },
           });
+
+          assertNonNegative('availableHTG', (fresh.availableHTG || 0) - fresh.availableHTG, { storeId: balance.storeId });
+          assertNonNegative('payoutPendingHTG', (fresh.payoutPendingHTG || 0) + fresh.availableHTG, { storeId: balance.storeId });
 
           await tx.sellerBalance.update({
             where: { storeId: balance.storeId },
@@ -113,17 +119,23 @@ const buildBatchRunner = (prismaClient, cfg) => {
     }
 
     const skippedRatio = report.createdCount + report.skipped.length === 0 ? 0 : report.skipped.length / (report.createdCount + report.skipped.length);
-    console.log(JSON.stringify({ event: 'payout_batch', ...report, skippedRatio }));
+    const skippedReasons = report.skipped.reduce((acc, item) => {
+      acc[item.reason] = (acc[item.reason] || 0) + 1;
+      return acc;
+    }, {});
+
+    console.log(JSON.stringify({ event: 'payout_batch', ...report, skippedRatio, skippedReasons }));
+
+    console.log(JSON.stringify({ event: 'metric', name: 'payout_batch_totalHTG', value: report.totalHTG }));
+    console.log(JSON.stringify({ event: 'metric', name: 'payout_batch_createdCount', value: report.createdCount }));
+    console.log(JSON.stringify({ event: 'metric', name: 'payout_batch_skippedCount', value: report.skipped.length }));
 
     // basic alert hooks
-    if (report.totalHTG > 0) {
-      console.log(JSON.stringify({ event: 'metric', name: 'batchTotalHTG', value: report.totalHTG }));
-    }
     if (skippedRatio > 0.5) {
       console.log(JSON.stringify({ event: 'alert', name: 'skippedRatio', value: skippedRatio }));
     }
 
-    return report;
+    return { ...report, skippedReasons };
   };
 };
 

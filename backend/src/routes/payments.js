@@ -12,6 +12,7 @@ const moncashService = require('../services/moncashService');
 const natcashService = require('../services/natcashService');
 const validate = require('../middleware/validate');
 const { body } = require('express-validator');
+const { assertNoDuplicateLedger, assertNonNegative } = require('../utils/financeGuards');
 
 const router = express.Router();
 
@@ -226,6 +227,9 @@ const applyEscrowAndCommission = async (order) => {
       create: { storeId: order.storeId },
     });
 
+    await assertNoDuplicateLedger(tx, { type: 'PLATFORM_EARN', orderId: order.id, storeId: order.storeId });
+    await assertNoDuplicateLedger(tx, { type: 'ESCROW_HOLD', orderId: order.id, storeId: order.storeId });
+
     await tx.financialLedger.create({
       data: {
         type: 'PLATFORM_EARN',
@@ -246,6 +250,11 @@ const applyEscrowAndCommission = async (order) => {
       },
     });
 
+    const balance = await tx.sellerBalance.findUnique({ where: { storeId: order.storeId } });
+    if (balance) {
+      assertNonNegative('escrowHTG', (balance.escrowHTG || 0) + (order.sellerNetHTG || 0), { orderId: order.id, storeId: order.storeId });
+    }
+
     await tx.sellerBalance.update({
       where: { storeId: order.storeId },
       data: {
@@ -262,6 +271,7 @@ const applyEscrowAndCommission = async (order) => {
   });
 
   console.log(JSON.stringify({ event: 'escrow_hold', orderId: order.id, storeId: order.storeId, amountHTG: order.sellerNetHTG || 0 }));
+  console.log(JSON.stringify({ event: 'metric', name: 'escrow_hold_totalHTG', value: order.sellerNetHTG || 0 }));
 };
 
 /**
@@ -662,3 +672,4 @@ router.post('/confirm-manual', authenticate, async (req, res, next) => {
 });
 
 module.exports = router;
+module.exports.__test = { applyEscrowAndCommission };
