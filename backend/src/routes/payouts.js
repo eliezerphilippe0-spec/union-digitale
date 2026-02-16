@@ -34,6 +34,9 @@ router.post('/request', authenticate, requireSeller, validate([
 
     const store = await prisma.store.findUnique({ where: { userId: req.user.id } });
     if (!store) throw new AppError('Boutique non trouvée', 404);
+    if (store.payoutsFrozen) {
+      throw new AppError('Payouts gelés — contactez le support', 403);
+    }
 
     const balance = await prisma.sellerBalance.upsert({
       where: { storeId: store.id },
@@ -91,6 +94,12 @@ router.post('/admin/:id/approve', authenticate, requireAdmin, async (req, res, n
     const request = await prisma.payoutRequest.findUnique({ where: { id } });
     if (!request) throw new AppError('Demande non trouvée', 404);
     if (request.status !== 'REQUESTED') throw new AppError('Demande déjà traitée', 400);
+
+    const store = await prisma.store.findUnique({ where: { id: request.storeId } });
+    if (!store) throw new AppError('Boutique non trouvée', 404);
+    if (store.riskLevel === 'FROZEN' || store.payoutsFrozen) {
+      throw new AppError('Payouts gelés — revue admin requise', 403);
+    }
 
     const result = await prisma.$transaction(async (tx) => {
       const balance = await tx.sellerBalance.upsert({
@@ -171,6 +180,12 @@ router.post('/admin/:id/paid', authenticate, requireAdmin, async (req, res, next
     const request = await prisma.payoutRequest.findUnique({ where: { id } });
     if (!request) throw new AppError('Demande non trouvée', 404);
     if (request.status !== 'APPROVED') throw new AppError('Demande non approuvée', 400);
+
+    const store = await prisma.store.findUnique({ where: { id: request.storeId } });
+    if (!store) throw new AppError('Boutique non trouvée', 404);
+    if (store.riskLevel === 'FROZEN' || store.payoutsFrozen) {
+      throw new AppError('Payouts gelés — revue admin requise', 403);
+    }
 
     const result = await prisma.$transaction(async (tx) => {
       const balance = await tx.sellerBalance.findUnique({ where: { storeId: request.storeId } });

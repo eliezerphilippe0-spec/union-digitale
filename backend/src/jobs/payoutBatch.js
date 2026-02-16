@@ -2,6 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const prisma = require('../lib/prisma');
 const config = require('../config');
 const { assertNonNegative, assertNoDuplicateLedger } = require('../utils/financeGuards');
+const { computeRiskLevel } = require('../services/riskEngine');
 
 const getWeekStartUTC = (date = new Date()) => {
   const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
@@ -37,6 +38,10 @@ const buildBatchRunner = (prismaClient, cfg) => {
         report.skipped.push({ storeId: balance.storeId, reason: 'PAYOUT_PENDING' });
         continue;
       }
+      if (store.payoutsFrozen === true) {
+        report.skipped.push({ storeId: balance.storeId, reason: 'RISK_FROZEN' });
+        continue;
+      }
       if (store.riskFlag === true) {
         report.skipped.push({ storeId: balance.storeId, reason: 'RISK_FLAG' });
         continue;
@@ -59,6 +64,7 @@ const buildBatchRunner = (prismaClient, cfg) => {
       }
 
       try {
+        let created = false;
         await prismaClient.$transaction(async (tx) => {
           const existing = await tx.payoutRequest.findUnique({ where: { batchKey } });
           if (existing) {
@@ -112,7 +118,12 @@ const buildBatchRunner = (prismaClient, cfg) => {
 
           report.createdCount += 1;
           report.totalHTG += fresh.availableHTG;
+          created = true;
         });
+
+        if (created) {
+          await computeRiskLevel(balance.storeId);
+        }
       } catch (error) {
         if (error.code === 'P2002') {
           report.skipped.push({ storeId: balance.storeId, reason: 'ALREADY_CREATED' });

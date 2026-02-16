@@ -1,3 +1,7 @@
+jest.mock('../src/services/riskEngine', () => ({
+  computeRiskLevel: jest.fn().mockResolvedValue({}),
+}));
+
 const { buildBatchRunner, getWeekStartUTC } = require('../src/jobs/payoutBatch');
 
 describe('payout batch', () => {

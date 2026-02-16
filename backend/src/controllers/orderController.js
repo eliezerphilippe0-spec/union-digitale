@@ -7,6 +7,7 @@ const { AppError } = require('../middleware/errorHandler');
 const { v4: uuidv4 } = require('uuid');
 const config = require('../config');
 const { assertNonNegative, assertNoDuplicateLedger } = require('../utils/financeGuards');
+const { computeRiskLevel } = require('../services/riskEngine');
 
 const calculateTier = (points = 0) => {
   if (points >= 50000) return 'diamond';
@@ -704,6 +705,10 @@ exports.updateOrderStatus = async (req, res, next) => {
         console.log(JSON.stringify({ event: 'refund_after_release', orderId: updatedOrder.id, storeId: updatedOrder.storeId, amountHTG: updatedOrder.sellerNetHTG || 0 }));
         console.log(JSON.stringify({ event: 'metric', name: 'refund_spike_count', value: 1 }));
       }
+    }
+
+    if (status === 'REFUNDED') {
+      await computeRiskLevel(updatedOrder.storeId);
     }
 
     // TODO: Send notification to customer
