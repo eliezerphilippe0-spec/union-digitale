@@ -45,8 +45,7 @@ router.get('/trust/stores', authenticate, requireAdmin, validate([
   query('tier').optional().isString(),
   query('cursor').optional().isString(),
   query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
-  query('sort').optional().isIn(['score','updatedAt']).default('score'),
-  query('direction').optional().isIn(['asc','desc']).default('desc'),
+  query('sort').optional().isString(),
   query('payoutDelayNot72').optional().isBoolean().toBoolean(),
   query('q').optional().isString(),
 ]), async (req, res, next) => {
@@ -54,8 +53,7 @@ router.get('/trust/stores', authenticate, requireAdmin, validate([
     const tiers = req.query.tier ? req.query.tier.split(',').map(t => t.trim()).filter(Boolean) : null;
     const limit = req.query.limit || 50;
     const cursor = req.query.cursor || null;
-    const sortField = req.query.sort || 'score';
-    const direction = req.query.direction || 'desc';
+    const sortParam = (req.query.sort || 'score_desc').toLowerCase();
 
     const where = {
       ...(tiers && tiers.length ? { trustTier: { in: tiers } } : {}),
@@ -69,9 +67,11 @@ router.get('/trust/stores', authenticate, requireAdmin, validate([
       } : {}),
     };
 
-    const orderBy = sortField === 'updatedAt'
-      ? { trustUpdatedAt: direction }
-      : { trustScore: direction };
+    let orderBy = { trustScore: 'desc' };
+    if (sortParam === 'updated_desc') orderBy = { trustUpdatedAt: 'desc' };
+    if (sortParam === 'score_asc') orderBy = { trustScore: 'asc' };
+    if (sortParam === 'tier_desc') orderBy = { trustTier: 'desc' };
+    if (sortParam === 'tier_asc') orderBy = { trustTier: 'asc' };
 
     const items = await prisma.store.findMany({
       where,

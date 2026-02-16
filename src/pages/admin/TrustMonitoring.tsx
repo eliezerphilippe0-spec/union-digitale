@@ -16,6 +16,8 @@ const TrustMonitoring = () => {
   const [payoutDelayOnly, setPayoutDelayOnly] = useState(false);
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [debouncedQuery, setDebouncedQuery] = useState(query);
+  const [sort, setSort] = useState('score_desc');
+  const [toast, setToast] = useState('');
 
   const [topItems, setTopItems] = useState<any[]>([]);
   const [topCursor, setTopCursor] = useState<string | null>(null);
@@ -56,8 +58,7 @@ const TrustMonitoring = () => {
       tier: tiers,
       limit: 20,
       cursor: reset ? null : (cursorArg ?? topCursor),
-      sort: 'score',
-      direction: 'desc',
+      sort,
       payoutDelayNot72: payoutDelayOnly,
       q: debouncedQuery,
     });
@@ -78,8 +79,7 @@ const TrustMonitoring = () => {
       tier: tiers,
       limit: 20,
       cursor: reset ? null : (cursorArg ?? riskCursor),
-      sort: 'score',
-      direction: 'asc',
+      sort,
       payoutDelayNot72: payoutDelayOnly,
       q: debouncedQuery,
     });
@@ -113,10 +113,22 @@ const TrustMonitoring = () => {
   }, [query]);
 
   useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(''), 1500);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
+  useEffect(() => {
     const params = new URLSearchParams();
     if (debouncedQuery) params.set('q', debouncedQuery);
+    if (sort) params.set('sort', sort);
     setSearchParams(params, { replace: true });
-  }, [debouncedQuery, setSearchParams]);
+  }, [debouncedQuery, sort, setSearchParams]);
+
+  useEffect(() => {
+    const sortParam = searchParams.get('sort');
+    if (sortParam) setSort(sortParam);
+  }, []);
 
   useEffect(() => {
     loadSummary();
@@ -128,14 +140,14 @@ const TrustMonitoring = () => {
     setRiskCursor(null);
     loadTop(true);
     loadRisk(true);
-  }, [filter, payoutDelayOnly, debouncedQuery]);
+  }, [filter, payoutDelayOnly, debouncedQuery, sort]);
 
   return (
     <div className="space-y-6">
       <TrustKPICards summary={summary} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-3">
           <TrustFilters
             active={filter}
             onChange={setFilter}
@@ -144,6 +156,18 @@ const TrustMonitoring = () => {
             query={query}
             onQueryChange={setQuery}
           />
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-slate-500">Sort by</label>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className="text-xs px-2 py-1 rounded border border-slate-200 bg-white text-slate-700"
+            >
+              <option value="score_desc">Trust score (desc)</option>
+              <option value="updated_desc">Updated (desc)</option>
+              <option value="tier_desc">Tier (desc)</option>
+            </select>
+          </div>
         </div>
         <TrustJobStatusCard
           status={jobStatus}
@@ -192,7 +216,18 @@ const TrustMonitoring = () => {
         events={events}
         onClose={() => setSelected(null)}
         onRecompute={handleRecompute}
+        onCopy={(text: string) => {
+          if (!text) return;
+          navigator.clipboard?.writeText(text);
+          setToast('Copied');
+        }}
       />
+
+      {toast && (
+        <div className="fixed bottom-6 right-6 bg-slate-900 text-white text-xs px-3 py-2 rounded-lg shadow-lg">
+          {toast}
+        </div>
+      )}
     </div>
   );
 };

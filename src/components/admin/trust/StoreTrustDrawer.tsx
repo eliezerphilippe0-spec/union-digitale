@@ -1,7 +1,7 @@
 import React from 'react';
 import TrustTierBadge from './TrustTierBadge';
 
-const StoreTrustDrawer = ({ open, store, events, onClose, onRecompute }: any) => {
+const StoreTrustDrawer = ({ open, store, events, onClose, onRecompute, onCopy }: any) => {
   if (!open) return null;
 
   const summary = store?.trustReasonSummary || {};
@@ -54,7 +54,22 @@ const StoreTrustDrawer = ({ open, store, events, onClose, onRecompute }: any) =>
         <div className="p-4 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">{store?.name || store?.id}</div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">{store?.name || store?.id}</div>
+                <button
+                  onClick={() => onCopy(store?.id)}
+                  className="text-[11px] px-2 py-0.5 rounded border border-slate-200 text-slate-600"
+                >
+                  Copy ID
+                </button>
+                <button
+                  disabled={!store?.slug}
+                  onClick={() => onCopy(store?.slug)}
+                  className="text-[11px] px-2 py-0.5 rounded border border-slate-200 text-slate-600 disabled:opacity-50"
+                >
+                  Copy Slug
+                </button>
+              </div>
               <div className="text-sm text-slate-500">{store?.id}</div>
             </div>
             <button onClick={onClose} className="text-slate-500">✕</button>
