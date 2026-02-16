@@ -5,7 +5,7 @@ import { products } from '../data/products';
 import { useLanguage } from '../contexts/LanguageContext';
 import SEO from '../components/common/SEO';
 import { useAuth } from '../contexts/AuthContext';
-import { collection, getDocs, limit, orderBy, query, where } from 'firebase/firestore';
+import { addDoc, collection, getDocs, limit, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 const Orders = () => {
@@ -53,8 +53,19 @@ const Orders = () => {
                         );
                         const subsSnap = await getDocs(subsQ);
                         suborders = subsSnap.docs.map((s) => s.data());
-                    } catch (e) {
-                        // fallback silently
+                    } catch (e: any) {
+                        try {
+                            const reason = String(e?.message || '').includes('index') ? 'index_missing' : 'query_error';
+                            await addDoc(collection(db, 'system_events'), {
+                                eventName: 'buyer_suborders_fallback_used',
+                                buyerId: currentUser.uid,
+                                orderId: doc.id,
+                                reason,
+                                createdAt: serverTimestamp(),
+                            });
+                        } catch (err) {
+                            // silent
+                        }
                     }
                     return {
                         id: data.orderNumber || doc.id,
