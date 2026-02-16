@@ -211,24 +211,54 @@ const redeemPointsOnPayment = async ({ order, paymentId }) => {
   });
 };
 
-const recordCommission = async (order) => {
+const applyEscrowAndCommission = async (order) => {
   if (!order) return;
-  await prisma.commissionLedger.upsert({
-    where: { orderId: order.id },
-    create: {
-      orderId: order.id,
-      storeId: order.storeId,
-      rate: order.commissionRate || 0,
-      amount: order.commissionAmount || 0,
-      status: 'COMMITTED',
-      committedAt: new Date(),
-    },
-    update: {
-      rate: order.commissionRate || 0,
-      amount: order.commissionAmount || 0,
-      status: 'COMMITTED',
-      committedAt: new Date(),
-    },
+
+  await prisma.$transaction(async (tx) => {
+    const existingHold = await tx.financialLedger.findFirst({
+      where: { orderId: order.id, type: 'ESCROW_HOLD' },
+    });
+    if (existingHold) return;
+
+    await tx.sellerBalance.upsert({
+      where: { storeId: order.storeId },
+      update: {},
+      create: { storeId: order.storeId },
+    });
+
+    await tx.financialLedger.create({
+      data: {
+        type: 'PLATFORM_EARN',
+        status: 'COMMITTED',
+        orderId: order.id,
+        storeId: order.storeId,
+        amountHTG: order.commissionAmountHTG || 0,
+      },
+    });
+
+    await tx.financialLedger.create({
+      data: {
+        type: 'ESCROW_HOLD',
+        status: 'COMMITTED',
+        orderId: order.id,
+        storeId: order.storeId,
+        amountHTG: order.sellerNetHTG || 0,
+      },
+    });
+
+    await tx.sellerBalance.update({
+      where: { storeId: order.storeId },
+      data: {
+        escrowHTG: { increment: order.sellerNetHTG || 0 },
+        lifetimeEarnedHTG: { increment: order.sellerNetHTG || 0 },
+        lifetimeCommissionPaidHTG: { increment: order.commissionAmountHTG || 0 },
+      },
+    });
+
+    await tx.order.update({
+      where: { id: order.id },
+      data: { escrowStatus: 'HELD' },
+    });
   });
 };
 
@@ -454,7 +484,7 @@ router.get('/callback/moncash', async (req, res, next) => {
 
         await redeemPointsOnPayment({ order: updated, paymentId: transactionId });
         await awardCashbackAndPoints(updated);
-        await recordCommission(updated);
+        await applyEscrowAndCommission(updated);
 
         // Update store total sales
         await prisma.store.update({
@@ -506,7 +536,7 @@ router.post('/callback/natcash', async (req, res, next) => {
 
         await redeemPointsOnPayment({ order: updated, paymentId: transactionId });
         await awardCashbackAndPoints(updated);
-        await recordCommission(updated);
+        await applyEscrowAndCommission(updated);
 
         await prisma.store.update({
           where: { id: order.storeId },
@@ -560,7 +590,7 @@ router.post('/webhook/stripe', express.raw({ type: 'application/json' }), async 
 
         await redeemPointsOnPayment({ order: updated, paymentId: session.payment_intent });
         await awardCashbackAndPoints(updated);
-        await recordCommission(updated);
+        await applyEscrowAndCommission(updated);
 
         await prisma.store.update({
           where: { id: order.storeId },
@@ -616,7 +646,7 @@ router.post('/confirm-manual', authenticate, async (req, res, next) => {
 
     await redeemPointsOnPayment({ order: updated, paymentId: paymentIdFinal });
     await awardCashbackAndPoints(updated);
-    await recordCommission(updated);
+    await applyEscrowAndCommission(updated);
 
     await prisma.store.update({
       where: { id: order.storeId },

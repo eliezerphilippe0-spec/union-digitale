@@ -215,7 +215,8 @@ exports.createOrder = async (req, res, next) => {
         const commissionRate = orderData.store?.commissionRate ?? 0.10;
         const commissionBase = Math.max(orderData.subtotal - pointsCalc.discountHtg, 0);
         const commissionAmount = commissionBase * commissionRate;
-        const sellerNetAmount = Math.max(commissionBase - commissionAmount, 0);
+        const sellerGross = Math.max(commissionBase, 0);
+        const sellerNet = Math.max(sellerGross - commissionAmount, 0);
 
         const order = await tx.order.create({
           data: {
@@ -225,12 +226,15 @@ exports.createOrder = async (req, res, next) => {
             addressId,
             paymentMethod,
             subtotal: orderData.subtotal,
+            subtotalProductsHTG: orderData.subtotal,
             shippingCost,
             total,
             customerNote,
             commissionRate,
-            commissionAmount,
-            sellerNetAmount,
+            commissionAmountHTG: commissionAmount,
+            sellerGrossHTG: sellerGross,
+            sellerNetHTG: sellerNet,
+            escrowStatus: 'NONE',
             pointsEarned,
             pointsUsed: pointsCalc.pointsApplied,
             pointsApplied: pointsCalc.pointsApplied,
@@ -516,6 +520,49 @@ exports.updateOrderStatus = async (req, res, next) => {
       },
     });
 
+    if (status === 'DELIVERED' && updatedOrder.escrowStatus === 'HELD') {
+      await prisma.$transaction(async (tx) => {
+        await tx.sellerBalance.upsert({
+          where: { storeId: updatedOrder.storeId },
+          update: {},
+          create: { storeId: updatedOrder.storeId },
+        });
+
+        await tx.sellerBalance.update({
+          where: { storeId: updatedOrder.storeId },
+          data: {
+            escrowHTG: { decrement: updatedOrder.sellerNetHTG || 0 },
+            availableHTG: { increment: updatedOrder.sellerNetHTG || 0 },
+          },
+        });
+
+        await tx.financialLedger.create({
+          data: {
+            type: 'ESCROW_RELEASE',
+            status: 'COMMITTED',
+            orderId: updatedOrder.id,
+            storeId: updatedOrder.storeId,
+            amountHTG: updatedOrder.sellerNetHTG || 0,
+          },
+        });
+
+        await tx.financialLedger.create({
+          data: {
+            type: 'SELLER_EARN',
+            status: 'COMMITTED',
+            orderId: updatedOrder.id,
+            storeId: updatedOrder.storeId,
+            amountHTG: updatedOrder.sellerNetHTG || 0,
+          },
+        });
+
+        await tx.order.update({
+          where: { id: updatedOrder.id },
+          data: { escrowStatus: 'RELEASED' },
+        });
+      });
+    }
+
     if (status === 'DELIVERED') {
       const existingEarn = await prisma.pointsLedger.findUnique({
         where: { idempotencyKey: `order:${updatedOrder.id}:earn` },
@@ -561,6 +608,48 @@ exports.updateOrderStatus = async (req, res, next) => {
         where: { orderId: updatedOrder.id, type: 'REDEEM', status: 'PENDING' },
         data: { status: 'CANCELED' },
       });
+
+      if (updatedOrder.escrowStatus === 'HELD') {
+        await prisma.$transaction(async (tx) => {
+          await tx.sellerBalance.upsert({
+            where: { storeId: updatedOrder.storeId },
+            update: {},
+            create: { storeId: updatedOrder.storeId },
+          });
+
+          await tx.sellerBalance.update({
+            where: { storeId: updatedOrder.storeId },
+            data: {
+              escrowHTG: { decrement: updatedOrder.sellerNetHTG || 0 },
+            },
+          });
+
+          await tx.financialLedger.create({
+            data: {
+              type: 'REVERSAL',
+              status: 'COMMITTED',
+              orderId: updatedOrder.id,
+              storeId: updatedOrder.storeId,
+              amountHTG: updatedOrder.sellerNetHTG ? -updatedOrder.sellerNetHTG : 0,
+            },
+          });
+
+          await tx.financialLedger.create({
+            data: {
+              type: 'REFUND',
+              status: 'COMMITTED',
+              orderId: updatedOrder.id,
+              storeId: updatedOrder.storeId,
+              amountHTG: updatedOrder.commissionAmountHTG ? -updatedOrder.commissionAmountHTG : 0,
+            },
+          });
+
+          await tx.order.update({
+            where: { id: updatedOrder.id },
+            data: { escrowStatus: 'REVERSED' },
+          });
+        });
+      }
     }
 
     // TODO: Send notification to customer

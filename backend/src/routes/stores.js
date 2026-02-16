@@ -129,18 +129,18 @@ router.get('/admin/commissions/summary', authenticate, requireAdmin, async (req,
 
     const where = Object.keys(dateFilter).length ? { createdAt: dateFilter } : {};
 
-    const totalAgg = await prisma.commissionLedger.aggregate({
-      _sum: { amount: true },
+    const totalAgg = await prisma.financialLedger.aggregate({
+      _sum: { amountHTG: true },
       _count: { _all: true },
-      where,
+      where: { ...where, type: 'PLATFORM_EARN' },
     });
 
-    const grouped = await prisma.commissionLedger.groupBy({
+    const grouped = await prisma.financialLedger.groupBy({
       by: ['storeId'],
-      _sum: { amount: true },
+      _sum: { amountHTG: true },
       _count: { _all: true },
-      where,
-      orderBy: { _sum: { amount: 'desc' } },
+      where: { ...where, type: 'PLATFORM_EARN' },
+      orderBy: { _sum: { amountHTG: 'desc' } },
       take: 10,
     });
 
@@ -153,12 +153,12 @@ router.get('/admin/commissions/summary', authenticate, requireAdmin, async (req,
 
     const topStores = grouped.map(g => ({
       store: storeMap[g.storeId] || { id: g.storeId, name: 'Unknown', slug: null },
-      amount: g._sum.amount || 0,
+      amount: g._sum.amountHTG || 0,
       count: g._count._all || 0,
     }));
 
     res.json({
-      totalCommission: totalAgg._sum.amount || 0,
+      totalCommission: totalAgg._sum.amountHTG || 0,
       totalOrders: totalAgg._count._all || 0,
       topStores,
     });
@@ -177,19 +177,19 @@ router.get('/admin/commissions/export', authenticate, requireAdmin, async (req, 
 
     const where = Object.keys(dateFilter).length ? { createdAt: dateFilter } : {};
 
-    const rows = await prisma.commissionLedger.findMany({
-      where,
-      include: { store: { select: { name: true, slug: true } }, order: { select: { orderNumber: true } } },
+    const rows = await prisma.financialLedger.findMany({
+      where: { ...where, type: 'PLATFORM_EARN' },
+      include: { store: { select: { name: true, slug: true } }, order: { select: { orderNumber: true, commissionRate: true } } },
       orderBy: { createdAt: 'desc' },
     });
 
-    const header = 'orderNumber,storeName,storeSlug,rate,amount,status,createdAt';
+    const header = 'orderNumber,storeName,storeSlug,rate,amountHTG,status,createdAt';
     const lines = rows.map(r => [
       r.order?.orderNumber || '',
       (r.store?.name || '').replace(/,/g, ' '),
       r.store?.slug || '',
-      r.rate,
-      r.amount,
+      r.order?.commissionRate || 0,
+      r.amountHTG,
       r.status,
       r.createdAt.toISOString(),
     ].join(','));
@@ -208,14 +208,14 @@ router.get('/me/commissions/summary', authenticate, requireSeller, async (req, r
     const store = await prisma.store.findUnique({ where: { userId: req.user.id } });
     if (!store) throw new AppError('Boutique non trouvée', 404);
 
-    const totalAgg = await prisma.commissionLedger.aggregate({
-      _sum: { amount: true },
+    const totalAgg = await prisma.financialLedger.aggregate({
+      _sum: { amountHTG: true },
       _count: { _all: true },
-      where: { storeId: store.id },
+      where: { storeId: store.id, type: 'PLATFORM_EARN' },
     });
 
     res.json({
-      totalCommission: totalAgg._sum.amount || 0,
+      totalCommission: totalAgg._sum.amountHTG || 0,
       totalOrders: totalAgg._count._all || 0,
     });
   } catch (error) {
@@ -229,17 +229,17 @@ router.get('/me/commissions/export', authenticate, requireSeller, async (req, re
     const store = await prisma.store.findUnique({ where: { userId: req.user.id } });
     if (!store) throw new AppError('Boutique non trouvée', 404);
 
-    const rows = await prisma.commissionLedger.findMany({
-      where: { storeId: store.id },
-      include: { order: { select: { orderNumber: true } } },
+    const rows = await prisma.financialLedger.findMany({
+      where: { storeId: store.id, type: 'PLATFORM_EARN' },
+      include: { order: { select: { orderNumber: true, commissionRate: true } } },
       orderBy: { createdAt: 'desc' },
     });
 
-    const header = 'orderNumber,rate,amount,status,createdAt';
+    const header = 'orderNumber,rate,amountHTG,status,createdAt';
     const lines = rows.map(r => [
       r.order?.orderNumber || '',
-      r.rate,
-      r.amount,
+      r.order?.commissionRate || 0,
+      r.amountHTG,
       r.status,
       r.createdAt.toISOString(),
     ].join(','));

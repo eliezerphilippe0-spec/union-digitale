@@ -304,11 +304,14 @@ model Order {
   paymentId       String?       // External payment ID
   paidAt          DateTime?
 
-  // Commission
-  commissionRate   Float        @default(0.10)
-  commissionAmount Float        @default(0)
-  sellerNetAmount  Float        @default(0)
-  
+  // Commission / Escrow
+  subtotalProductsHTG  Float    @default(0)
+  commissionRate       Float    @default(0.10)
+  commissionAmountHTG  Float    @default(0)
+  sellerGrossHTG       Float    @default(0)
+  sellerNetHTG         Float    @default(0)
+  escrowStatus         EscrowStatus @default(NONE)
+
   // Shipping
   shippingMethod  String?
   trackingNumber  String?
@@ -476,26 +479,52 @@ enum CashbackStatus {
   EXPIRED
 }
 
-enum CommissionStatus {
+enum EscrowStatus {
+  NONE
+  HELD
+  RELEASED
+  REVERSED
+}
+
+enum FinancialLedgerType {
+  PLATFORM_EARN
+  SELLER_EARN
+  ESCROW_HOLD
+  ESCROW_RELEASE
+  REFUND
+  REVERSAL
+}
+
+enum FinancialLedgerStatus {
   PENDING
   COMMITTED
 }
 
-model CommissionLedger {
-  id          String            @id @default(uuid())
-  orderId     String            @unique
-  order       Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  storeId     String
-  store       Store             @relation(fields: [storeId], references: [id], onDelete: Cascade)
+model SellerBalance {
+  id                      String  @id @default(uuid())
+  storeId                 String  @unique
+  store                   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  availableHTG            Float   @default(0)
+  escrowHTG               Float   @default(0)
+  lifetimeEarnedHTG       Float   @default(0)
+  lifetimeCommissionPaidHTG Float @default(0)
+  updatedAt               DateTime @updatedAt
+}
 
-  rate        Float
-  amount      Float
-  status      CommissionStatus  @default(PENDING)
-  committedAt DateTime?
-  createdAt   DateTime          @default(now())
+model FinancialLedger {
+  id        String                @id @default(uuid())
+  type      FinancialLedgerType
+  status    FinancialLedgerStatus @default(COMMITTED)
+  orderId   String?
+  order     Order?                @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  storeId   String?
+  store     Store?                @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  amountHTG Float
+  createdAt DateTime              @default(now())
 
+  @@index([orderId])
   @@index([storeId])
-  @@index([status])
+  @@index([type])
 }
 
 model CashbackTransaction {
