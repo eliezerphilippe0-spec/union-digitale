@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package, Download, CheckCircle, Clock } from 'lucide-react';
 import { products } from '../data/products';
 import { useLanguage } from '../contexts/LanguageContext';
 import SEO from '../components/common/SEO';
+import { useAuth } from '../contexts/AuthContext';
+import { collection, getDocs, limit, orderBy, query, where } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 const Orders = () => {
     const navigate = useNavigate();
     const { t, language } = useLanguage();
-
-    // Mock Orders Data
-    const orders = [
+    const { currentUser } = useAuth();
+    const [orders, setOrders] = useState([
         {
             id: 'CMD-84932',
             date: new Date('2025-12-01'),
@@ -25,7 +27,52 @@ const Orders = () => {
             status: 'Disponible',
             items: [products[2]]
         }
-    ];
+    ]);
+
+    useEffect(() => {
+        const enabled = import.meta.env.VITE_SUBORDERS_BUYER_VIEW_ENABLED === 'true';
+        if (!enabled || !currentUser?.uid) return;
+
+        const loadOrders = async () => {
+            try {
+                const q = query(
+                    collection(db, 'orders'),
+                    where('buyerId', '==', currentUser.uid),
+                    orderBy('createdAt', 'desc'),
+                    limit(20)
+                );
+                const snap = await getDocs(q);
+                const items = await Promise.all(snap.docs.map(async (doc) => {
+                    const data = doc.data();
+                    let suborders = [];
+                    try {
+                        const subsQ = query(
+                            collection(db, 'orderSubs'),
+                            where('buyerId', '==', currentUser.uid),
+                            where('orderId', '==', doc.id)
+                        );
+                        const subsSnap = await getDocs(subsQ);
+                        suborders = subsSnap.docs.map((s) => s.data());
+                    } catch (e) {
+                        // fallback silently
+                    }
+                    return {
+                        id: data.orderNumber || doc.id,
+                        date: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
+                        total: data.totalAmount || data.total || 0,
+                        status: data.status || t('pending'),
+                        items: data.items || [],
+                        suborders,
+                    };
+                }));
+                if (items.length > 0) setOrders(items);
+            } catch (e) {
+                // fallback to mock
+            }
+        };
+
+        loadOrders();
+    }, [currentUser, t]);
 
     return (
         <div className="bg-gray-100 min-h-screen py-8">
@@ -71,17 +118,17 @@ const Orders = () => {
                                     )}
                                 </div>
 
-                                {order.items.map(item => (
-                                    <div key={item.id} className="flex gap-6">
+                                {order.items.map((item, idx) => (
+                                    <div key={item.id || idx} className="flex gap-6">
                                         <div className="w-24 h-24 bg-gray-100 flex items-center justify-center text-2xl text-gray-400 rounded">
-                                            {item.image}
+                                            {item.image || '📦'}
                                         </div>
                                         <div className="flex-1">
                                             <h3 className="font-bold text-blue-600 hover:underline cursor-pointer mb-2">
-                                                {item.title}
+                                                {item.title || item.productId || t('product')}
                                             </h3>
                                             <div className="text-sm text-gray-500 mb-4">
-                                                {t('sold_by')}: {item.brand}
+                                                {t('sold_by')}: {item.brand || item.vendorId || '—'}
                                             </div>
 
                                             <div className="flex gap-4">
@@ -105,6 +152,20 @@ const Orders = () => {
                                         </div>
                                     </div>
                                 ))}
+
+                                {order.suborders && order.suborders.length > 0 && (
+                                    <div className="mt-4 bg-gray-50 rounded-lg p-3 text-xs text-gray-600">
+                                        <div className="font-semibold mb-2">Sous‑commandes</div>
+                                        <div className="space-y-1">
+                                            {order.suborders.map((s, i) => (
+                                                <div key={i} className="flex items-center justify-between">
+                                                    <span>{s.vendorId || 'Vendeur'}</span>
+                                                    <span>{(s.subtotalAmount || 0).toLocaleString()} G</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}
