@@ -22,6 +22,7 @@ const buildBatchRunner = (prismaClient, cfg) => {
     });
 
     const report = { batchId, weekStart: weekStart.toISOString(), createdCount: 0, totalHTG: 0, skipped: [], errors: [] };
+    console.log(JSON.stringify({ event: 'payout_batch_start', batchId, weekStart: report.weekStart }));
 
     for (const balance of balances) {
       const store = balance.store;
@@ -29,6 +30,10 @@ const buildBatchRunner = (prismaClient, cfg) => {
 
       if (!store?.kycStatus) {
         report.skipped.push({ storeId: balance.storeId, reason: 'KYC_NOT_AVAILABLE' });
+        continue;
+      }
+      if ((balance.payoutPendingHTG || 0) > 0) {
+        report.skipped.push({ storeId: balance.storeId, reason: 'PAYOUT_PENDING' });
         continue;
       }
       if (store.riskFlag === true) {
@@ -63,6 +68,10 @@ const buildBatchRunner = (prismaClient, cfg) => {
           const fresh = await tx.sellerBalance.findUnique({ where: { storeId: balance.storeId } });
           if (!fresh || fresh.availableHTG < minAmount) {
             report.skipped.push({ storeId: balance.storeId, reason: 'BELOW_MIN' });
+            return;
+          }
+          if ((fresh.payoutPendingHTG || 0) > 0) {
+            report.skipped.push({ storeId: balance.storeId, reason: 'PAYOUT_PENDING' });
             return;
           }
 
@@ -103,7 +112,17 @@ const buildBatchRunner = (prismaClient, cfg) => {
       }
     }
 
-    console.log(JSON.stringify({ event: 'payout_batch', ...report }));
+    const skippedRatio = report.createdCount + report.skipped.length === 0 ? 0 : report.skipped.length / (report.createdCount + report.skipped.length);
+    console.log(JSON.stringify({ event: 'payout_batch', ...report, skippedRatio }));
+
+    // basic alert hooks
+    if (report.totalHTG > 0) {
+      console.log(JSON.stringify({ event: 'metric', name: 'batchTotalHTG', value: report.totalHTG }));
+    }
+    if (skippedRatio > 0.5) {
+      console.log(JSON.stringify({ event: 'alert', name: 'skippedRatio', value: skippedRatio }));
+    }
+
     return report;
   };
 };

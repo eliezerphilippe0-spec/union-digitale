@@ -6,6 +6,7 @@ const prisma = require('../lib/prisma');
 const { AppError } = require('../middleware/errorHandler');
 const { v4: uuidv4 } = require('uuid');
 const config = require('../config');
+const { assertNonNegative } = require('../utils/financeGuards');
 
 const calculateTier = (points = 0) => {
   if (points >= 50000) return 'diamond';
@@ -528,6 +529,10 @@ exports.updateOrderStatus = async (req, res, next) => {
           create: { storeId: updatedOrder.storeId },
         });
 
+        const balance = await tx.sellerBalance.findUnique({ where: { storeId: updatedOrder.storeId } });
+        if (!balance) throw new AppError('Solde vendeur introuvable', 404);
+        assertNonNegative('escrowHTG', (balance.escrowHTG || 0) - (updatedOrder.sellerNetHTG || 0));
+
         await tx.sellerBalance.update({
           where: { storeId: updatedOrder.storeId },
           data: {
@@ -561,6 +566,8 @@ exports.updateOrderStatus = async (req, res, next) => {
           data: { escrowStatus: 'RELEASED' },
         });
       });
+
+      console.log(JSON.stringify({ event: 'escrow_release', orderId: updatedOrder.id, storeId: updatedOrder.storeId, amountHTG: updatedOrder.sellerNetHTG || 0 }));
     }
 
     if (status === 'DELIVERED') {
@@ -617,6 +624,10 @@ exports.updateOrderStatus = async (req, res, next) => {
             create: { storeId: updatedOrder.storeId },
           });
 
+          const balance = await tx.sellerBalance.findUnique({ where: { storeId: updatedOrder.storeId } });
+          if (!balance) throw new AppError('Solde vendeur introuvable', 404);
+          assertNonNegative('escrowHTG', (balance.escrowHTG || 0) - (updatedOrder.sellerNetHTG || 0));
+
           await tx.sellerBalance.update({
             where: { storeId: updatedOrder.storeId },
             data: {
@@ -649,6 +660,36 @@ exports.updateOrderStatus = async (req, res, next) => {
             data: { escrowStatus: 'REVERSED' },
           });
         });
+
+        console.log(JSON.stringify({ event: 'escrow_reversal', orderId: updatedOrder.id, storeId: updatedOrder.storeId, amountHTG: updatedOrder.sellerNetHTG || 0 }));
+        console.log(JSON.stringify({ event: 'alert', name: 'refundSpike', value: updatedOrder.sellerNetHTG || 0 }));
+      }
+
+      if (updatedOrder.escrowStatus === 'RELEASED') {
+        await prisma.$transaction(async (tx) => {
+          const balance = await tx.sellerBalance.findUnique({ where: { storeId: updatedOrder.storeId } });
+          if (!balance) throw new AppError('Solde vendeur introuvable', 404);
+          assertNonNegative('availableHTG', (balance.availableHTG || 0) - (updatedOrder.sellerNetHTG || 0));
+
+          await tx.sellerBalance.update({
+            where: { storeId: updatedOrder.storeId },
+            data: {
+              availableHTG: { decrement: updatedOrder.sellerNetHTG || 0 },
+            },
+          });
+
+          await tx.financialLedger.create({
+            data: {
+              type: 'REFUND',
+              status: 'COMMITTED',
+              orderId: updatedOrder.id,
+              storeId: updatedOrder.storeId,
+              amountHTG: updatedOrder.sellerNetHTG ? -updatedOrder.sellerNetHTG : 0,
+            },
+          });
+        });
+
+        console.log(JSON.stringify({ event: 'refund_after_release', orderId: updatedOrder.id, storeId: updatedOrder.storeId, amountHTG: updatedOrder.sellerNetHTG || 0 }));
       }
     }
 

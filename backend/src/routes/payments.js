@@ -260,6 +260,8 @@ const applyEscrowAndCommission = async (order) => {
       data: { escrowStatus: 'HELD' },
     });
   });
+
+  console.log(JSON.stringify({ event: 'escrow_hold', orderId: order.id, storeId: order.storeId, amountHTG: order.sellerNetHTG || 0 }));
 };
 
 /**

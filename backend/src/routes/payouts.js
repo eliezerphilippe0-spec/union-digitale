@@ -5,9 +5,15 @@ const { AppError } = require('../middleware/errorHandler');
 
 const router = express.Router();
 const { runWeeklyPayoutBatch } = require('../jobs/payoutBatch');
+const { body, query } = require('express-validator');
+const validate = require('../middleware/validate');
+const { assertNonNegative } = require('../utils/financeGuards');
 
 // Admin run payout batch
-router.post('/batch/run', authenticate, requireAdmin, async (req, res, next) => {
+router.post('/batch/run', authenticate, requireAdmin, validate([
+  query('DRY_RUN').optional().isBoolean().toBoolean(),
+  body('DRY_RUN').optional().isBoolean().toBoolean(),
+]), async (req, res, next) => {
   try {
     const dryRun = String(req.query.DRY_RUN || req.body?.DRY_RUN || '').toLowerCase() === 'true';
     const report = await runWeeklyPayoutBatch({ dryRun });
@@ -18,14 +24,13 @@ router.post('/batch/run', authenticate, requireAdmin, async (req, res, next) => 
 });
 
 // Seller requests payout
-router.post('/request', authenticate, requireSeller, async (req, res, next) => {
+router.post('/request', authenticate, requireSeller, validate([
+  body('amountHTG').isFloat({ gt: 0 }).withMessage('Montant invalide'),
+  body('method').optional().isString(),
+]), async (req, res, next) => {
   try {
     const { amountHTG, method, accountInfo } = req.body;
     const amount = Number(amountHTG || 0);
-
-    if (!amount || amount <= 0) {
-      throw new AppError('Montant invalide', 400);
-    }
 
     const store = await prisma.store.findUnique({ where: { userId: req.user.id } });
     if (!store) throw new AppError('Boutique non trouvée', 404);
@@ -39,6 +44,7 @@ router.post('/request', authenticate, requireSeller, async (req, res, next) => {
     if (balance.availableHTG < amount) {
       throw new AppError('Solde disponible insuffisant', 400);
     }
+    assertNonNegative('availableHTG', balance.availableHTG - amount);
 
     const request = await prisma.payoutRequest.create({
       data: {
@@ -49,6 +55,8 @@ router.post('/request', authenticate, requireSeller, async (req, res, next) => {
         reference: accountInfo ? JSON.stringify(accountInfo) : null,
       },
     });
+
+    console.log(JSON.stringify({ event: 'payout_request', storeId: store.id, amountHTG: amount, status: 'REQUESTED' }));
 
     res.status(201).json({ request });
   } catch (error) {
@@ -95,6 +103,8 @@ router.post('/admin/:id/approve', authenticate, requireAdmin, async (req, res, n
         throw new AppError('Solde disponible insuffisant', 400);
       }
 
+      assertNonNegative('availableHTG', balance.availableHTG - request.amountHTG);
+
       await tx.sellerBalance.update({
         where: { storeId: request.storeId },
         data: {
@@ -122,6 +132,8 @@ router.post('/admin/:id/approve', authenticate, requireAdmin, async (req, res, n
       });
     });
 
+    console.log(JSON.stringify({ event: 'payout_approve', requestId: result.id, storeId: result.storeId, amountHTG: result.amountHTG }));
+    console.log(JSON.stringify({ event: 'metric', name: 'payoutPendingGrowth', value: result.amountHTG }));
     res.json({ request: result });
   } catch (error) {
     next(error);
@@ -141,6 +153,7 @@ router.post('/admin/:id/reject', authenticate, requireAdmin, async (req, res, ne
       data: { status: 'REJECTED', approvedBy: req.user.id },
     });
 
+    console.log(JSON.stringify({ event: 'payout_reject', requestId: updated.id, storeId: updated.storeId, amountHTG: updated.amountHTG }));
     res.json({ request: updated });
   } catch (error) {
     next(error);
@@ -158,6 +171,10 @@ router.post('/admin/:id/paid', authenticate, requireAdmin, async (req, res, next
     if (request.status !== 'APPROVED') throw new AppError('Demande non approuvée', 400);
 
     const result = await prisma.$transaction(async (tx) => {
+      const balance = await tx.sellerBalance.findUnique({ where: { storeId: request.storeId } });
+      if (!balance) throw new AppError('Solde vendeur introuvable', 404);
+      assertNonNegative('payoutPendingHTG', (balance.payoutPendingHTG || 0) - request.amountHTG);
+
       await tx.sellerBalance.update({
         where: { storeId: request.storeId },
         data: {
@@ -181,6 +198,7 @@ router.post('/admin/:id/paid', authenticate, requireAdmin, async (req, res, next
       });
     });
 
+    console.log(JSON.stringify({ event: 'payout_paid', requestId: result.id, storeId: result.storeId, amountHTG: result.amountHTG }));
     res.json({ request: result });
   } catch (error) {
     next(error);
