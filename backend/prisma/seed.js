@@ -149,6 +149,23 @@ async function main() {
   });
   console.log('✅ Created demo seller and store');
 
+  const riskRules = [
+    { key: 'refundSpike7d', severity: 'WARNING', threshold: 0.08, threshold2: 0.15, windowDays: 7 },
+    { key: 'refundAfterRelease30d', severity: 'CRITICAL', threshold: 0.05, windowDays: 30 },
+    { key: 'chargebacks30d', severity: 'CRITICAL', limitInt: 2, windowDays: 30 },
+    { key: 'payoutPendingGrowth', severity: 'WARNING', multiplier: 3.0, windowDays: 30 },
+    { key: 'paymentVelocity1h', severity: 'WARNING', limitInt: 10 },
+    { key: 'rapidPayoutPattern7d', severity: 'CRITICAL', limitInt: 3, windowDays: 7 },
+  ];
+
+  await Promise.all(riskRules.map(rule => prisma.riskRuleConfig.upsert({
+    where: { key: rule.key },
+    update: rule,
+    create: rule,
+  })));
+
+  console.log('✅ Seeded risk rule configs');
+
   // Create demo products
   const products = [
     {

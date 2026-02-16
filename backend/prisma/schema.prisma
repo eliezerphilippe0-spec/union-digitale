@@ -109,6 +109,13 @@ enum KycStatus {
   REJECTED
 }
 
+enum RiskLevel {
+  NORMAL
+  WATCH
+  HIGH
+  FROZEN
+}
+
 model Store {
   id              String      @id @default(uuid())
   userId          String      @unique
@@ -121,7 +128,10 @@ model Store {
   banner          String?
   status          StoreStatus @default(PENDING)
   kycStatus       KycStatus   @default(UNVERIFIED)
+  riskLevel       RiskLevel   @default(NORMAL)
   riskFlag        Boolean     @default(false)
+  payoutsFrozen   Boolean     @default(false)
+  lastRiskEvaluated DateTime?
   
   // Contact
   email           String?
@@ -161,9 +171,67 @@ model Store {
   products        Product[]
   orders          Order[]
   payouts         Payout[]
+  riskEvents      RiskEvent[]
+  riskSnapshot    RiskSnapshot?
   
   @@index([slug])
   @@index([status])
+}
+
+enum RiskEventType {
+  REFUND_SPIKE
+  REFUND_AFTER_RELEASE_SPIKE
+  CHARGEBACK_SPIKE
+  PAYOUT_PENDING_GROWTH
+  PAYMENT_VELOCITY
+  RAPID_PAYOUT_PATTERN
+  MANUAL_SET
+}
+
+enum RiskSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+model RiskEvent {
+  id         String        @id @default(cuid())
+  storeId    String
+  store      Store         @relation(fields: [storeId], references: [id])
+  type       RiskEventType
+  severity   RiskSeverity
+  prevLevel  RiskLevel
+  nextLevel  RiskLevel
+  scoreDelta Int           @default(0)
+  details    Json
+  createdAt  DateTime      @default(now())
+
+  @@index([storeId, createdAt])
+  @@index([type, createdAt])
+}
+
+model RiskRuleConfig {
+  id         String        @id @default(cuid())
+  key        String        @unique
+  enabled    Boolean       @default(true)
+  severity   RiskSeverity
+  windowDays Int?
+  threshold  Float?
+  threshold2 Float?
+  limitInt   Int?
+  multiplier Float?
+  json       Json?
+  updatedAt  DateTime      @updatedAt
+  createdAt  DateTime      @default(now())
+}
+
+model RiskSnapshot {
+  id        String   @id @default(cuid())
+  storeId   String   @unique
+  store     Store    @relation(fields: [storeId], references: [id])
+  window7d  Json?
+  window30d Json?
+  computedAt DateTime @default(now())
 }
 
 // ============== PRODUCTS ==============
