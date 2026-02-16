@@ -178,6 +178,8 @@ describe('Finance invariants & idempotency', () => {
         create: jest.fn().mockRejectedValue({ code: 'P2002' }),
       },
       financialLedger: { create: jest.fn(), findFirst: jest.fn() },
+      store: { findUnique: jest.fn().mockResolvedValue({ payoutDelayHours: 0 }) },
+      order: { count: jest.fn().mockResolvedValue(1) },
       $transaction: async (fn) => fn(prismaMock),
     };
 

@@ -40,6 +40,8 @@ describe('payout batch', () => {
         create: jest.fn(),
       },
       financialLedger: { create: jest.fn(), findFirst: jest.fn().mockResolvedValue(null) },
+      store: { findUnique: jest.fn().mockResolvedValue({ payoutDelayHours: 0 }) },
+      order: { count: jest.fn().mockResolvedValue(1) },
       $transaction: async (fn) => fn(prisma),
     };
 
@@ -71,6 +73,8 @@ describe('payout batch', () => {
         }),
       },
       financialLedger: { create: jest.fn(), findFirst: jest.fn().mockResolvedValue(null) },
+      store: { findUnique: jest.fn().mockResolvedValue({ payoutDelayHours: 0 }) },
+      order: { count: jest.fn().mockResolvedValue(1) },
       $transaction: async (fn) => fn(prisma),
     };
 
@@ -98,6 +102,8 @@ describe('payout batch', () => {
         create: jest.fn().mockResolvedValue({ id: 'req1' }),
       },
       financialLedger: { create: jest.fn().mockRejectedValue(new Error('ledger fail')), findFirst: jest.fn().mockResolvedValue(null) },
+      store: { findUnique: jest.fn().mockResolvedValue({ payoutDelayHours: 0 }) },
+      order: { count: jest.fn().mockResolvedValue(1) },
       $transaction: async (fn) => fn(prisma),
     };
 

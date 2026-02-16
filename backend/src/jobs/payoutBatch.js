@@ -82,6 +82,21 @@ const buildBatchRunner = (prismaClient, cfg) => {
             return;
           }
 
+          const storeMeta = await tx.store.findUnique({ where: { id: balance.storeId }, select: { payoutDelayHours: true } });
+          const delayHours = storeMeta?.payoutDelayHours ?? 72;
+          const eligibleOrders = await tx.order.count({
+            where: {
+              storeId: balance.storeId,
+              status: 'DELIVERED',
+              deliveredAt: { lte: new Date(Date.now() - delayHours * 3600 * 1000) },
+            },
+          });
+
+          if (eligibleOrders === 0) {
+            report.skipped.push({ storeId: balance.storeId, reason: 'PAYOUT_DELAY' });
+            return;
+          }
+
           const request = await tx.payoutRequest.create({
             data: {
               storeId: balance.storeId,
