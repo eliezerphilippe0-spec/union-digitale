@@ -131,6 +131,7 @@ model Store {
   riskLevel       RiskLevel   @default(NORMAL)
   riskFlag        Boolean     @default(false)
   payoutsFrozen   Boolean     @default(false)
+  freezeExpiresAt DateTime?
   lastRiskEvaluated DateTime?
   
   // Contact
@@ -186,6 +187,7 @@ enum RiskEventType {
   PAYMENT_VELOCITY
   RAPID_PAYOUT_PATTERN
   MANUAL_SET
+  AUTO_UNFREEZE
 }
 
 enum RiskSeverity {
@@ -232,6 +234,14 @@ model RiskSnapshot {
   window7d  Json?
   window30d Json?
   computedAt DateTime @default(now())
+}
+
+model JobLock {
+  key       String   @id
+  lockedBy  String?
+  lockedAt  DateTime?
+  expiresAt DateTime?
+  lastReport Json?
 }
 
 // ============== PRODUCTS ==============
