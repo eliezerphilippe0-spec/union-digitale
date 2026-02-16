@@ -3,16 +3,14 @@ import * as admin from "firebase-admin";
 
 const db = admin.firestore();
 
-interface OrderItem {
+interface OrderItemInput {
     productId: string;
-    price: number;
     quantity?: number;
-    type: 'digital' | 'physical';
+    variantId?: string;
 }
 
 interface CreateOrderRequest {
-    items: OrderItem[];
-    userId: string;
+    items: OrderItemInput[];
     customerDetails?: {
         name: string;
         email: string;
@@ -21,19 +19,50 @@ interface CreateOrderRequest {
 }
 
 export const createOrder = onCall(async (request) => {
-    const { items, userId, customerDetails } = request.data as CreateOrderRequest;
+    if (!request.auth?.uid) {
+        throw new HttpsError('unauthenticated', 'Auth required');
+    }
+
+    const { items, customerDetails } = request.data as CreateOrderRequest;
+    const userId = request.auth.uid;
 
     if (!items || items.length === 0) {
         throw new HttpsError('invalid-argument', 'No items in order');
     }
 
-    // Basic validation or price check from DB could go here
+    const productRefs = items.map((it) => db.doc(`products/${it.productId}`));
+    const productSnaps = await db.getAll(...productRefs);
 
-    const totalPrice = items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+    const lineItems = items.map((it, idx) => {
+        const snap = productSnaps[idx];
+        if (!snap.exists) throw new HttpsError('not-found', `Product not found: ${it.productId}`);
+        const p: any = snap.data();
+        if (p?.active === false) throw new HttpsError('failed-precondition', `Product inactive: ${it.productId}`);
+        const qty = Number(it.quantity || 1);
+        if (!Number.isFinite(qty) || qty <= 0 || qty > 999) throw new HttpsError('invalid-argument', 'Invalid qty');
+        const unitPrice = Number(p?.price || 0);
+        if (!Number.isFinite(unitPrice) || unitPrice < 0) throw new HttpsError('failed-precondition', 'Invalid price');
+        return {
+            productId: it.productId,
+            variantId: it.variantId || null,
+            vendorId: p?.vendorId || p?.storeId || null,
+            qty,
+            unitPrice,
+            lineTotal: unitPrice * qty,
+        };
+    });
+
+    const vendorIds = Array.from(new Set(lineItems.map((li) => li.vendorId).filter(Boolean)));
+    if (vendorIds.length !== 1) {
+        throw new HttpsError('failed-precondition', 'multi_vendor_not_supported_yet');
+    }
+
+    const totalPrice = lineItems.reduce((sum, item) => sum + item.lineTotal, 0);
 
     const orderData = {
-        userId: userId || 'guest',
-        items,
+        userId,
+        vendorId: vendorIds[0],
+        items: lineItems.map(({ productId, qty, unitPrice }) => ({ productId, qty, price: unitPrice })),
         totalPrice,
         status: 'pending',
         paymentStatus: 'pending',

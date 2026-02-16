@@ -195,12 +195,41 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     
-    // Messages
+    // Messages (participants-only)
+    function isParticipantMessage(data) {
+      return isAuthenticated() && (
+        (data.participants is list && data.participants.hasAny([request.auth.uid])) ||
+        (data.buyerId == request.auth.uid) ||
+        (data.sellerId == request.auth.uid)
+      );
+    }
+
+    function messageOnlyAllowedFields() {
+      return request.resource.data.keys().hasOnly([
+        "threadId",
+        "participants",
+        "buyerId",
+        "sellerId",
+        "senderId",
+        "text",
+        "createdAt",
+        "type",
+        "attachments"
+      ]);
+    }
+
+    function validMessageCreate() {
+      return request.resource.data.senderId == request.auth.uid &&
+        request.resource.data.createdAt is timestamp &&
+        request.resource.data.text is string &&
+        request.resource.data.text.size() <= 2000;
+    }
+
     match /messages/{messageId} {
-      allow create: if isAuthenticated();
-      allow read: if isAuthenticated();
-      allow update: if isOwner(resource.data.senderId);
-      allow delete: if isOwner(resource.data.senderId) || isAdmin();
+      allow read: if isParticipantMessage(resource.data) || isAdmin();
+      allow create: if isAuthenticated() && messageOnlyAllowedFields() && isParticipantMessage(request.resource.data) && validMessageCreate();
+      allow update: if false;
+      allow delete: if (isParticipantMessage(resource.data) && resource.data.senderId == request.auth.uid) || isAdmin();
     }
     
     // Notifications
