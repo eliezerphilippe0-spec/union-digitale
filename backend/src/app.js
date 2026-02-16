@@ -27,6 +27,7 @@ const payoutRoutes = require('./routes/payouts');
 const uploadRoutes = require('./routes/upload');
 const adminRiskRoutes = require('./routes/adminRisk');
 const adminTrustRoutes = require('./routes/adminTrust');
+const sellerTrustRoutes = require('./routes/sellerTrust');
 
 const app = express();
 
@@ -155,6 +156,7 @@ app.use('/api/payouts', payoutRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/admin', adminRiskRoutes);
 app.use('/api/admin', adminTrustRoutes);
+app.use('/api/seller', sellerTrustRoutes);
 
 // 404 handler
 app.use((req, res) => {

@@ -75,6 +75,7 @@ const SellerSettings = React.lazy(() => import('./pages/seller/Settings'));
 const AdvancedAnalytics = React.lazy(() => import('./pages/seller/AdvancedAnalytics'));
 const POSTerminal = React.lazy(() => import('./pages/seller/POSTerminal'));
 const SellerCredit = React.lazy(() => import('./pages/seller/SellerCredit'));
+const TrustPage = React.lazy(() => import('./pages/seller/TrustPage'));
 
 // New Features - lazy loaded
 const AppStore = React.lazy(() => import('./pages/AppStore'));
@@ -307,6 +308,7 @@ function App() {
                                     <Route path="seller/analytics" element={<AdvancedAnalytics />} />
                                     <Route path="seller/pos" element={<POSTerminal />} />
                                     <Route path="seller/credit" element={<SellerCredit />} />
+                                    <Route path="seller/trust" element={<TrustPage />} />
                                     <Route path="cars/:id" element={<CarDetails />} />
 
                                     {/* New Features */}
