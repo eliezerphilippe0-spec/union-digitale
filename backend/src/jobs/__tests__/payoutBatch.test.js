@@ -12,7 +12,7 @@ describe('payout batch', () => {
     const prisma = {
       sellerBalance: {
         findMany: jest.fn().mockResolvedValue([
-          { storeId: 's1', availableHTG: 1500, store: { kycStatus: 'VERIFIED', riskFlag: false } },
+          { storeId: 's1', availableHTG: 1500, payoutPendingHTG: 0, store: { kycStatus: 'VERIFIED', riskFlag: false } },
         ]),
       },
     };
@@ -20,5 +20,27 @@ describe('payout batch', () => {
     const report = await run({ dryRun: true, now: new Date() });
     expect(report.createdCount).toBe(0);
     expect(report.skipped[0].reason).toBe('BELOW_MIN');
+  });
+
+  test('double run same week skips existing', async () => {
+    const prisma = {
+      sellerBalance: {
+        findMany: jest.fn().mockResolvedValue([
+          { storeId: 's1', availableHTG: 5000, payoutPendingHTG: 0, store: { kycStatus: 'VERIFIED', riskFlag: false } },
+        ]),
+        findUnique: jest.fn().mockResolvedValue({ storeId: 's1', availableHTG: 5000, payoutPendingHTG: 0 }),
+        update: jest.fn(),
+      },
+      payoutRequest: {
+        findUnique: jest.fn().mockResolvedValue({ id: 'existing' }),
+        create: jest.fn(),
+      },
+      financialLedger: { create: jest.fn() },
+      $transaction: async (fn) => fn(prisma),
+    };
+
+    const run = buildBatchRunner(prisma, { PAYOUT_MIN_HTG: 2000 });
+    const report = await run({ dryRun: false, now: new Date() });
+    expect(report.skipped.some(s => s.reason === 'ALREADY_CREATED')).toBe(true);
   });
 });
