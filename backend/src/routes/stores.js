@@ -73,6 +73,26 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+// Public trust badge by slug
+router.get('/:slug/trust', async (req, res, next) => {
+  try {
+    const store = await prisma.store.findUnique({
+      where: { slug: req.params.slug },
+      select: { trustTier: true, payoutDelayHours: true },
+    });
+
+    if (!store) return res.status(404).json({ error: 'Store not found' });
+
+    res.json({
+      trustTier: store.trustTier,
+      badge: store.trustTier === 'ELITE' ? 'Elite Seller' : store.trustTier === 'TRUSTED' ? 'Trusted Seller' : 'Seller',
+      payoutDelayHours: store.payoutDelayHours,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Get store by slug (public)
 router.get('/:slug', async (req, res, next) => {
   try {

@@ -6,6 +6,8 @@ import { useFavorites } from '../../contexts/FavoritesContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToast } from '../ui/Toast';
 import Badge from '../ui/Badge';
+import TrustBadge from '../common/TrustBadge';
+import { getStoreTrust } from '../../services/trustService';
 
 const ProductCard = ({ product, onQuickView }) => {
     const navigate = useNavigate();
@@ -13,6 +15,7 @@ const ProductCard = ({ product, onQuickView }) => {
     const { isFavorite, toggleFavorite } = useFavorites();
     const { t } = useLanguage();
     const toast = useToast();
+    const [trust, setTrust] = React.useState(null);
 
     const handleQuickView = (e) => {
         e.preventDefault();
@@ -51,6 +54,12 @@ const ProductCard = ({ product, onQuickView }) => {
     const discountPercentage = product.originalPrice && product.originalPrice > product.price
         ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
         : 0;
+
+    React.useEffect(() => {
+        if (product?.storeSlug) {
+            getStoreTrust(product.storeSlug).then(setTrust).catch(() => {});
+        }
+    }, [product?.storeSlug]);
 
     return (
         <div
@@ -224,6 +233,13 @@ const ProductCard = ({ product, onQuickView }) => {
                 ">
                     {product.title}
                 </h3>
+
+                {(product.storeName || trust?.trustTier) && (
+                    <div className="flex items-center gap-2 mb-2 text-xs text-neutral-500">
+                        {product.storeName && <span>{product.storeName}</span>}
+                        {trust?.trustTier && <TrustBadge tier={trust.trustTier} />}
+                    </div>
+                )}
 
                 {/* Rating */}
                 <div className="flex items-center gap-1 sm:gap-1.5 mb-2 sm:mb-3 min-h-[18px] sm:min-h-[20px]">

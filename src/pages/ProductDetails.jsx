@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLoyalty } from '../contexts/LoyaltyContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Check, Shirt, Loader, ThumbsUp } from 'lucide-react';
+import TrustBadge from '../components/common/TrustBadge';
+import { getStoreTrust } from '../services/trustService';
 import { useProducts } from '../hooks/useProducts';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -59,6 +61,13 @@ const ProductDetails = () => {
     // Find product by ID (handle both string and number IDs)
     const product = products.find(p => String(p.id) === String(id));
     const [activeImage, setActiveImage] = useState(0);
+    const [trust, setTrust] = useState(null);
+
+    useEffect(() => {
+        if (product?.storeSlug) {
+            getStoreTrust(product.storeSlug).then(setTrust).catch(() => {});
+        }
+    }, [product?.storeSlug]);
 
     // Related products for bundles (same category, different product)
     const relatedProducts = products
@@ -135,6 +144,11 @@ const ProductDetails = () => {
                     <div className="lg:col-span-4">
                         <h1 className="text-2xl font-medium text-gray-900 mb-1">{product.title}</h1>
                         <a href={product.storeSlug ? `/store/${product.storeSlug}` : '#'} className="text-blue-600 text-sm hover:underline mb-2 block">{t('visit_store')} {product.brand}</a>
+                        {trust?.trustTier && (
+                            <div className="mb-2">
+                                <TrustBadge tier={trust.trustTier} />
+                            </div>
+                        )}
 
                         <div className="flex items-center gap-2 mb-3">
                             <div className="flex text-secondary">

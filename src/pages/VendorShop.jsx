@@ -16,6 +16,8 @@ import { getVendorOffers } from '../services/offerService';
 import OfferCard from '../components/OfferCard';
 import './VendorShop.css';
 import SEO from '../components/common/SEO';
+import TrustBadge from '../components/common/TrustBadge';
+import { getStoreTrust } from '../services/trustService';
 
 const VendorShop = () => {
     const { vendorId } = useParams();
@@ -25,6 +27,7 @@ const VendorShop = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedType, setSelectedType] = useState('all');
+    const [trust, setTrust] = useState(null);
 
     useEffect(() => {
         loadVendorData();
@@ -42,6 +45,11 @@ const VendorShop = () => {
             setVendor(vendorData);
             setOffers(offersData);
             setStats(statsData);
+
+            const slug = vendorData?.storeSlug || vendorData?.shopSlug || vendorData?.slug;
+            if (slug) {
+                getStoreTrust(slug).then(setTrust).catch(() => {});
+            }
         } catch (error) {
             console.error('Error loading vendor:', error);
         } finally {
@@ -137,6 +145,11 @@ const VendorShop = () => {
                     <div className="vendor-details">
                         <h1 className="vendor-shop-name">{vendor.shopName}</h1>
                         {getVerificationBadge()}
+                        {trust?.trustTier && (
+                            <div className="mt-2">
+                                <TrustBadge tier={trust.trustTier} />
+                            </div>
+                        )}
 
                         <div className="vendor-meta">
                             {vendor.category && (
