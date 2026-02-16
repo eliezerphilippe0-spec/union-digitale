@@ -21,11 +21,13 @@ const RiskMonitoring = () => {
   const [showSetLevel, setShowSetLevel] = useState(false);
   const [showFreeze, setShowFreeze] = useState(false);
   const [showUnfreeze, setShowUnfreeze] = useState(false);
+  const [lastDecision, setLastDecision] = useState<any>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
     level: searchParams.get('level') || 'HIGH,FROZEN',
     frozen: (searchParams.get('frozen') || '1') === '1',
     search: searchParams.get('q') || '',
+    reason: searchParams.get('reason') || '',
   });
 
   const loadStores = async (reset = false) => {
@@ -37,9 +39,15 @@ const RiskMonitoring = () => {
       cursor: reset ? null : cursor,
     });
     const items = response.items || [];
-    const filtered = filters.search
-      ? items.filter((s: any) => s.name?.toLowerCase().includes(filters.search.toLowerCase()) || s.storeId?.includes(filters.search))
-      : items;
+    const filtered = items.filter((s: any) => {
+      const matchSearch = filters.search
+        ? s.name?.toLowerCase().includes(filters.search.toLowerCase()) || s.storeId?.includes(filters.search)
+        : true;
+      const matchReason = filters.reason
+        ? s.lastEvent?.type === filters.reason
+        : true;
+      return matchSearch && matchReason;
+    });
     setStores(reset ? filtered : [...stores, ...filtered]);
     setNextCursor(response.nextCursor || null);
     setLoading(false);
@@ -65,6 +73,7 @@ const RiskMonitoring = () => {
     params.set('level', filters.level);
     params.set('frozen', filters.frozen ? '1' : '0');
     if (filters.search) params.set('q', filters.search);
+    if (filters.reason) params.set('reason', filters.reason);
     setSearchParams(params, { replace: true });
   }, [filters, setSearchParams]);
 
@@ -124,14 +133,19 @@ const RiskMonitoring = () => {
   };
 
   const evaluateStore = async (store: any, dryRun: boolean) => {
-    await api.riskEvaluate(store.storeId, { dryRun });
-    await loadStores(true);
+    const res = await api.riskEvaluate(store.storeId, { dryRun });
+    if (dryRun) {
+      setLastDecision(res?.decision || null);
+    } else {
+      await loadStores(true);
+      setLastDecision(null);
+    }
   };
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Risk & Monitoring</h1>
+        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">🛡️ Risk & Monitoring</h1>
         <div className="flex gap-2">
           <button className="px-3 py-1.5 text-xs border rounded" onClick={() => runDaily(true)}>Run Daily (Dry)</button>
           <button className="px-3 py-1.5 text-xs rounded bg-black text-white" onClick={() => runDaily(false)}>Run Now</button>
@@ -177,12 +191,21 @@ const RiskMonitoring = () => {
               <div className="text-sm font-semibold mb-2">Top reasons (24h)</div>
               <div className="grid grid-cols-2 gap-2">
                 {Object.entries(summary.signals24h).map(([key, val]: any) => (
-                  <div key={key} className="flex justify-between">
+                  <button
+                    key={key}
+                    className="flex justify-between hover:bg-gray-50 rounded px-2 py-1"
+                    onClick={() => setFilters({ ...filters, reason: key })}
+                  >
                     <span>{key}</span>
                     <span className="font-semibold">{val}</span>
-                  </div>
+                  </button>
                 ))}
               </div>
+              {filters.reason && (
+                <div className="mt-2">
+                  <button className="text-xs text-blue-600" onClick={() => setFilters({ ...filters, reason: '' })}>Clear reason filter</button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -191,6 +214,7 @@ const RiskMonitoring = () => {
       <StoreRiskDrawer
         store={selected}
         events={events}
+        decision={lastDecision}
         onClose={() => setSelected(null)}
         onEvaluate={evaluateStore}
         onSetLevel={() => setShowSetLevel(true)}

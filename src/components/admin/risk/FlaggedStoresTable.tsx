@@ -1,6 +1,8 @@
 import React from 'react';
 import RiskLevelBadge from './RiskLevelBadge';
 import SeverityBadge from './SeverityBadge';
+import PayoutFrozenPill from './PayoutFrozenPill';
+import { Shield, Gavel, Snowflake } from 'lucide-react';
 
 const FlaggedStoresTable = ({ items, loading, onSelect, onFreeze, onUnfreeze, onSetLevel }: any) => {
   return (
@@ -10,7 +12,7 @@ const FlaggedStoresTable = ({ items, loading, onSelect, onFreeze, onUnfreeze, on
           <tr>
             <th className="text-left px-4 py-3">Store</th>
             <th className="text-left px-4 py-3">Risk</th>
-            <th className="text-left px-4 py-3">Frozen</th>
+            <th className="text-left px-4 py-3">Payouts</th>
             <th className="text-left px-4 py-3">Last Eval</th>
             <th className="text-left px-4 py-3">Last Event</th>
             <th className="text-right px-4 py-3">Actions</th>
@@ -23,13 +25,13 @@ const FlaggedStoresTable = ({ items, loading, onSelect, onFreeze, onUnfreeze, on
             </tr>
           )}
           {items.map((store: any) => (
-            <tr key={store.storeId} className="border-t">
+            <tr key={store.storeId} className="border-t group">
               <td className="px-4 py-3">
                 <div className="font-medium">{store.name}</div>
                 <div className="text-xs text-gray-500">{store.storeId}</div>
               </td>
-              <td className="px-4 py-3"><RiskLevelBadge level={store.riskLevel} /></td>
-              <td className="px-4 py-3">{store.payoutsFrozen ? 'Yes' : 'No'}</td>
+              <td className="px-4 py-3 flex items-center gap-2"><Shield className="w-3 h-3 text-gray-400" /><RiskLevelBadge level={store.riskLevel} /></td>
+              <td className="px-4 py-3"><PayoutFrozenPill frozen={store.payoutsFrozen} /></td>
               <td className="px-4 py-3 text-xs text-gray-500">{store.lastRiskEvaluated || '-'}</td>
               <td className="px-4 py-3 text-xs">
                 {store.lastEvent ? (
@@ -40,13 +42,13 @@ const FlaggedStoresTable = ({ items, loading, onSelect, onFreeze, onUnfreeze, on
                 ) : '-'}
               </td>
               <td className="px-4 py-3 text-right">
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition">
                   <button className="px-2 py-1 text-xs border rounded" onClick={() => onSelect(store)}>View</button>
-                  <button className="px-2 py-1 text-xs border rounded" onClick={() => onSetLevel(store)}>Set</button>
+                  <button className="px-2 py-1 text-xs border rounded inline-flex items-center gap-1" onClick={() => onSetLevel(store)}><Gavel className="w-3 h-3" /> Set</button>
                   {store.payoutsFrozen ? (
-                    <button className="px-2 py-1 text-xs border rounded" onClick={() => onUnfreeze(store)}>Unfreeze</button>
+                    <button className="px-2 py-1 text-xs border rounded inline-flex items-center gap-1" onClick={() => onUnfreeze(store)}><Snowflake className="w-3 h-3" /> Unfreeze</button>
                   ) : (
-                    <button className="px-2 py-1 text-xs border rounded" onClick={() => onFreeze(store)}>Freeze</button>
+                    <button className="px-2 py-1 text-xs border rounded inline-flex items-center gap-1" onClick={() => onFreeze(store)}><Snowflake className="w-3 h-3" /> Freeze</button>
                   )}
                 </div>
               </td>
