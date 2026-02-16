@@ -1,11 +1,27 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingBag, Settings, LogOut, User, Banknote, Crown, ShieldCheck, BadgeCheck } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Settings, LogOut, User, Banknote, Crown, ShieldCheck, BadgeCheck, Radar } from 'lucide-react';
+import { useAdminFetch } from '../hooks/useAdminFetch';
 
 const AdminLayout = ({ children }) => {
     const location = useLocation();
+    const { adminFetch } = useAdminFetch();
+    const [insightsActive, setInsightsActive] = useState(false);
 
     const isActive = (path) => location.pathname === path;
+
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const summary = await adminFetch('/api/admin/trust/insights/summary?window=24h');
+                const hasData = (summary?.navClicks || summary?.pageViews || summary?.timelineExpands || summary?.uniqueSellers) > 0;
+                setInsightsActive(!!hasData);
+            } catch (e) {
+                setInsightsActive(false);
+            }
+        };
+        load();
+    }, [adminFetch]);
 
     return (
         <div className="flex min-h-screen bg-gray-100 font-sans">
@@ -59,6 +75,16 @@ const AdminLayout = ({ children }) => {
                     >
                         <BadgeCheck className="w-5 h-5" />
                         Trust
+                    </Link>
+                    <Link
+                        to="/admin/trust-insights"
+                        className={`flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/admin/trust-insights') ? 'bg-secondary text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
+                    >
+                        <div className="flex items-center gap-3">
+                            <Radar className="w-5 h-5" />
+                            Trust Insights
+                        </div>
+                        {insightsActive && <span className="w-2 h-2 rounded-full bg-emerald-400" />}
                     </Link>
                     <Link
                         to="/admin/risk-monitoring"
