@@ -102,6 +102,13 @@ enum StoreStatus {
   REJECTED
 }
 
+enum KycStatus {
+  UNVERIFIED
+  VERIFIED
+  PENDING
+  REJECTED
+}
+
 model Store {
   id              String      @id @default(uuid())
   userId          String      @unique
@@ -113,6 +120,8 @@ model Store {
   logo            String?
   banner          String?
   status          StoreStatus @default(PENDING)
+  kycStatus       KycStatus   @default(UNVERIFIED)
+  riskFlag        Boolean     @default(false)
   
   // Contact
   email           String?
@@ -523,6 +532,7 @@ model FinancialLedger {
   storeId   String?
   store     Store?                @relation(fields: [storeId], references: [id], onDelete: Cascade)
   payoutRequestId String?
+  payoutRequest   PayoutRequest?  @relation(fields: [payoutRequestId], references: [id], onDelete: SetNull)
   amountHTG Float
   createdAt DateTime              @default(now())
 
@@ -546,10 +556,14 @@ model PayoutRequest {
   amountHTG  Float
   method     String
   status     PayoutRequestStatus  @default(REQUESTED)
+  weekStart  DateTime?
+  batchKey   String?              @unique
   createdAt  DateTime             @default(now())
   approvedBy String?
   paidAt     DateTime?
   reference  String?
+
+  @@index([storeId])
 }
 
 model CashbackTransaction {

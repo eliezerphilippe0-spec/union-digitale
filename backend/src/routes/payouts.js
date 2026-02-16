@@ -4,6 +4,18 @@ const { authenticate, requireSeller, requireAdmin } = require('../middleware/aut
 const { AppError } = require('../middleware/errorHandler');
 
 const router = express.Router();
+const { runWeeklyPayoutBatch } = require('../jobs/payoutBatch');
+
+// Admin run payout batch
+router.post('/batch/run', authenticate, requireAdmin, async (req, res, next) => {
+  try {
+    const dryRun = String(req.query.DRY_RUN || req.body?.DRY_RUN || '').toLowerCase() === 'true';
+    const report = await runWeeklyPayoutBatch({ dryRun });
+    res.json(report);
+  } catch (error) {
+    next(error);
+  }
+});
 
 // Seller requests payout
 router.post('/request', authenticate, requireSeller, async (req, res, next) => {

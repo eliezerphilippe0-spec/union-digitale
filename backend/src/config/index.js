@@ -56,6 +56,18 @@ module.exports = {
   // Frontend URL
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:5173',
   
+  // Cashback
+  CASHBACK_EXPIRY_DAYS: parseInt(process.env.CASHBACK_EXPIRY_DAYS || '90', 10),
+  CASHBACK_MONTHLY_CAP: parseFloat(process.env.CASHBACK_MONTHLY_CAP || '5000'),
+
+  // Points
+  POINTS_VALUE_HTG: parseInt(process.env.POINTS_VALUE_HTG || '10', 10),
+  POINTS_MAX_PERCENT: parseInt(process.env.POINTS_MAX_PERCENT || '20', 10),
+  POINTS_MIN_ORDER_HTG: parseInt(process.env.POINTS_MIN_ORDER_HTG || '1000', 10),
+  POINTS_EXPIRY_DAYS: parseInt(process.env.POINTS_EXPIRY_DAYS || '365', 10),
+  POINTS_EXPIRY_SOON_DAYS: parseInt(process.env.POINTS_EXPIRY_SOON_DAYS || '14', 10),
+  PAYOUT_MIN_HTG: parseInt(process.env.PAYOUT_MIN_HTG || '2000', 10),
+
   // Pagination
   DEFAULT_PAGE_SIZE: 20,
   MAX_PAGE_SIZE: 100,

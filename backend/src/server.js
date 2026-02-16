@@ -4,15 +4,28 @@
 
 const app = require('./app');
 const config = require('./config');
-const { PrismaClient } = require('@prisma/client');
-
-const prisma = new PrismaClient();
+const prisma = require('./lib/prisma');
+const cron = require('node-cron');
+const { runWeeklyPayoutBatch } = require('./jobs/payoutBatch');
 
 async function main() {
   try {
     // Test database connection
     await prisma.$connect();
     console.log('✅ Database connected');
+
+    // Schedule points maintenance (every 6 hours)
+    const { run } = require('./jobs/pointsMaintenance');
+    setInterval(run, 6 * 60 * 60 * 1000);
+
+    // Weekly payout batch (Monday 09:00 server time)
+    cron.schedule('0 9 * * 1', async () => {
+      try {
+        await runWeeklyPayoutBatch({ dryRun: false });
+      } catch (error) {
+        console.error('Payout batch cron error:', error);
+      }
+    });
 
     // Start server
     app.listen(config.PORT, () => {
