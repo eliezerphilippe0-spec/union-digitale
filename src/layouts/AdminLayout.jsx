@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingBag, Settings, LogOut, User, Banknote, Crown } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Settings, LogOut, User, Banknote, Crown, ShieldCheck, BadgeCheck } from 'lucide-react';
 
 const AdminLayout = ({ children }) => {
     const location = useLocation();
@@ -52,6 +52,20 @@ const AdminLayout = ({ children }) => {
                     >
                         <Banknote className="w-5 h-5" />
                         Paiements
+                    </Link>
+                    <Link
+                        to="/admin/trust"
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/admin/trust') ? 'bg-secondary text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
+                    >
+                        <BadgeCheck className="w-5 h-5" />
+                        Trust
+                    </Link>
+                    <Link
+                        to="/admin/risk-monitoring"
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/admin/risk-monitoring') ? 'bg-secondary text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
+                    >
+                        <ShieldCheck className="w-5 h-5" />
+                        Risk
                     </Link>
                     <Link
                         to="/admin/subscription"
