@@ -45,6 +45,7 @@ const TrustInsights = () => {
                 <th className="text-left px-4 py-2">Store</th>
                 <th className="text-left px-4 py-2">Event</th>
                 <th className="text-left px-4 py-2">Tier</th>
+                <th className="text-left px-4 py-2">Formula</th>
                 <th className="text-left px-4 py-2">Source</th>
               </tr>
             </thead>
@@ -56,6 +57,7 @@ const TrustInsights = () => {
                   <td className="px-4 py-2 text-xs">{evt.storeId}</td>
                   <td className="px-4 py-2 text-xs">{evt.eventName}</td>
                   <td className="px-4 py-2 text-xs">{evt.metadata?.trustTier || '-'}</td>
+                  <td className="px-4 py-2 text-xs">{evt.formulaVersion || '-'}</td>
                   <td className="px-4 py-2 text-xs">{evt.metadata?.sourceDashboard || '-'}</td>
                 </tr>
               ))}

@@ -200,6 +200,16 @@ router.get('/trust/insights/summary', authenticate, requireAdmin, validate([
 
     const uniqueSellers = uniqueRows.length;
 
+    const formulaGroups = await prisma.store.groupBy({
+      by: ['trustFormulaVersion'],
+      _count: { trustFormulaVersion: true },
+    });
+
+    const formulaDistribution = formulaGroups.reduce((acc, row) => {
+      acc[row.trustFormulaVersion || 'unknown'] = row._count.trustFormulaVersion;
+      return acc;
+    }, {});
+
     res.json({
       navClicks,
       pageViews,
@@ -207,6 +217,7 @@ router.get('/trust/insights/summary', authenticate, requireAdmin, validate([
       uniqueSellers,
       navToPageRate: navClicks ? Number((pageViews / navClicks).toFixed(2)) : 0,
       pageToTimelineRate: pageViews ? Number((timelineExpands / pageViews).toFixed(2)) : 0,
+      formulaDistribution,
     });
   } catch (error) {
     next(error);
@@ -222,7 +233,20 @@ router.get('/trust/insights/events', authenticate, requireAdmin, validate([
       orderBy: { createdAt: 'desc' },
       take: limit,
     });
-    res.json({ items });
+
+    const storeIds = [...new Set(items.map((i) => i.storeId))];
+    const stores = await prisma.store.findMany({
+      where: { id: { in: storeIds } },
+      select: { id: true, trustFormulaVersion: true },
+    });
+    const storeMap = new Map(stores.map((s) => [s.id, s.trustFormulaVersion]));
+
+    const enriched = items.map((item) => ({
+      ...item,
+      formulaVersion: storeMap.get(item.storeId) || null,
+    }));
+
+    res.json({ items: enriched });
   } catch (error) {
     next(error);
   }
