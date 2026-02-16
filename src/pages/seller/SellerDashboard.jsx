@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { appApiClient } from '../../services/apiClient';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     BarChart, Bar
@@ -17,6 +18,8 @@ const SellerDashboard = () => {
     const { currentUser } = useAuth();
     const [loading, setLoading] = useState(true);
     const [period, setPeriod] = useState('30');
+    const [commissionSummary, setCommissionSummary] = useState({ totalCommission: 0, totalOrders: 0 });
+    const [commissionLoading, setCommissionLoading] = useState(false);
 
     // Données vendeur
     const [vendorData, setVendorData] = useState({
@@ -79,6 +82,22 @@ const SellerDashboard = () => {
 
     useEffect(() => {
         setTimeout(() => setLoading(false), 800);
+    }, []);
+
+    useEffect(() => {
+        const fetchCommissions = async () => {
+            try {
+                setCommissionLoading(true);
+                const res = await appApiClient.get('/stores/me/commissions/summary');
+                setCommissionSummary(res.data || { totalCommission: 0, totalOrders: 0 });
+            } catch (error) {
+                console.error('Commission summary error:', error);
+            } finally {
+                setCommissionLoading(false);
+            }
+        };
+
+        fetchCommissions();
     }, []);
 
     const formatCurrency = (value) => `${value.toLocaleString()} G`;
@@ -291,6 +310,23 @@ const SellerDashboard = () => {
                         </div>
                         <div className="text-2xl font-bold text-gray-900 mb-1">{stats.nextPayout}</div>
                         <p className="text-xs text-gray-400">{t('seller_dashboard_via_moncash')}</p>
+                    </div>
+                </div>
+
+                {/* Commissions */}
+                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="p-2 bg-amber-50 rounded-lg">
+                            <Wallet size={18} className="text-amber-600" />
+                        </div>
+                        <a href="/api/stores/me/commissions/export" className="text-xs text-amber-700 font-semibold hover:underline">Export CSV</a>
+                    </div>
+                    <div className="text-sm text-gray-500">Commissions</div>
+                    <div className="text-2xl font-bold text-gray-900 mt-1">
+                        {commissionLoading ? '...' : `${commissionSummary.totalCommission.toLocaleString()} G`}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">
+                        {commissionLoading ? '' : `${commissionSummary.totalOrders.toLocaleString()} commandes`}
                     </div>
                 </div>
 
