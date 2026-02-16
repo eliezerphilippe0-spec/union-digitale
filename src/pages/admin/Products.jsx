@@ -31,22 +31,31 @@ const AdminProducts = () => {
     });
 
     // Fetch All Items (Products + Flights)
-    const fetchItems = async (reset = false) => {
+    const fetchItems = async (reset = false, target = 'all') => {
         setLoading(true);
         try {
-            let productsQ = query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
-            let flightsQ = query(collection(db, 'flights'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
+            const shouldFetchProducts = target === 'all' || target === 'products';
+            const shouldFetchFlights = target === 'all' || target === 'flights';
 
-            if (!reset && productCursor) {
-                productsQ = query(collection(db, 'products'), orderBy('createdAt', 'desc'), startAfter(productCursor), limit(PAGE_SIZE));
+            let productsQ;
+            let flightsQ;
+
+            if (shouldFetchProducts) {
+                productsQ = query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
+                if (!reset && productCursor) {
+                    productsQ = query(collection(db, 'products'), orderBy('createdAt', 'desc'), startAfter(productCursor), limit(PAGE_SIZE));
+                }
             }
-            if (!reset && flightCursor) {
-                flightsQ = query(collection(db, 'flights'), orderBy('createdAt', 'desc'), startAfter(flightCursor), limit(PAGE_SIZE));
+            if (shouldFetchFlights) {
+                flightsQ = query(collection(db, 'flights'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
+                if (!reset && flightCursor) {
+                    flightsQ = query(collection(db, 'flights'), orderBy('createdAt', 'desc'), startAfter(flightCursor), limit(PAGE_SIZE));
+                }
             }
 
             const [productsSnap, flightsSnap] = await Promise.all([
-                getDocs(productsQ),
-                getDocs(flightsQ)
+                shouldFetchProducts ? getDocs(productsQ) : Promise.resolve({ docs: [] }),
+                shouldFetchFlights ? getDocs(flightsQ) : Promise.resolve({ docs: [] })
             ]);
 
             const productsData = productsSnap.docs.map(doc => ({
@@ -65,12 +74,16 @@ const AdminProducts = () => {
                 collection: 'flights'
             }));
 
-            const nextProductCursor = productsSnap.docs[productsSnap.docs.length - 1] || null;
-            const nextFlightCursor = flightsSnap.docs[flightsSnap.docs.length - 1] || null;
-            setProductCursor(nextProductCursor);
-            setFlightCursor(nextFlightCursor);
-            setHasMoreProducts(productsSnap.docs.length === PAGE_SIZE);
-            setHasMoreFlights(flightsSnap.docs.length === PAGE_SIZE);
+            if (shouldFetchProducts) {
+                const nextProductCursor = productsSnap.docs[productsSnap.docs.length - 1] || null;
+                setProductCursor(nextProductCursor);
+                setHasMoreProducts(productsSnap.docs.length === PAGE_SIZE);
+            }
+            if (shouldFetchFlights) {
+                const nextFlightCursor = flightsSnap.docs[flightsSnap.docs.length - 1] || null;
+                setFlightCursor(nextFlightCursor);
+                setHasMoreFlights(flightsSnap.docs.length === PAGE_SIZE);
+            }
 
             const nextItems = [...productsData, ...flightsData];
             setItems(prev => reset ? nextItems : [...prev, ...nextItems]);
@@ -216,14 +229,24 @@ const AdminProducts = () => {
                 )}
             </div>
 
-            {(hasMoreProducts || hasMoreFlights) && !loading && (
-                <div className="p-4 flex justify-center">
-                    <button
-                        onClick={() => fetchItems(false)}
-                        className="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 rounded"
-                    >
-                        {t('load_more')}
-                    </button>
+            {(!loading && (hasMoreProducts || hasMoreFlights)) && (
+                <div className="p-4 flex justify-center gap-3 flex-wrap">
+                    {hasMoreProducts && (
+                        <button
+                            onClick={() => fetchItems(false, 'products')}
+                            className="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 rounded"
+                        >
+                            {t('load_more_products') || t('load_more')}
+                        </button>
+                    )}
+                    {hasMoreFlights && (
+                        <button
+                            onClick={() => fetchItems(false, 'flights')}
+                            className="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 rounded"
+                        >
+                            {t('load_more_flights') || t('load_more')}
+                        </button>
+                    )}
                 </div>
             )}
 

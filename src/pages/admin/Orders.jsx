@@ -57,7 +57,15 @@ const AdminOrders = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                 <h3 className="text-lg font-bold">{t('latest_orders')}</h3>
-                <div className="text-sm text-gray-500">{orders.length} commandes</div>
+                <div className="flex items-center gap-3 text-sm text-gray-500">
+                    <span>{orders.length} commandes</span>
+                    <button
+                        onClick={() => fetchOrders(true)}
+                        className="px-3 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 rounded"
+                    >
+                        {t('refresh')}
+                    </button>
+                </div>
             </div>
 
             <div className="overflow-x-auto">

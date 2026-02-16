@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../../lib/firebase';
 import { collection, query, orderBy, getDocs, updateDoc, doc, limit, startAfter } from 'firebase/firestore';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -9,6 +9,7 @@ const AdminUsers = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [filter, setFilter] = useState('all'); // all, admin, seller, buyer
     const [cursor, setCursor] = useState(null);
     const [hasMore, setHasMore] = useState(true);
@@ -19,11 +20,16 @@ const AdminUsers = () => {
     }, []);
 
     useEffect(() => {
+        const handler = setTimeout(() => setDebouncedSearch(searchTerm), 300);
+        return () => clearTimeout(handler);
+    }, [searchTerm]);
+
+    useEffect(() => {
         setCursor(null);
         setUsers([]);
         setHasMore(true);
         fetchUsers(true);
-    }, [filter, searchTerm]);
+    }, [filter, debouncedSearch]);
 
     const fetchUsers = async (reset = false) => {
         setLoading(true);
@@ -71,12 +77,12 @@ const AdminUsers = () => {
         }
     };
 
-    const filteredUsers = users.filter(user => {
-        const matchesSearch = (user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.displayName?.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filteredUsers = useMemo(() => users.filter(user => {
+        const matchesSearch = (user.email?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+            user.displayName?.toLowerCase().includes(debouncedSearch.toLowerCase()));
         const matchesFilter = filter === 'all' || user.role === filter;
         return matchesSearch && matchesFilter;
-    });
+    }), [users, filter, debouncedSearch]);
 
     return (
         <div className="space-y-6">
