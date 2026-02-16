@@ -133,6 +133,15 @@ model Store {
   payoutsFrozen   Boolean     @default(false)
   freezeExpiresAt DateTime?
   lastRiskEvaluated DateTime?
+
+  trustScore         Int        @default(100)
+  trustTier          TrustTier  @default(STANDARD)
+  trustUpdatedAt     DateTime?
+  trustReasonSummary Json?
+  trustScoreStableDays Int      @default(0)
+  trustLastTierChangeAt DateTime?
+  listingBoostFactor Float      @default(1.0)
+  payoutDelayHours   Int        @default(72)
   
   // Contact
   email           String?
@@ -196,6 +205,14 @@ enum RiskSeverity {
   CRITICAL
 }
 
+enum TrustTier {
+  ELITE
+  TRUSTED
+  STANDARD
+  WATCH
+  RESTRICTED
+}
+
 model RiskEvent {
   id         String        @id @default(cuid())
   storeId    String
@@ -242,6 +259,20 @@ model JobLock {
   lockedAt  DateTime?
   expiresAt DateTime?
   lastReport Json?
+}
+
+model TrustEvent {
+  id        String    @id @default(cuid())
+  storeId   String
+  store     Store     @relation(fields: [storeId], references: [id])
+  prevScore Int
+  nextScore Int
+  prevTier  TrustTier
+  nextTier  TrustTier
+  details   Json
+  createdAt DateTime  @default(now())
+
+  @@index([storeId, createdAt])
 }
 
 // ============== PRODUCTS ==============

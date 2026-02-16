@@ -166,6 +166,16 @@ async function main() {
 
   console.log('✅ Seeded risk rule configs');
 
+  // Initialize trust fields for existing stores
+  await prisma.store.updateMany({
+    data: {
+      trustScore: 100,
+      trustTier: 'STANDARD',
+      listingBoostFactor: 1.0,
+      payoutDelayHours: 72,
+    },
+  });
+
   // Create demo products
   const products = [
     {
