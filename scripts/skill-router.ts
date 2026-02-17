@@ -63,6 +63,10 @@ if (selectedSkill === 'finance_guardian' && text.includes('refund') && !secondar
   secondarySkills = ['security_auditor', ...secondarySkills].slice(0, 2);
 }
 
+if (secondarySkills.length > 2) {
+  secondarySkills = secondarySkills.slice(0, 2);
+}
+
 let checklistStatus = 'PASSED';
 const refusalHits = (refusalRules[selectedSkill] || []).filter((k) => text.includes(k));
 if (refusalHits.length > 0) checklistStatus = 'BLOCKED';
@@ -77,6 +81,11 @@ const getChangedFiles = () => {
 };
 
 const changedFiles = getChangedFiles();
+const safeTask = String(task || '').slice(0, 500);
+const safeChangedFiles = Array.isArray(changedFiles)
+  ? changedFiles.filter((f) => typeof f === 'string').slice(0, 50)
+  : [];
+
 const output = {
   task,
   selectedSkill,
@@ -103,6 +112,7 @@ try {
 } catch (e) {
   commitHash = null;
 }
+const safeCommitHash = typeof commitHash === 'string' ? commitHash.slice(0, 100) : null;
 
 // Best-effort DB log (if prisma available)
 try {
@@ -112,13 +122,13 @@ try {
     await prisma.default.skillUsageEvent.create({
       data: {
         actor: 'openclaw',
-        task,
+        task: safeTask,
         selectedSkill,
         secondarySkills,
         result: checklistStatus,
         blocked: checklistStatus === 'BLOCKED',
-        changedFiles,
-        commitHash,
+        changedFiles: safeChangedFiles,
+        commitHash: safeCommitHash,
       },
     });
   }
