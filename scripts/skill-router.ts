@@ -16,6 +16,9 @@ const getArg = (flag) => {
 
 let task = getArg('--task');
 const forceSkill = getArg('--force');
+const overrideArg = getArg('--skill');
+const overrideEnv = process.env.SKILL_OVERRIDE || null;
+
 const testsAdded = getArg('--testsAdded') === 'true';
 
 if (!task) {
@@ -54,6 +57,16 @@ for (const rule of skillRules) {
 // priority order already in skillRules
 let selectedSkill = matched[0] || 'growth_engineer';
 if (forceSkill) selectedSkill = forceSkill;
+const overrideSkill = overrideArg || overrideEnv;
+if (overrideSkill) {
+  const allowed = ['finance_guardian','security_auditor','perf_optimizer','architecture_guard','growth_engineer'];
+  if (!allowed.includes(overrideSkill)) {
+    console.error('BLOCKED: invalid override skill');
+    process.exit(1);
+  }
+  selectedSkill = overrideSkill;
+}
+
 
 let secondarySkills = matched
   .filter((k) => k !== selectedSkill)
@@ -92,6 +105,9 @@ const output = {
   secondarySkills,
   checklistStatus,
   testsAdded: !!testsAdded,
+  overrideUsed: !!overrideSkill,
+  overrideSkill: overrideSkill || null,
+  overrideReason: overrideArg ? 'CLI' : (overrideEnv ? 'ENV' : null),
 };
 
 const skillDir = path.join(process.cwd(), '.skill');
@@ -141,4 +157,7 @@ if (checklistStatus === 'BLOCKED') {
   process.exit(1);
 }
 
+if (overrideSkill) {
+  console.warn(`WARN: skill override used (${overrideArg ? 'CLI' : 'ENV'})`);
+}
 console.log(`Selected skill: ${selectedSkill}`);
