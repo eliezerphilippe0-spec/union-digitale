@@ -100,6 +100,7 @@ if (driftWarnings.length > 0) {
 // attach warnings to last_run.json (non-blocking)
 try {
   lastRun.driftWarnings = driftWarnings;
+  lastRun.driftWarningCount = driftWarnings.length;
   fs.writeFileSync(lastRunPath, JSON.stringify(lastRun, null, 2));
 } catch (e) {}
 
@@ -133,6 +134,7 @@ try {
 
 try {
   lastRun.commitPolicyWarnings = commitPolicyWarnings;
+  lastRun.commitPolicyWarningCount = commitPolicyWarnings.length;
   fs.writeFileSync(lastRunPath, JSON.stringify(lastRun, null, 2));
 } catch (e) {}
 

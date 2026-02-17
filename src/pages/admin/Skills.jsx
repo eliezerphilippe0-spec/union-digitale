@@ -65,6 +65,27 @@ const AdminSkills = () => {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white p-4 rounded border">
+          <div className="text-xs text-gray-500">Override used</div>
+          <div className="text-2xl font-bold">{summary?.overrideUsedCount || 0}</div>
+        </div>
+        <div className="bg-white p-4 rounded border">
+          <div className="text-xs text-gray-500">Drift warnings</div>
+          <div className="text-sm text-gray-700">
+            <div>{summary?.runsWithDriftWarningsCount || 0} runs</div>
+            <div className="text-xs text-gray-500">avg {Number(summary?.avgDriftWarningsPerRun || 0).toFixed(2)}</div>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded border">
+          <div className="text-xs text-gray-500">Commit policy warnings</div>
+          <div className="text-sm text-gray-700">
+            <div>{summary?.runsWithCommitPolicyWarningsCount || 0} runs</div>
+            <div className="text-xs text-gray-500">avg {Number(summary?.avgCommitPolicyWarningsPerRun || 0).toFixed(2)}</div>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-white p-4 rounded border">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold">Recent events</h2>

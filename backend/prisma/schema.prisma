@@ -312,6 +312,9 @@ model SkillUsageEvent {
   testsAdded      Boolean  @default(true)
   result          String   @default("PASSED")
   blocked         Boolean  @default(false)
+  overrideUsed    Boolean  @default(false)
+  driftWarningCount Int    @default(0)
+  commitPolicyWarningCount Int @default(0)
   changedFiles    Json?
   commitHash      String?
 

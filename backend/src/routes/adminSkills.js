@@ -47,7 +47,7 @@ router.get('/skills/usage/summary', authenticate, requireAdmin, async (req, res,
     const { window = '7d' } = req.query;
     const since = windowToDate(window);
 
-    const [totalRuns, blockedRuns, topSkills] = await Promise.all([
+    const [totalRuns, blockedRuns, topSkills, overrideUsedCount, runsWithDriftWarningsCount, runsWithCommitPolicyWarningsCount, driftAgg, commitAgg] = await Promise.all([
       prisma.skillUsageEvent.count({ where: { createdAt: { gte: since } } }),
       prisma.skillUsageEvent.count({ where: { createdAt: { gte: since }, blocked: true } }),
       prisma.skillUsageEvent.groupBy({
@@ -57,12 +57,28 @@ router.get('/skills/usage/summary', authenticate, requireAdmin, async (req, res,
         orderBy: { _count: { selectedSkill: 'desc' } },
         take: 5,
       }),
+      prisma.skillUsageEvent.count({ where: { createdAt: { gte: since }, overrideUsed: true } }),
+      prisma.skillUsageEvent.count({ where: { createdAt: { gte: since }, driftWarningCount: { gt: 0 } } }),
+      prisma.skillUsageEvent.count({ where: { createdAt: { gte: since }, commitPolicyWarningCount: { gt: 0 } } }),
+      prisma.skillUsageEvent.aggregate({
+        where: { createdAt: { gte: since } },
+        _avg: { driftWarningCount: true },
+      }),
+      prisma.skillUsageEvent.aggregate({
+        where: { createdAt: { gte: since } },
+        _avg: { commitPolicyWarningCount: true },
+      }),
     ]);
 
     res.json({
       totalRuns,
       blockedRuns,
       topSkills: topSkills.map((s) => ({ skill: s.selectedSkill, count: s._count.selectedSkill })),
+      overrideUsedCount,
+      runsWithDriftWarningsCount,
+      runsWithCommitPolicyWarningsCount,
+      avgDriftWarningsPerRun: driftAgg?._avg?.driftWarningCount || 0,
+      avgCommitPolicyWarningsPerRun: commitAgg?._avg?.commitPolicyWarningCount || 0,
     });
   } catch (error) {
     next(error);

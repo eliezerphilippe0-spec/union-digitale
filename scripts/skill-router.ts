@@ -146,14 +146,27 @@ try {
   const prisma = await import(path.join(process.cwd(), 'backend', 'src', 'lib', 'prisma.js'))
     .catch(() => null);
   if (prisma?.default?.skillUsageEvent?.create) {
+    let driftWarningCount = 0;
+    let commitPolicyWarningCount = 0;
+    try {
+      const last = JSON.parse(fs.readFileSync(path.join(skillDir, 'last_run.json'), 'utf8'));
+      driftWarningCount = Number(last.driftWarningCount || 0);
+      commitPolicyWarningCount = Number(last.commitPolicyWarningCount || 0);
+    } catch (e) {}
+
     await prisma.default.skillUsageEvent.create({
       data: {
         actor: 'openclaw',
         task: safeTask,
         selectedSkill,
         secondarySkills,
+        checklistStatus,
+        testsAdded: !!testsAdded,
         result: checklistStatus,
         blocked: checklistStatus === 'BLOCKED',
+        overrideUsed: !!overrideSkill,
+        driftWarningCount,
+        commitPolicyWarningCount,
         changedFiles: safeChangedFiles,
         commitHash: safeCommitHash,
       },

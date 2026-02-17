@@ -10,6 +10,9 @@ CREATE TABLE IF NOT EXISTS "SkillUsageEvent" (
   "testsAdded" BOOLEAN NOT NULL DEFAULT true,
   "result" TEXT NOT NULL DEFAULT 'PASSED',
   "blocked" BOOLEAN NOT NULL DEFAULT false,
+  "overrideUsed" BOOLEAN NOT NULL DEFAULT false,
+  "driftWarningCount" INTEGER NOT NULL DEFAULT 0,
+  "commitPolicyWarningCount" INTEGER NOT NULL DEFAULT 0,
   "changedFiles" JSONB,
   "commitHash" TEXT
 );
