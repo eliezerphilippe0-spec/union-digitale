@@ -26,7 +26,7 @@ const text = task.toLowerCase();
 
 const skillRules = [
   { key: 'finance_guardian', keywords: ['escrow', 'payout', 'refund', 'commission', 'ledger', 'balance', 'wallet', 'suborder', 'suborders'] },
-  { key: 'security_auditor', keywords: ['rules', 'auth', 'admin', 'role', 'permission', 'jwt', 'webhook'] },
+  { key: 'security_auditor', keywords: ['rules', 'auth', 'role', 'permission', 'jwt', 'webhook'] },
   { key: 'perf_optimizer', keywords: ['query', 'index', 'pagination', 'firestore', 'limit', 'startafter', 'n+1'] },
   { key: 'architecture_guard', keywords: ['migration', 'schema', 'refactor', 'version', 'flag', 'compatibility'] },
   { key: 'growth_engineer', keywords: ['badge', 'tracking', 'analytics', 'kpi', 'conversion', 'a/b'] },
@@ -49,9 +49,13 @@ for (const rule of skillRules) {
 let selectedSkill = matched[0] || 'growth_engineer';
 if (forceSkill) selectedSkill = forceSkill;
 
-const secondarySkills = matched
+let secondarySkills = matched
   .filter((k) => k !== selectedSkill)
   .slice(0, 2);
+
+if (selectedSkill === 'finance_guardian' && text.includes('refund') && !secondarySkills.includes('security_auditor')) {
+  secondarySkills = ['security_auditor', ...secondarySkills].slice(0, 2);
+}
 
 let checklistStatus = 'PASSED';
 const refusalHits = (refusalRules[selectedSkill] || []).filter((k) => text.includes(k));
