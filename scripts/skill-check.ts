@@ -34,6 +34,14 @@ const getChangedFiles = () => {
 };
 
 const changed = getChangedFiles();
+const isBackendChange = (f) => (
+  f.startsWith('backend/') ||
+  f.startsWith('functions/') ||
+  f.startsWith('prisma/') ||
+  f === 'firestore.rules' ||
+  f === 'firestore.indexes.json'
+);
+
 const backendChanged = changed.some((f) => f.startsWith('backend/'));
 const financeChanged = changed.some((f) => /finance|payout|escrow|ledger|refund|commission/i.test(f));
 const rulesChanged = changed.some((f) => f === 'firestore.rules');

@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS "SkillUsageEvent" (
   "selectedSkill" TEXT NOT NULL,
   "secondarySkills" JSONB,
   "result" TEXT NOT NULL DEFAULT 'PASSED',
+  "blocked" BOOLEAN NOT NULL DEFAULT false,
   "changedFiles" JSONB,
   "commitHash" TEXT
 );
@@ -14,3 +15,4 @@ CREATE TABLE IF NOT EXISTS "SkillUsageEvent" (
 CREATE INDEX IF NOT EXISTS "SkillUsageEvent_createdAt_idx" ON "SkillUsageEvent"("createdAt");
 CREATE INDEX IF NOT EXISTS "SkillUsageEvent_selectedSkill_createdAt_idx" ON "SkillUsageEvent"("selectedSkill", "createdAt");
 CREATE INDEX IF NOT EXISTS "SkillUsageEvent_result_createdAt_idx" ON "SkillUsageEvent"("result", "createdAt");
+CREATE INDEX IF NOT EXISTS "SkillUsageEvent_blocked_createdAt_idx" ON "SkillUsageEvent"("blocked", "createdAt");

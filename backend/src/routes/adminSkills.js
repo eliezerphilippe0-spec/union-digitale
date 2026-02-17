@@ -49,7 +49,7 @@ router.get('/skills/usage/summary', authenticate, requireAdmin, async (req, res,
 
     const [totalRuns, blockedRuns, topSkills] = await Promise.all([
       prisma.skillUsageEvent.count({ where: { createdAt: { gte: since } } }),
-      prisma.skillUsageEvent.count({ where: { createdAt: { gte: since }, result: 'BLOCKED' } }),
+      prisma.skillUsageEvent.count({ where: { createdAt: { gte: since }, blocked: true } }),
       prisma.skillUsageEvent.groupBy({
         by: ['selectedSkill'],
         where: { createdAt: { gte: since } },

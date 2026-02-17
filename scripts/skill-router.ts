@@ -13,7 +13,7 @@ const getArg = (flag) => {
   return args[idx + 1] || null;
 };
 
-const task = getArg('--task');
+let task = getArg('--task');
 const forceSkill = getArg('--force');
 const testsAdded = getArg('--testsAdded') === 'true';
 
@@ -22,6 +22,12 @@ if (!task) {
   process.exit(1);
 }
 
+
+// sanitize task
+if (task) {
+  task = String(task).replace(/s+/g,' ').trim();
+  if (task.length > 500) task = task.slice(0, 500);
+}
 const text = task.toLowerCase();
 
 const skillRules = [
@@ -61,6 +67,17 @@ let checklistStatus = 'PASSED';
 const refusalHits = (refusalRules[selectedSkill] || []).filter((k) => text.includes(k));
 if (refusalHits.length > 0) checklistStatus = 'BLOCKED';
 
+const getChangedFiles = () => {
+  try {
+    const out = require('child_process').execSync('git diff --name-only --cached', { stdio: ['ignore','pipe','pipe'] }).toString();
+    return out.split('
+').filter(Boolean).slice(0,50);
+  } catch (e) {
+    return [];
+  }
+};
+
+const changedFiles = getChangedFiles();
 const output = {
   task,
   selectedSkill,

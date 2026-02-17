@@ -299,6 +299,8 @@ model SellerAnalyticsEvent {
 
 // ============== SKILLS ==============
 
+// ============== SKILLS ==============
+
 model SkillUsageEvent {
   id              String   @id @default(cuid())
   createdAt       DateTime @default(now())
@@ -307,12 +309,14 @@ model SkillUsageEvent {
   selectedSkill   String
   secondarySkills Json?
   result          String   @default("PASSED")
+  blocked         Boolean  @default(false)
   changedFiles    Json?
   commitHash      String?
 
   @@index([createdAt])
   @@index([selectedSkill, createdAt])
   @@index([result, createdAt])
+  @@index([blocked, createdAt])
 }
 
 // ============== PRODUCTS ==============
