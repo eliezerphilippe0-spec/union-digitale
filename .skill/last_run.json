@@ -1,0 +1,8 @@
+{
+  "task": "Ajouter refund après release",
+  "selectedSkill": "finance_guardian",
+  "secondarySkills": ["security_auditor"],
+  "checklistStatus": "PASSED",
+  "testsAdded": true,
+  "changelogNote": false
+}

@@ -52,3 +52,7 @@ Output `.skill/last_run.json` (example):
 }
 ```
 Commit only passes if tests are added and checklistStatus is PASSED.
+
+
+## Git hooks setup
+Run: `git config core.hooksPath .githooks` to enable the pre-commit hook.
