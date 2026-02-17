@@ -53,6 +53,7 @@ router.get('/', async (req, res, next) => {
           reviewCount: true,
           totalSales: true,
           isVerified: true,
+          isVerifiedSeller: true,
           city: true,
         },
       }),

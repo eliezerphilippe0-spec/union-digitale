@@ -7,6 +7,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useToast } from '../ui/Toast';
 import Badge from '../ui/Badge';
 import TrustBadge from '../common/TrustBadge';
+import VerifiedSellerBadge from '../common/VerifiedSellerBadge';
 import { getStoreTrust } from '../../services/trustService';
 
 const ProductCard = ({ product, onQuickView }) => {
@@ -234,10 +235,17 @@ const ProductCard = ({ product, onQuickView }) => {
                     {product.title}
                 </h3>
 
-                {(product.storeName || trust?.trustTier) && (
-                    <div className="flex items-center gap-2 mb-2 text-xs text-neutral-500">
+                {(product.storeName || trust?.trustTier || product?.store?.isVerifiedSeller) && (
+                    <div className="flex items-center gap-2 mb-2 text-xs text-neutral-500 flex-wrap">
                         {product.storeName && <span>{product.storeName}</span>}
                         {trust?.trustTier && <TrustBadge tier={trust.trustTier} />}
+                        {product?.store?.isVerifiedSeller && (
+                            <VerifiedSellerBadge
+                                storeId={product?.store?.id}
+                                productId={product?.id}
+                                location="product_card"
+                            />
+                        )}
                     </div>
                 )}
 

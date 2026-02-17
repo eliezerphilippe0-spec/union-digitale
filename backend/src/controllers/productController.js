@@ -66,7 +66,7 @@ exports.getProducts = async (req, res, next) => {
         orderBy,
         include: {
           category: { select: { id: true, name: true, slug: true } },
-          store: { select: { id: true, name: true, slug: true, rating: true } },
+          store: { select: { id: true, name: true, slug: true, rating: true, isVerifiedSeller: true } },
         },
       }),
       prisma.product.count({ where }),
@@ -108,6 +108,7 @@ exports.getProduct = async (req, res, next) => {
             rating: true,
             reviewCount: true,
             isVerified: true,
+            isVerifiedSeller: true,
           },
         },
         reviews: {

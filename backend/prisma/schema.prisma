@@ -174,8 +174,11 @@ model Store {
   commissionRate  Float       @default(0.10) // 10% default
   
   // Verification
-  isVerified      Boolean     @default(false)
-  verifiedAt      DateTime?
+  isVerified        Boolean     @default(false)
+  isVerifiedSeller  Boolean     @default(false)
+  verifiedAt        DateTime?
+  verifiedByUid     String?
+  verifiedByEmail   String?
   
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt

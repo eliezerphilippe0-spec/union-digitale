@@ -3,6 +3,7 @@ import { useLoyalty } from '../contexts/LoyaltyContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Check, Shirt, Loader, ThumbsUp } from 'lucide-react';
 import TrustBadge from '../components/common/TrustBadge';
+import VerifiedSellerBadge from '../components/common/VerifiedSellerBadge';
 import { getStoreTrust } from '../services/trustService';
 import { useProducts } from '../hooks/useProducts';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -144,9 +145,16 @@ const ProductDetails = () => {
                     <div className="lg:col-span-4">
                         <h1 className="text-2xl font-medium text-gray-900 mb-1">{product.title}</h1>
                         <a href={product.storeSlug ? `/store/${product.storeSlug}` : '#'} className="text-blue-600 text-sm hover:underline mb-2 block">{t('visit_store')} {product.brand}</a>
-                        {trust?.trustTier && (
-                            <div className="mb-2">
-                                <TrustBadge tier={trust.trustTier} />
+                        {(trust?.trustTier || product?.store?.isVerifiedSeller) && (
+                            <div className="mb-2 flex items-center gap-2 flex-wrap">
+                                {trust?.trustTier && <TrustBadge tier={trust.trustTier} />}
+                                {product?.store?.isVerifiedSeller && (
+                                    <VerifiedSellerBadge
+                                        storeId={product?.store?.id}
+                                        productId={product?.id}
+                                        location="product_detail"
+                                    />
+                                )}
                             </div>
                         )}
 

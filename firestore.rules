@@ -262,6 +262,19 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
+    match /analytics_events/{eventId} {
+      allow create: if isAuthenticated() &&
+        request.resource.data.eventName == 'verified_seller_badge_impression' &&
+        request.resource.data.storeId is string &&
+        request.resource.data.location is string &&
+        request.resource.data.createdAt is timestamp &&
+        (
+          request.resource.data.keys().hasOnly(['eventName', 'storeId', 'location', 'createdAt']) ||
+          request.resource.data.keys().hasOnly(['eventName', 'storeId', 'location', 'productId', 'createdAt'])
+        );
+      allow read, update, delete: if false;
+    }
+
     // Notifications
     match /notifications/{notificationId} {
       allow create: if isAuthenticated();

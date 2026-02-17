@@ -27,6 +27,7 @@ const payoutRoutes = require('./routes/payouts');
 const uploadRoutes = require('./routes/upload');
 const adminRiskRoutes = require('./routes/adminRisk');
 const adminTrustRoutes = require('./routes/adminTrust');
+const adminStoresRoutes = require('./routes/adminStores');
 const sellerTrustRoutes = require('./routes/sellerTrust');
 const { router: sellerAnalyticsRoutes } = require('./routes/sellerAnalytics');
 
@@ -157,6 +158,7 @@ app.use('/api/payouts', payoutRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/admin', adminRiskRoutes);
 app.use('/api/admin', adminTrustRoutes);
+app.use('/api/admin', adminStoresRoutes);
 app.use('/api/seller', sellerTrustRoutes);
 app.use('/api/seller', sellerAnalyticsRoutes);
 

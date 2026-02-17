@@ -17,6 +17,7 @@ import OfferCard from '../components/OfferCard';
 import './VendorShop.css';
 import SEO from '../components/common/SEO';
 import TrustBadge from '../components/common/TrustBadge';
+import VerifiedSellerBadge from '../components/common/VerifiedSellerBadge';
 import { getStoreTrust } from '../services/trustService';
 
 const VendorShop = () => {
@@ -145,6 +146,14 @@ const VendorShop = () => {
                     <div className="vendor-details">
                         <h1 className="vendor-shop-name">{vendor.shopName}</h1>
                         {getVerificationBadge()}
+                        {vendor?.isVerifiedSeller && (
+                            <div className="mt-2">
+                                <VerifiedSellerBadge
+                                    storeId={vendor?.id}
+                                    location="vendor_shop"
+                                />
+                            </div>
+                        )}
                         {trust?.trustTier && (
                             <div className="mt-2">
                                 <TrustBadge tier={trust.trustTier} />
