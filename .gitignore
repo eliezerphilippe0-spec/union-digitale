@@ -45,3 +45,5 @@ nul
 tmpclaude-*
 .aider*
 .cursor*
+
+/.skill/last_run.json
