@@ -1,6 +1,10 @@
 # Logs
 logs
 *.log
+
+# Skill logs
+.skill/logs/
+.skill/*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

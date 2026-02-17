@@ -64,6 +64,7 @@ const AdminSubscription = React.lazy(() => import('./pages/admin/Subscription'))
 const RiskMonitoring = React.lazy(() => import('./pages/admin/RiskMonitoring'));
 const TrustMonitoring = React.lazy(() => import('./pages/admin/TrustMonitoring'));
 const TrustInsights = React.lazy(() => import('./pages/admin/TrustInsights'));
+const AdminSkills = React.lazy(() => import('./pages/admin/Skills'));
 
 // Seller - lazy loaded
 const DashboardUltimate = React.lazy(() => import('./pages/seller/DashboardUltimate'));
@@ -292,6 +293,7 @@ function App() {
                                     <Route path="admin/risk-monitoring" element={<AdminLayout><RiskMonitoring /></AdminLayout>} />
                                     <Route path="admin/trust" element={<AdminLayout><TrustMonitoring /></AdminLayout>} />
                                     <Route path="admin/trust-insights" element={<AdminLayout><TrustInsights /></AdminLayout>} />
+                                    <Route path="admin/skills" element={<AdminLayout><AdminSkills /></AdminLayout>} />
 
                                     {/* General Routes */}
                                     <Route path="best-shops" element={<BestShops />} />

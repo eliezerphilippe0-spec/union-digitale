@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingBag, Settings, LogOut, User, Banknote, Crown, ShieldCheck, BadgeCheck, Radar } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Settings, LogOut, User, Banknote, Crown, ShieldCheck, BadgeCheck, Radar, Wrench } from 'lucide-react';
 import { useAdminFetch } from '../hooks/useAdminFetch';
 
 const AdminLayout = ({ children }) => {
@@ -92,6 +92,13 @@ const AdminLayout = ({ children }) => {
                     >
                         <ShieldCheck className="w-5 h-5" />
                         Risk
+                    </Link>
+                    <Link
+                        to="/admin/skills"
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/admin/skills') ? 'bg-secondary text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
+                    >
+                        <Wrench className="w-5 h-5" />
+                        Skills
                     </Link>
                     <Link
                         to="/admin/subscription"
