@@ -1,0 +1,3 @@
+#!/bin/sh
+# Skill enforcement
+node scripts/skill-check.ts || exit 1
