@@ -31,7 +31,6 @@ const adminStoresRoutes = require('./routes/adminStores');
 const sellerTrustRoutes = require('./routes/sellerTrust');
 const { router: sellerAnalyticsRoutes } = require('./routes/sellerAnalytics');
 const skillsRoutes = require('./routes/skills');
-const adminSkillsRoutes = require('./routes/adminSkills');
 
 const app = express();
 
@@ -162,7 +161,6 @@ app.use('/api/skills', skillsRoutes);
 app.use('/api/admin', adminRiskRoutes);
 app.use('/api/admin', adminTrustRoutes);
 app.use('/api/admin', adminStoresRoutes);
-app.use('/api/admin', adminSkillsRoutes);
 app.use('/api/seller', sellerTrustRoutes);
 app.use('/api/seller', sellerAnalyticsRoutes);
 

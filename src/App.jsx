@@ -293,7 +293,6 @@ function App() {
                                     <Route path="admin/risk-monitoring" element={<AdminLayout><RiskMonitoring /></AdminLayout>} />
                                     <Route path="admin/trust" element={<AdminLayout><TrustMonitoring /></AdminLayout>} />
                                     <Route path="admin/trust-insights" element={<AdminLayout><TrustInsights /></AdminLayout>} />
-                                    <Route path="admin/skills" element={<AdminLayout><AdminSkills /></AdminLayout>} />
 
                                     {/* General Routes */}
                                     <Route path="best-shops" element={<BestShops />} />

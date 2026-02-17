@@ -296,28 +296,6 @@ model SellerAnalyticsEvent {
   @@index([eventName, createdAt])
 }
 
-// ============== SKILLS ==============
-
-model SkillUsageEvent {
-  id          String   @id @default(cuid())
-  skillKey    String
-  skillName   String?
-  status      String   @default("success")
-  source      String   @default("api")
-  durationMs  Int?
-  actorUserId String?
-  actorEmail  String?
-  actorRole   UserRole?
-  ipAddress   String?
-  userAgent   String?
-  metadata    Json?
-  createdAt   DateTime @default(now())
-
-  @@index([skillKey, createdAt])
-  @@index([actorUserId, createdAt])
-  @@index([status, createdAt])
-}
-
 // ============== PRODUCTS ==============
 
 enum ProductStatus {
