@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS "SkillUsageEvent" (
   "task" TEXT NOT NULL,
   "selectedSkill" TEXT NOT NULL,
   "secondarySkills" JSONB,
+  "checklistStatus" TEXT NOT NULL DEFAULT 'PASSED',
+  "testsAdded" BOOLEAN NOT NULL DEFAULT true,
   "result" TEXT NOT NULL DEFAULT 'PASSED',
   "blocked" BOOLEAN NOT NULL DEFAULT false,
   "changedFiles" JSONB,

@@ -308,6 +308,8 @@ model SkillUsageEvent {
   task            String
   selectedSkill   String
   secondarySkills Json?
+  checklistStatus String   @default("PASSED")
+  testsAdded      Boolean  @default(true)
   result          String   @default("PASSED")
   blocked         Boolean  @default(false)
   changedFiles    Json?

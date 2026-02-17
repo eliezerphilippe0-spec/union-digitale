@@ -24,7 +24,22 @@ if (lastRun.checklistStatus !== 'PASSED') {
 }
 
 const getChangedFiles = () => {
-  const cmd = isCI ? 'git diff --name-only origin/main...HEAD' : 'git diff --name-only --cached';
+  if (isCI) {
+    const base = process.env.SKILL_DIFF_BASE;
+    if (!base) {
+      console.error('BLOCKED: SKILL_DIFF_BASE missing in CI');
+      process.exit(1);
+    }
+    const cmd = `git diff --name-only ${base}...HEAD`;
+    try {
+      const out = execSync(cmd, { stdio: ['ignore', 'pipe', 'pipe'] }).toString();
+      return out.split('\n').filter(Boolean);
+    } catch (e) {
+      console.error('BLOCKED: git diff failed in CI');
+      process.exit(1);
+    }
+  }
+  const cmd = 'git diff --name-only --cached';
   try {
     const out = execSync(cmd, { stdio: ['ignore', 'pipe', 'pipe'] }).toString();
     return out.split('\n').filter(Boolean);
