@@ -59,6 +59,9 @@ const normalSelectedSkill = matched[0] || 'growth_engineer';
 let selectedSkill = normalSelectedSkill;
 if (forceSkill) selectedSkill = forceSkill;
 const overrideSkill = overrideArg || overrideEnv;
+let secondarySkills = matched.filter((k) => k !== selectedSkill).slice(0, 2);
+let normalSecondarySkills = matched.filter((k) => k !== normalSelectedSkill);
+
 if (overrideSkill) {
   const allowed = ['finance_guardian','security_auditor','perf_optimizer','architecture_guard','growth_engineer'];
   if (!allowed.includes(overrideSkill)) {
@@ -68,23 +71,20 @@ if (overrideSkill) {
   selectedSkill = overrideSkill;
 }
 
+if (selectedSkill === 'finance_guardian' && text.includes('refund') && !secondarySkills.includes('security_auditor')) {
+  secondarySkills = ['security_auditor', ...secondarySkills].slice(0, 2);
+}
+
 if (overrideSkill) {
   const priority = ['finance_guardian','security_auditor','perf_optimizer','architecture_guard','growth_engineer'];
-  const normalSkills = [normalSelectedSkill, ...normalSecondarySkills]
-    .filter((k) => k !== selectedSkill);
+  const baseSkills = [normalSelectedSkill, ...normalSecondarySkills];
+  if (normalSelectedSkill === 'finance_guardian' && text.includes('refund')) {
+    baseSkills.push('security_auditor');
+  }
+  const normalSkills = baseSkills.filter((k) => k !== selectedSkill);
   secondarySkills = Array.from(new Set(normalSkills))
     .sort((a,b)=>priority.indexOf(a)-priority.indexOf(b))
     .slice(0,2);
-}
-
-
-let secondarySkills = matched.filter((k) => k !== selectedSkill).slice(0, 2);
-
-let normalSecondarySkills = matched.filter((k) => k !== normalSelectedSkill);
-
-
-if (selectedSkill === 'finance_guardian' && text.includes('refund') && !secondarySkills.includes('security_auditor')) {
-  secondarySkills = ['security_auditor', ...secondarySkills].slice(0, 2);
 }
 
 if (secondarySkills.length > 2) {
