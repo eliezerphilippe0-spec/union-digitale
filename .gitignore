@@ -1,6 +1,4 @@
 # Logs
-logs
-*.log
 /logs/skill_usage.log
 
 # Skill logs
@@ -47,3 +45,5 @@ tmpclaude-*
 .cursor*
 
 /.skill/last_run.json
+
+/.skill/
