@@ -55,7 +55,8 @@ for (const rule of skillRules) {
 }
 
 // priority order already in skillRules
-let selectedSkill = matched[0] || 'growth_engineer';
+const normalSelectedSkill = matched[0] || 'growth_engineer';
+let selectedSkill = normalSelectedSkill;
 if (forceSkill) selectedSkill = forceSkill;
 const overrideSkill = overrideArg || overrideEnv;
 if (overrideSkill) {
@@ -67,10 +68,20 @@ if (overrideSkill) {
   selectedSkill = overrideSkill;
 }
 
+if (overrideSkill) {
+  const priority = ['finance_guardian','security_auditor','perf_optimizer','architecture_guard','growth_engineer'];
+  const normalSkills = [normalSelectedSkill, ...normalSecondarySkills]
+    .filter((k) => k !== selectedSkill);
+  secondarySkills = Array.from(new Set(normalSkills))
+    .sort((a,b)=>priority.indexOf(a)-priority.indexOf(b))
+    .slice(0,2);
+}
 
-let secondarySkills = matched
-  .filter((k) => k !== selectedSkill)
-  .slice(0, 2);
+
+let secondarySkills = matched.filter((k) => k !== selectedSkill).slice(0, 2);
+
+let normalSecondarySkills = matched.filter((k) => k !== normalSelectedSkill);
+
 
 if (selectedSkill === 'finance_guardian' && text.includes('refund') && !secondarySkills.includes('security_auditor')) {
   secondarySkills = ['security_auditor', ...secondarySkills].slice(0, 2);
