@@ -296,6 +296,25 @@ model SellerAnalyticsEvent {
   @@index([eventName, createdAt])
 }
 
+
+// ============== SKILLS ==============
+
+model SkillUsageEvent {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  actor           String?
+  task            String
+  selectedSkill   String
+  secondarySkills Json?
+  result          String   @default("PASSED")
+  changedFiles    Json?
+  commitHash      String?
+
+  @@index([createdAt])
+  @@index([selectedSkill, createdAt])
+  @@index([result, createdAt])
+}
+
 // ============== PRODUCTS ==============
 
 enum ProductStatus {
