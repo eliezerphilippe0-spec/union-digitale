@@ -45,9 +45,13 @@ for (const rule of skillRules) {
   if (rule.keywords.some((k) => text.includes(k))) matched.push(rule.key);
 }
 
+// priority order already in skillRules
 let selectedSkill = matched[0] || 'growth_engineer';
 if (forceSkill) selectedSkill = forceSkill;
-const secondarySkills = matched.filter((k) => k !== selectedSkill).slice(0, 2);
+
+const secondarySkills = matched
+  .filter((k) => k !== selectedSkill)
+  .slice(0, 2);
 
 let checklistStatus = 'PASSED';
 const refusalHits = (refusalRules[selectedSkill] || []).filter((k) => text.includes(k));
