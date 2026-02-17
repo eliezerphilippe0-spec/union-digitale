@@ -1,6 +1,10 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const args = process.argv.slice(2);
 const getArg = (flag) => {
@@ -71,15 +75,18 @@ try {
 
 // Best-effort DB log (if prisma available)
 try {
-  const prisma = require(path.join(process.cwd(), 'backend', 'src', 'lib', 'prisma'));
-  prisma.skillUsageEvent?.create?.({
-    data: {
-      skillKey: selectedSkill,
-      status: checklistStatus,
-      source: 'router',
-      metadata: { task, secondarySkills },
-    },
-  }).catch(() => {});
+  const prisma = await import(path.join(process.cwd(), 'backend', 'src', 'lib', 'prisma.js'))
+    .catch(() => null);
+  if (prisma?.default?.skillUsageEvent?.create) {
+    await prisma.default.skillUsageEvent.create({
+      data: {
+        skillKey: selectedSkill,
+        status: checklistStatus,
+        source: 'router',
+        metadata: { task, secondarySkills },
+      },
+    });
+  }
 } catch (e) {
   // ignore
 }
