@@ -42,10 +42,15 @@ const isBackendChange = (f) => (
   f === 'firestore.indexes.json'
 );
 
-const backendChanged = changed.some((f) => f.startsWith('backend/'));
+const backendChanged = changed.some(isBackendChange);
 const financeChanged = changed.some((f) => /finance|payout|escrow|ledger|refund|commission/i.test(f));
 const rulesChanged = changed.some((f) => f === 'firestore.rules');
 const indexesChanged = changed.some((f) => f === 'firestore.indexes.json');
+
+if ((backendChanged || financeChanged) && lastRun.testsAdded !== true) {
+  console.error('BLOCKED: backend/finance changes require testsAdded=true');
+  process.exit(1);
+}
 
 if (indexesChanged) {
   try {
@@ -57,7 +62,7 @@ if (indexesChanged) {
 }
 
 if (rulesChanged || indexesChanged) {
-  // enforce presence only; changelog handled in review
+  // JSON validation only; changelog enforced in review
 }
 
 console.log('SKILL CHECK PASSED');

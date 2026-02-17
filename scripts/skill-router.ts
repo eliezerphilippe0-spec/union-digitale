@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from 'fs';
 import path from 'path';
+import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -22,10 +23,9 @@ if (!task) {
   process.exit(1);
 }
 
-
 // sanitize task
 if (task) {
-  task = String(task).replace(/s+/g,' ').trim();
+  task = String(task).replace(/\s+/g, ' ').trim();
   if (task.length > 500) task = task.slice(0, 500);
 }
 const text = task.toLowerCase();
@@ -69,9 +69,8 @@ if (refusalHits.length > 0) checklistStatus = 'BLOCKED';
 
 const getChangedFiles = () => {
   try {
-    const out = require('child_process').execSync('git diff --name-only --cached', { stdio: ['ignore','pipe','pipe'] }).toString();
-    return out.split('
-').filter(Boolean).slice(0,50);
+    const out = execSync('git diff --name-only --cached', { stdio: ['ignore', 'pipe', 'pipe'] }).toString();
+    return out.split('\n').filter(Boolean).slice(0, 50).map((f) => f.slice(0, 200));
   } catch (e) {
     return [];
   }
@@ -98,6 +97,13 @@ try {
   // ignore
 }
 
+let commitHash = null;
+try {
+  commitHash = execSync('git rev-parse HEAD', { stdio: ['ignore', 'pipe', 'pipe'] }).toString().trim();
+} catch (e) {
+  commitHash = null;
+}
+
 // Best-effort DB log (if prisma available)
 try {
   const prisma = await import(path.join(process.cwd(), 'backend', 'src', 'lib', 'prisma.js'))
@@ -105,10 +111,14 @@ try {
   if (prisma?.default?.skillUsageEvent?.create) {
     await prisma.default.skillUsageEvent.create({
       data: {
-        skillKey: selectedSkill,
-        status: checklistStatus,
-        source: 'router',
-        metadata: { task, secondarySkills },
+        actor: 'openclaw',
+        task,
+        selectedSkill,
+        secondarySkills,
+        result: checklistStatus,
+        blocked: checklistStatus === 'BLOCKED',
+        changedFiles,
+        commitHash,
       },
     });
   }
