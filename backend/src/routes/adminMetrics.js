@@ -3,6 +3,7 @@ const prisma = require('../lib/prisma');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 const { query } = require('express-validator');
 const validate = require('../middleware/validate');
+const { computeVerifiedSellerUpliftFirestore } = require('../services/metrics/verifiedUpliftFirestore');
 
 const router = express.Router();
 
@@ -69,6 +70,14 @@ router.get('/metrics/summary', authenticate, requireAdmin, validate([
       _count: { _all: true },
     });
 
+    const upliftResult = await computeVerifiedSellerUpliftFirestore({
+      from: since,
+      to: now,
+      budgetMs: 1200,
+      maxDocs: 15000,
+      STORE_KEY_MODE: 'DOC_ID',
+    });
+
     const revenueConfirmed = Number(orderAgg._sum.total || 0);
     const ordersConfirmed = Number(orderAgg._count._all || 0);
     const aovConfirmed = ordersConfirmed ? Number((revenueConfirmed / ordersConfirmed).toFixed(2)) : 0;
@@ -113,8 +122,8 @@ router.get('/metrics/summary', authenticate, requireAdmin, validate([
       trustBadgeCTR,
       trackingSupportClicks,
       trackingTicketRate,
-      verifiedSellerUplift,
-      verifiedUpliftStatus,
+      verifiedSellerUplift: upliftResult.data,
+      verifiedUpliftStatus: upliftResult.status,
       rates: {
         cartToCheckout: safeRate(checkoutStarts, cartCheckoutClicks),
         checkoutCompletion: safeRate(checkoutCompletions, checkoutStarts),
