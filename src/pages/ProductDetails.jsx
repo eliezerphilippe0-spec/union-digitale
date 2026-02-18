@@ -1,42 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { useLoyalty } from '../contexts/LoyaltyContext';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Check, Shirt, Loader, ThumbsUp } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Shirt, Loader, ThumbsUp } from 'lucide-react';
 import TrustBadge from '../components/common/TrustBadge';
 import VerifiedSellerBadge from '../components/common/VerifiedSellerBadge';
 import TrustRow from '../components/common/TrustRow';
 import { getStoreTrust } from '../services/trustService';
 import { useProducts } from '../hooks/useProducts';
 import { useLanguage } from '../contexts/LanguageContext';
+import { logProductCtaVisible, logProductAddToCartClick } from '../utils/analytics';
+import { buildResponsiveImage } from '../utils/imageProvider';
 
 import SocialProof from '../components/marketing/SocialProof';
-import CrossSell from '../components/product/CrossSell';
-import VirtualFittingRoom from '../components/VirtualFittingRoom';
-import ReviewSection from '../components/product/ReviewSection';
 import SEO from '../components/common/SEO';
 import { useCart } from '../contexts/CartContext';
 import { useToast } from '../components/ui/Toast';
 import StickyAddToCart from '../components/product/StickyAddToCart';
-import UrgencyIndicators, { StockWarning, LiveViewers, RecentSales } from '../components/marketing/UrgencyIndicators';
+import { StockWarning, LiveViewers, RecentSales } from '../components/marketing/UrgencyIndicators';
 import ImageZoom from '../components/product/ImageZoom';
 // Nouveaux composants inspirés des géants
-import FrequentlyBoughtTogether from '../components/product/FrequentlyBoughtTogether';
-import ProductVariants from '../components/product/ProductVariants';
 import BuyNowButton from '../components/product/BuyNowButton';
-import QuestionsAnswers from '../components/product/QuestionsAnswers';
-import DeliveryEstimate from '../components/product/DeliveryEstimate';
 // Composants spécifiques produits digitaux
 import { 
-    DigitalProductFeatures, 
-    CourseContent, 
-    DigitalPreview, 
-    InstructorCard, 
     DigitalBuyBox 
 } from '../components/digital';
 
+const CrossSell = lazy(() => import('../components/product/CrossSell'));
+const VirtualFittingRoom = lazy(() => import('../components/VirtualFittingRoom'));
+const ReviewSection = lazy(() => import('../components/product/ReviewSection'));
+const FrequentlyBoughtTogether = lazy(() => import('../components/product/FrequentlyBoughtTogether'));
+const QuestionsAnswers = lazy(() => import('../components/product/QuestionsAnswers'));
+const DeliveryEstimate = lazy(() => import('../components/product/DeliveryEstimate'));
+const DigitalProductFeatures = lazy(() => import('../components/digital/DigitalProductFeatures'));
+const CourseContent = lazy(() => import('../components/digital/CourseContent'));
+const DigitalPreview = lazy(() => import('../components/digital/DigitalPreview'));
+const InstructorCard = lazy(() => import('../components/digital/InstructorCard'));
+
 const ProductDetails = () => {
     const { id } = useParams();
-    const navigate = useNavigate();
     const [quantity, setQuantity] = useState(1);
     const { products, loading } = useProducts();
     const { t } = useLanguage();
@@ -54,14 +55,14 @@ const ProductDetails = () => {
     const cashbackRate = cashbackRateMap[loyaltyData?.tier] || 0.02;
     const tierInfo = getTierInfo(loyaltyData?.tier);
     const [showFittingRoom, setShowFittingRoom] = useState(false);
-    const [selectedVariants, setSelectedVariants] = useState({});
     const [showDigitalPreview, setShowDigitalPreview] = useState(false);
-
-    // Check if product is digital
-    const isDigitalProduct = product?.type === 'digital';
+    const ctaRefs = useRef([]);
 
     // Find product by ID (handle both string and number IDs)
     const product = products.find(p => String(p.id) === String(id));
+
+    // Check if product is digital
+    const isDigitalProduct = product?.type === 'digital';
     const [activeImage, setActiveImage] = useState(0);
     const [trust, setTrust] = useState(null);
 
@@ -70,6 +71,75 @@ const ProductDetails = () => {
             getStoreTrust(product.storeSlug).then(setTrust).catch(() => {});
         }
     }, [product?.storeSlug]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        sessionStorage.setItem('image_budget_version', 'product-details-v1');
+    }, []);
+
+    const registerCtaRef = (node) => {
+        if (node && !ctaRefs.current.includes(node)) {
+            ctaRefs.current.push(node);
+        }
+    };
+
+    const LazySection = ({ children, minHeight = 240, rootMargin = '200px', className = '' }) => {
+        const [isVisible, setIsVisible] = useState(false);
+        const sectionRef = useRef(null);
+
+        useEffect(() => {
+            if (isVisible) return;
+            if (typeof window === 'undefined') {
+                setIsVisible(true);
+                return;
+            }
+
+            const node = sectionRef.current;
+            if (!node || !('IntersectionObserver' in window)) {
+                setIsVisible(true);
+                return;
+            }
+
+            const observer = new IntersectionObserver(
+                ([entry]) => {
+                    if (entry.isIntersecting) {
+                        setIsVisible(true);
+                        observer.disconnect();
+                    }
+                },
+                { rootMargin }
+            );
+
+            observer.observe(node);
+
+            return () => observer.disconnect();
+        }, [isVisible, rootMargin]);
+
+        return (
+            <div ref={sectionRef} className={`w-full ${className}`} style={{ minHeight: `${minHeight}px` }}>
+                {isVisible ? children : <div className="w-full h-full rounded-xl bg-gray-50 animate-pulse" />}
+            </div>
+        );
+    };
+
+    useEffect(() => {
+        if (!product?.id) return;
+        if (!ctaRefs.current.length) return;
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        logProductCtaVisible({ productId: product.id, price: product.price });
+                    }
+                });
+            },
+            { threshold: 0.5 }
+        );
+
+        ctaRefs.current.forEach((node) => observer.observe(node));
+
+        return () => observer.disconnect();
+    }, [product?.id, product?.price]);
 
     const trustItems = [
         {
@@ -99,11 +169,9 @@ const ProductDetails = () => {
         .slice(0, 4);
 
     // Handle variant change
-    const handleVariantChange = (type, value) => {
-        setSelectedVariants(prev => ({ ...prev, [type]: value }));
-    };
 
     const handleAddToCart = () => {
+        logProductAddToCartClick({ productId: product.id, price: product.price });
         for (let i = 0; i < quantity; i++) {
             addToCart(product);
         }
@@ -117,6 +185,13 @@ const ProductDetails = () => {
     if (!product) {
         return <div className="p-8 text-center">{t('product_not_found')}</div>;
     }
+
+    const mainImage = (product.images && product.images.length > 0 ? product.images[0] : product.image);
+    const activeImageSrc = (product.images && product.images[activeImage]) || product.image;
+    const preloadImage = mainImage && (mainImage.startsWith('http') || mainImage.startsWith('/')) ? mainImage : null;
+
+    const IMAGE_WIDTHS = [360, 480, 640, 800, 960, 1200];
+    const THUMB_WIDTHS = [48, 72, 96, 120, 160];
 
     return (
         <div className="bg-white min-h-screen py-8">
@@ -139,7 +214,22 @@ const ProductDetails = () => {
                                 >
                                     {/* Handle both Emoji mocks and URL images */}
                                     {img && (img.startsWith('http') || img.startsWith('/')) ? (
-                                        <img src={img} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
+                                        {(() => {
+                                            const { src, srcSet } = buildResponsiveImage(img, THUMB_WIDTHS);
+                                            return (
+                                                <img
+                                                    src={src}
+                                                    srcSet={srcSet}
+                                                    sizes="48px"
+                                                    width={48}
+                                                    height={48}
+                                                    alt={`Thumb ${idx}`}
+                                                    loading={idx === 0 ? 'eager' : 'lazy'}
+                                                    decoding="async"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            );
+                                        })()}
                                     ) : (
                                         <span className="text-xs text-gray-400">{img || 'Img'}</span>
                                     )}
@@ -149,12 +239,31 @@ const ProductDetails = () => {
 
                         {/* Main Image with Zoom - P3 FIX */}
                         <div className="flex-1 relative">
-                            <ImageZoom
-                                src={(product.images && product.images[activeImage]) || product.image}
-                                alt={product.title}
-                                placeholder={product.title?.charAt(0) || '📦'}
-                                className="min-h-[280px] md:min-h-[400px] border border-gray-100"
-                            />
+                            {(() => {
+                                const { src, srcSet } = buildResponsiveImage(activeImageSrc, IMAGE_WIDTHS);
+                                const imgWidth = product?.imageWidth || 800;
+                                const imgHeight = product?.imageHeight || 1000;
+                                const aspectRatio = product?.imageWidth && product?.imageHeight
+                                    ? `${product.imageWidth} / ${product.imageHeight}`
+                                    : '4 / 5';
+                                return (
+                                    <ImageZoom
+                                        src={src}
+                                        alt={product.title}
+                                        placeholder={product.title?.charAt(0) || '📦'}
+                                        loading={activeImage === 0 ? 'eager' : 'lazy'}
+                                        fetchPriority={activeImage === 0 ? 'high' : 'auto'}
+                                        decoding="async"
+                                        width={imgWidth}
+                                        height={imgHeight}
+                                        sizes="(min-width: 1024px) 40vw, (min-width: 768px) 60vw, 90vw"
+                                        srcSet={srcSet}
+                                        aspectRatio={aspectRatio}
+                                        objectFit="cover"
+                                        className="min-h-[280px] md:min-h-[400px] border border-gray-100"
+                                    />
+                                );
+                            })()}
 
                             {product.type === 'digital' && (
                                 <div className="absolute top-4 right-4 bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded flex items-center gap-1 z-10">
@@ -262,6 +371,20 @@ const ProductDetails = () => {
 
                         <TrustRow items={trustItems} size="md" pill variant="full" className="mb-4" />
 
+                        <div className="lg:hidden mb-5">
+                            <button
+                                ref={registerCtaRef}
+                                onClick={handleAddToCart}
+                                className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 font-bold py-3 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+                            >
+                                <span>🛒</span>
+                                {t('add_to_cart')}
+                            </button>
+                            <p className="text-xs text-gray-500 mt-2 text-center">
+                                {t('secure_transaction')}
+                            </p>
+                        </div>
+
                         <div className="mb-4">
                             <h3 className="font-bold mb-2">{t('about_item')}</h3>
                             <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
@@ -323,7 +446,7 @@ const ProductDetails = () => {
 
                             {/* Urgency Indicators */}
                             <div className="mb-4 space-y-2">
-                                <StockWarning stock={product.stock || 8} />
+                                <StockWarning stock={product.stock || 8} productId={product.id} price={product.price} />
                                 <LiveViewers productId={product.id} />
                                 <RecentSales count={product.recentSales || 12} hours={24} />
                             </div>
@@ -334,6 +457,7 @@ const ProductDetails = () => {
                                 title={product.title}
                                 description={product.description}
                                 image={product.image} // Note: This assumes image is a URL, but current mock data uses emojis. In real app, this would be product.imageUrl
+                                preloadImage={preloadImage}
                             />
 
                             <div className="space-y-3">
@@ -349,6 +473,7 @@ const ProductDetails = () => {
                                 </div>
 
                                 <button
+                                    ref={registerCtaRef}
                                     onClick={handleAddToCart}
                                     className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 font-bold py-3 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
                                 >
@@ -394,79 +519,99 @@ const ProductDetails = () => {
                     {isDigitalProduct && (
                         <>
                             {/* Course Content / Table of Contents */}
-                            <div className="lg:col-span-8">
-                                <CourseContent course={product} />
-                            </div>
+                            <LazySection className="lg:col-span-8" minHeight={320}>
+                                <Suspense fallback={<div className="w-full min-h-[320px] rounded-xl bg-gray-50 animate-pulse" />}>
+                                    <CourseContent course={product} />
+                                </Suspense>
+                            </LazySection>
                             
                             {/* Instructor / Author Card */}
-                            <div className="lg:col-span-4">
-                                <InstructorCard instructor={product.instructor} />
-                            </div>
+                            <LazySection className="lg:col-span-4" minHeight={320}>
+                                <Suspense fallback={<div className="w-full min-h-[320px] rounded-xl bg-gray-50 animate-pulse" />}>
+                                    <InstructorCard instructor={product.instructor} />
+                                </Suspense>
+                            </LazySection>
                             
                             {/* Digital Product Features */}
-                            <div className="lg:col-span-12">
-                                <DigitalProductFeatures product={product} />
-                            </div>
+                            <LazySection className="lg:col-span-12" minHeight={320}>
+                                <Suspense fallback={<div className="w-full min-h-[320px] rounded-xl bg-gray-50 animate-pulse" />}>
+                                    <DigitalProductFeatures product={product} />
+                                </Suspense>
+                            </LazySection>
                         </>
                     )}
 
                     {/* Frequently Bought Together - Amazon Style */}
-                    <div className="lg:col-span-12">
-                        <FrequentlyBoughtTogether 
-                            mainProduct={product} 
-                            relatedProducts={relatedProducts}
-                        />
-                    </div>
+                    <LazySection className="lg:col-span-12" minHeight={360}>
+                        <Suspense fallback={<div className="w-full min-h-[360px] rounded-xl bg-gray-50 animate-pulse" />}>
+                            <FrequentlyBoughtTogether 
+                                mainProduct={product} 
+                                relatedProducts={relatedProducts}
+                            />
+                        </Suspense>
+                    </LazySection>
 
                     {/* Delivery Estimate - Only for physical */}
                     {!isDigitalProduct && (
-                        <div className="lg:col-span-12">
-                            <DeliveryEstimate 
-                                department="Ouest"
-                                hasUnionPlus={product.unionPlus}
-                                productType={product.type}
-                            />
-                        </div>
+                        <LazySection className="lg:col-span-12" minHeight={200}>
+                            <Suspense fallback={<div className="w-full min-h-[200px] rounded-xl bg-gray-50 animate-pulse" />}>
+                                <DeliveryEstimate 
+                                    department="Ouest"
+                                    hasUnionPlus={product.unionPlus}
+                                    productType={product.type}
+                                />
+                            </Suspense>
+                        </LazySection>
                     )}
 
                     {/* Questions & Answers - Amazon Style */}
-                    <div className="lg:col-span-12">
-                        <QuestionsAnswers productId={id} />
-                    </div>
+                    <LazySection className="lg:col-span-12" minHeight={280}>
+                        <Suspense fallback={<div className="w-full min-h-[280px] rounded-xl bg-gray-50 animate-pulse" />}>
+                            <QuestionsAnswers productId={id} />
+                        </Suspense>
+                    </LazySection>
 
                     {/* Review Section */}
-                    <div className="lg:col-span-12">
-                        <ReviewSection productId={id} />
-                    </div>
+                    <LazySection className="lg:col-span-12" minHeight={320}>
+                        <Suspense fallback={<div className="w-full min-h-[320px] rounded-xl bg-gray-50 animate-pulse" />}>
+                            <ReviewSection productId={id} />
+                        </Suspense>
+                    </LazySection>
 
                     {/* Cross Sell Section */}
-                    <div className="lg:col-span-12">
-                        <CrossSell currentProduct={product} products={products} />
-                    </div>
+                    <LazySection className="lg:col-span-12" minHeight={320}>
+                        <Suspense fallback={<div className="w-full min-h-[320px] rounded-xl bg-gray-50 animate-pulse" />}>
+                            <CrossSell currentProduct={product} products={products} />
+                        </Suspense>
+                    </LazySection>
                 </div>
             </div>
 
             {/* Virtual Fitting Room Modal */}
             {showFittingRoom && (
-                <VirtualFittingRoom
-                    product={product}
-                    onClose={() => setShowFittingRoom(false)}
-                    onAddToCart={(prod, size) => {
-                        addToCart({ ...prod, selectedSize: size });
-                        if (toast) {
-                            toast.success(`Ajouté au panier - Taille ${size}`);
-                        }
-                    }}
-                />
+                <Suspense fallback={null}>
+                    <VirtualFittingRoom
+                        product={product}
+                        onClose={() => setShowFittingRoom(false)}
+                        onAddToCart={(prod, size) => {
+                            addToCart({ ...prod, selectedSize: size });
+                            if (toast) {
+                                toast.success(`Ajouté au panier - Taille ${size}`);
+                            }
+                        }}
+                    />
+                </Suspense>
             )}
 
             {/* Digital Preview Modal */}
             {showDigitalPreview && isDigitalProduct && (
-                <DigitalPreview
-                    product={product}
-                    isOpen={showDigitalPreview}
-                    onClose={() => setShowDigitalPreview(false)}
-                />
+                <Suspense fallback={null}>
+                    <DigitalPreview
+                        product={product}
+                        isOpen={showDigitalPreview}
+                        onClose={() => setShowDigitalPreview(false)}
+                    />
+                </Suspense>
             )}
 
             {/* Sticky Add to Cart for Mobile */}

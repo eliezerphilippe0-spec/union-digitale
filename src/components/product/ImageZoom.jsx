@@ -6,7 +6,21 @@
 import React, { useState, useRef } from 'react';
 import { ZoomIn } from 'lucide-react';
 
-const ImageZoom = ({ src, alt, placeholder, className = '' }) => {
+const ImageZoom = ({
+    src,
+    alt,
+    placeholder,
+    className = '',
+    loading = 'lazy',
+    fetchPriority = 'auto',
+    decoding = 'async',
+    width,
+    height,
+    sizes,
+    srcSet,
+    aspectRatio,
+    objectFit = 'contain',
+}) => {
     const [isZooming, setIsZooming] = useState(false);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const containerRef = useRef(null);
@@ -27,6 +41,7 @@ const ImageZoom = ({ src, alt, placeholder, className = '' }) => {
         <div 
             ref={containerRef}
             className={`relative overflow-hidden rounded-lg bg-gray-50 cursor-zoom-in ${className}`}
+            style={aspectRatio ? { aspectRatio } : undefined}
             onMouseEnter={() => setIsZooming(true)}
             onMouseLeave={() => setIsZooming(false)}
             onMouseMove={handleMouseMove}
@@ -36,7 +51,14 @@ const ImageZoom = ({ src, alt, placeholder, className = '' }) => {
                 <img 
                     src={src} 
                     alt={alt}
-                    className="w-full h-full object-contain transition-transform duration-300"
+                    loading={loading}
+                    fetchPriority={fetchPriority}
+                    decoding={decoding}
+                    width={width}
+                    height={height}
+                    sizes={sizes}
+                    srcSet={srcSet}
+                    className={`w-full h-full object-${objectFit} transition-transform duration-300`}
                     style={{
                         transform: isZooming ? 'scale(1.1)' : 'scale(1)',
                     }}
