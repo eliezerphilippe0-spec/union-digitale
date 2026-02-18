@@ -65,6 +65,9 @@ const AdminMetrics = () => {
           <div className="text-xs text-slate-400 mt-2">
             Non‑verified: {formatPct(summary?.verifiedSellerUplift?.counts?.nonVerified?.conversionRate)}
           </div>
+          <div className="text-xs text-slate-400 mt-1">
+            Snapshot coverage: {formatPct(summary?.verifiedSellerUplift?.snapshot?.coverageRate)}
+          </div>
         </div>
         <Card label="Redirect drop" value={formatPct(summary?.redirectDropRate)} />
       </div>

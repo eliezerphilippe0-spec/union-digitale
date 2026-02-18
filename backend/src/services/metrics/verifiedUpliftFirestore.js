@@ -90,6 +90,8 @@ const computeVerifiedSellerUpliftFirestore = async ({
 
   const vendorAgg = new Map();
   let hasSnapshot = false;
+  let snapshotCovered = 0;
+  let snapshotTotal = 0;
 
   while (cursorFrom < end) {
     if (Date.now() - started > budgetMs) {
@@ -117,7 +119,12 @@ const computeVerifiedSellerUpliftFirestore = async ({
       if (typeof d.isVerifiedSellerSnapshot === 'boolean') hasSnapshot = true;
       const agg = vendorAgg.get(vendorId) || { total: 0, converted: 0, snapshot: null };
       agg.total += 1;
-      if (isConvertedSubOrder(d)) agg.converted += 1;
+      const converted = isConvertedSubOrder(d);
+      if (converted) {
+        agg.converted += 1;
+        snapshotTotal += 1;
+        if (typeof d.isVerifiedSellerSnapshot === 'boolean') snapshotCovered += 1;
+      }
       if (agg.snapshot === null && typeof d.isVerifiedSellerSnapshot === 'boolean') {
         agg.snapshot = d.isVerifiedSellerSnapshot;
       }
@@ -137,6 +144,7 @@ const computeVerifiedSellerUpliftFirestore = async ({
         nonVerified: { subs: 0, converted: 0, conversionRate: 0 },
       },
       uplift: { conversionDelta: null, conversionLiftPct: null },
+      snapshot: { coveredCount: 0, totalCount: 0, coverageRate: 0 },
     };
     cacheSet(cacheKey, emptyValue);
     return { status: 'EMPTY', data: emptyValue, scanned, cache: 'MISS' };
@@ -176,6 +184,11 @@ const computeVerifiedSellerUpliftFirestore = async ({
     uplift: {
       conversionDelta: (vSub + nvSub) > 0 ? (clamp01(rateV) - clamp01(rateNV)) : null,
       conversionLiftPct: rateNV > 0 ? (rateV - rateNV) / rateNV : null,
+    },
+    snapshot: {
+      coveredCount: snapshotCovered,
+      totalCount: snapshotTotal,
+      coverageRate: clamp01(snapshotTotal > 0 ? snapshotCovered / snapshotTotal : 0),
     },
   };
 
