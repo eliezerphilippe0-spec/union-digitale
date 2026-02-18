@@ -35,6 +35,8 @@ router.get('/metrics/summary', authenticate, requireAdmin, validate([
         COUNT(*) FILTER (WHERE "eventName" = 'checkout_completed') AS "checkoutCompletions",
         COUNT(*) FILTER (WHERE "eventName" = 'checkout_payment_success' AND ("eventData"->>'successSource') = 'confirmed') AS "paymentSuccessConfirmed",
         COUNT(*) FILTER (WHERE "eventName" = 'checkout_payment_success' AND ("eventData"->>'successSource') = 'redirect') AS "paymentSuccessRedirect",
+        COUNT(*) FILTER (WHERE "eventName" = 'checkout_payment_webhook_received') AS "paymentWebhookReceived",
+        COUNT(*) FILTER (WHERE "eventName" IN ('checkout_payment_reconciliation_fixed','payment_reconciliation_fixed')) AS "paymentReconciliationFixed",
         COUNT(*) FILTER (WHERE "eventName" = 'cart_upsell_visible') AS "upsellVisible",
         COUNT(*) FILTER (WHERE "eventName" = 'cart_upsell_added') AS "upsellAdded",
         COUNT(*) FILTER (WHERE "eventName" = 'pickup_order_persisted') AS "pickupOrders",
@@ -53,6 +55,8 @@ router.get('/metrics/summary', authenticate, requireAdmin, validate([
     const checkoutCompletions = toNumber(row.checkoutCompletions);
     const paymentSuccessConfirmed = toNumber(row.paymentSuccessConfirmed);
     const paymentSuccessRedirect = toNumber(row.paymentSuccessRedirect);
+    const paymentWebhookReceived = toNumber(row.paymentWebhookReceived);
+    const paymentReconciliationFixed = toNumber(row.paymentReconciliationFixed);
     const upsellVisible = toNumber(row.upsellVisible);
     const upsellAdded = toNumber(row.upsellAdded);
     const pickupOrders = toNumber(row.pickupOrders);
@@ -90,6 +94,9 @@ router.get('/metrics/summary', authenticate, requireAdmin, validate([
     };
 
     const redirectDropRate = safeRate((paymentSuccessRedirect - paymentSuccessConfirmed), Math.max(paymentSuccessRedirect, 1));
+    const redirectToWebhookDropRate = safeRate((paymentSuccessRedirect - paymentWebhookReceived), Math.max(paymentSuccessRedirect, 1));
+    const webhookToConfirmedDropRate = safeRate((paymentWebhookReceived - paymentSuccessConfirmed), Math.max(paymentWebhookReceived, 1));
+    const reconciliationFixRate = safeRate(paymentReconciliationFixed, Math.max(paymentSuccessRedirect, 1));
     const upsellAttachRate = safeRate(upsellAdded, Math.max(upsellVisible, 1));
     const pickupAdoptionRate = safeRate(pickupOrders, Math.max(ordersConfirmed, 1));
     const trustBadgeCTR = safeRate(trustClick, Math.max(trustVisible, 1));
@@ -110,8 +117,13 @@ router.get('/metrics/summary', authenticate, requireAdmin, validate([
       revenueConfirmed,
       aovConfirmed,
       redirectSuccess: paymentSuccessRedirect,
+      webhookReceived: paymentWebhookReceived,
       confirmedSuccess: paymentSuccessConfirmed,
+      reconciliationFixedCount: paymentReconciliationFixed,
       redirectDropRate,
+      redirectToWebhookDropRate,
+      webhookToConfirmedDropRate,
+      reconciliationFixRate,
       upsellVisible,
       upsellAdded,
       upsellAttachRate,

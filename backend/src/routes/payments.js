@@ -12,9 +12,32 @@ const moncashService = require('../services/moncashService');
 const natcashService = require('../services/natcashService');
 const validate = require('../middleware/validate');
 const { body } = require('express-validator');
-const { assertNoDuplicateLedger, assertNonNegative } = require('../utils/financeGuards');
+const { redeemPointsOnPayment, awardCashbackAndPoints, applyEscrowAndCommission } = require('../services/paymentCompletion');
 
 const router = express.Router();
+
+const logPaymentEvent = (event, payload = {}) => {
+  try {
+    console.log(JSON.stringify({ event, ...payload }));
+  } catch (error) {
+    console.log(JSON.stringify({ event, error: 'event_log_failed' }));
+  }
+};
+
+const getPaymentSuccessSource = (order) => {
+  if (!order) return null;
+  return order.paymentStatus === 'PAID' ? 'confirmed' : null;
+};
+
+const recheckRateBuckets = new Map();
+const checkRecheckRateLimit = (orderId) => {
+  const now = Date.now();
+  const bucket = recheckRateBuckets.get(orderId) || { lastCalledAt: 0 };
+  if (now - bucket.lastCalledAt < 30 * 1000) return false;
+  bucket.lastCalledAt = now;
+  recheckRateBuckets.set(orderId, bucket);
+  return true;
+};
 
 const paymentLimiter = require('express-rate-limit')({
   windowMs: 5 * 60 * 1000,
@@ -28,250 +51,36 @@ const initPaymentRules = [
   body('customerPhone').optional().isString().isLength({ min: 6 }).withMessage('Téléphone invalide'),
 ];
 
-const CASHBACK_RATES = {
-  bronze: 0.01,
-  silver: 0.02,
-  gold: 0.03,
-  platinum: 0.05,
-  diamond: 0.07,
-};
+const confirmPaymentIfNeeded = async ({ order, paymentId, provider, successSource }) => {
+  if (!order) return null;
+  if (order.paymentStatus === 'PAID') return order;
 
-const calculateTier = (points = 0) => {
-  if (points >= 50000) return 'diamond';
-  if (points >= 15000) return 'platinum';
-  if (points >= 5000) return 'gold';
-  if (points >= 1000) return 'silver';
-  return 'bronze';
-};
-
-const expireCashbackIfNeeded = async (userId) => {
-  const now = new Date();
-  const expired = await prisma.cashbackTransaction.findMany({
-    where: {
-      userId,
-      status: 'AVAILABLE',
-      expiresAt: { lt: now },
-    },
-  });
-
-  if (expired.length === 0) return;
-
-  const totalExpired = expired.reduce((sum, t) => sum + t.amount, 0);
-
-  await prisma.cashbackTransaction.updateMany({
-    where: {
-      id: { in: expired.map(t => t.id) },
-    },
-    data: { status: 'EXPIRED' },
-  });
-
-  await prisma.user.update({
-    where: { id: userId },
+  const updated = await prisma.order.update({
+    where: { id: order.id },
     data: {
-      cashbackBalance: { decrement: totalExpired },
-    },
-  });
-};
-
-const awardCashbackAndPoints = async (order) => {
-  await expireCashbackIfNeeded(order.userId);
-
-  const user = await prisma.user.findUnique({ where: { id: order.userId } });
-  if (!user) return;
-
-  const newPoints = (user.loyaltyPoints || 0) + (order.pointsEarned || 0);
-  const newTier = calculateTier(newPoints);
-  const rate = CASHBACK_RATES[newTier] || 0;
-  const cashbackRaw = order.total * rate;
-
-  const monthStart = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1));
-  const monthTotal = await prisma.cashbackTransaction.aggregate({
-    _sum: { amount: true },
-    where: { userId: user.id, createdAt: { gte: monthStart } },
-  });
-  const cap = config.CASHBACK_MONTHLY_CAP || 0;
-  const already = monthTotal._sum.amount || 0;
-  const remaining = Math.max(cap - already, 0);
-  const cashbackFinal = Math.max(Math.min(cashbackRaw, remaining), 0);
-
-  const existingCashback = cashbackFinal > 0 ? await prisma.cashbackTransaction.findFirst({
-    where: { orderId: order.id, status: 'AVAILABLE' },
-  }) : null;
-
-  const cashbackToApply = existingCashback ? 0 : cashbackFinal;
-
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      loyaltyTier: newTier,
-      cashbackBalance: { increment: cashbackToApply },
-      cashbackLifetime: { increment: cashbackToApply },
+      paymentStatus: 'PAID',
+      paymentId: paymentId || order.paymentId,
+      paidAt: new Date(),
+      status: 'CONFIRMED',
     },
   });
 
-  if (cashbackToApply > 0) {
-    const expiresAt = new Date(Date.now() + config.CASHBACK_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
-    await prisma.cashbackTransaction.create({
-      data: {
-        userId: user.id,
-        orderId: order.id,
-        amount: cashbackToApply,
-        status: 'AVAILABLE',
-        expiresAt,
-      },
-    });
-  }
-};
+  await redeemPointsOnPayment({ order: updated, paymentId: paymentId || updated.paymentId || 'UNKNOWN' });
+  await awardCashbackAndPoints(updated);
+  await applyEscrowAndCommission(updated);
 
-const expirePointsIfNeeded = async (tx, userId) => {
-  const now = new Date();
-  const expired = await tx.pointsLedger.findMany({
-    where: {
-      userId,
-      type: 'EARN',
-      status: 'COMMITTED',
-      expiresAt: { lt: now },
-    },
+  await prisma.store.update({
+    where: { id: order.storeId },
+    data: { totalSales: { increment: 1 } },
   });
 
-  if (expired.length === 0) return;
-
-  const totalExpired = expired.reduce((sum, t) => sum + Math.max(t.points, 0), 0);
-
-  await tx.pointsLedger.updateMany({
-    where: { id: { in: expired.map(t => t.id) } },
-    data: { status: 'EXPIRED' },
+  logPaymentEvent('checkout_payment_confirmed', {
+    orderId: order.id,
+    provider,
+    successSource: successSource || 'confirmed',
   });
 
-  if (totalExpired > 0) {
-    const wallet = await tx.pointsWallet.findUnique({ where: { userId } });
-    if (wallet) {
-      await tx.pointsWallet.updateMany({
-        where: { userId, version: wallet.version },
-        data: { balance: { decrement: totalExpired }, version: { increment: 1 } },
-      });
-    }
-  }
-};
-
-const redeemPointsOnPayment = async ({ order, paymentId }) => {
-  if (!order || !order.userId) return;
-  if (!order.pointsApplied || order.pointsApplied <= 0) return;
-
-  const idempotencyKey = `payment:${paymentId}:redeem`;
-
-  await prisma.$transaction(async (tx) => {
-    const existing = await tx.pointsLedger.findUnique({ where: { idempotencyKey } });
-    if (existing?.status === 'COMMITTED') return;
-
-    await expirePointsIfNeeded(tx, order.userId);
-
-    const pending = await tx.pointsLedger.findFirst({
-      where: { orderId: order.id, type: 'REDEEM', status: 'PENDING' },
-    });
-
-    if (!pending) return;
-
-    const wallet = await tx.pointsWallet.findUnique({ where: { userId: order.userId } });
-    if (!wallet) {
-      throw new AppError('Wallet points introuvable', 400);
-    }
-
-    const expectedDiscount = order.pointsApplied * order.pointsValueHtgAtRedemption;
-    if (expectedDiscount !== order.pointsDiscountHtg) {
-      throw new AppError('Points mismatch', 400);
-    }
-
-    if (wallet.balance < Math.abs(pending.points)) {
-      throw new AppError('Points insuffisants au moment du paiement', 400);
-    }
-
-    const updated = await tx.pointsWallet.updateMany({
-      where: { userId: order.userId, version: wallet.version },
-      data: { balance: { decrement: Math.abs(pending.points) }, version: { increment: 1 } },
-    });
-
-    if (updated.count !== 1) {
-      throw new AppError('Conflit wallet, réessayez', 409);
-    }
-
-    await tx.pointsLedger.update({
-      where: { id: pending.id },
-      data: {
-        status: 'COMMITTED',
-        paymentId,
-        committedAt: new Date(),
-        idempotencyKey,
-        meta: {
-          rate: order.pointsValueHtgAtRedemption,
-          maxPercent: order.pointsMaxPercent,
-          eligibleSubtotalHtg: order.pointsEligibleSubtotalHtg,
-        },
-      },
-    });
-  });
-};
-
-const applyEscrowAndCommission = async (order) => {
-  if (!order) return;
-
-  await prisma.$transaction(async (tx) => {
-    const existingHold = await tx.financialLedger.findFirst({
-      where: { orderId: order.id, type: 'ESCROW_HOLD' },
-    });
-    if (existingHold) return;
-
-    await tx.sellerBalance.upsert({
-      where: { storeId: order.storeId },
-      update: {},
-      create: { storeId: order.storeId },
-    });
-
-    await assertNoDuplicateLedger(tx, { type: 'PLATFORM_EARN', orderId: order.id, storeId: order.storeId });
-    await assertNoDuplicateLedger(tx, { type: 'ESCROW_HOLD', orderId: order.id, storeId: order.storeId });
-
-    await tx.financialLedger.create({
-      data: {
-        type: 'PLATFORM_EARN',
-        status: 'COMMITTED',
-        orderId: order.id,
-        storeId: order.storeId,
-        amountHTG: order.commissionAmountHTG || 0,
-      },
-    });
-
-    await tx.financialLedger.create({
-      data: {
-        type: 'ESCROW_HOLD',
-        status: 'COMMITTED',
-        orderId: order.id,
-        storeId: order.storeId,
-        amountHTG: order.sellerNetHTG || 0,
-      },
-    });
-
-    const balance = await tx.sellerBalance.findUnique({ where: { storeId: order.storeId } });
-    if (balance) {
-      assertNonNegative('escrowHTG', (balance.escrowHTG || 0) + (order.sellerNetHTG || 0), { orderId: order.id, storeId: order.storeId });
-    }
-
-    await tx.sellerBalance.update({
-      where: { storeId: order.storeId },
-      data: {
-        escrowHTG: { increment: order.sellerNetHTG || 0 },
-        lifetimeEarnedHTG: { increment: order.sellerNetHTG || 0 },
-        lifetimeCommissionPaidHTG: { increment: order.commissionAmountHTG || 0 },
-      },
-    });
-
-    await tx.order.update({
-      where: { id: order.id },
-      data: { escrowStatus: 'HELD' },
-    });
-  });
-
-  console.log(JSON.stringify({ event: 'escrow_hold', orderId: order.id, storeId: order.storeId, amountHTG: order.sellerNetHTG || 0 }));
-  console.log(JSON.stringify({ event: 'metric', name: 'escrow_hold_totalHTG', value: order.sellerNetHTG || 0 }));
+  return updated;
 };
 
 /**
@@ -345,6 +154,11 @@ router.post('/initialize', paymentLimiter, authenticate, validate(initPaymentRul
             expiresAt: natcashPayment.expiresAt,
             instructions: natcashPayment.instructions,
           };
+
+          await prisma.order.update({
+            where: { id: orderId },
+            data: { paymentId: natcashPayment.paymentId },
+          });
         }
         break;
 
@@ -433,20 +247,16 @@ router.post('/initialize', paymentLimiter, authenticate, validate(initPaymentRul
 });
 
 /**
- * Check payment status
+ * Check payment status (legacy)
  */
 router.get('/status/:orderId', authenticate, async (req, res, next) => {
   try {
-    const order = await prisma.order.findFirst({
-      where: { 
-        id: req.params.orderId,
-        userId: req.user.id,
-      },
-    });
+    const order = await prisma.order.findUnique({ where: { id: req.params.orderId } });
+    if (!order) throw new AppError('Commande non trouvée', 404);
 
-    if (!order) {
-      throw new AppError('Commande non trouvée', 404);
-    }
+    const isAdmin = req.user.role === 'ADMIN';
+    const isBuyer = req.user.role === 'BUYER' && order.userId === req.user.id;
+    if (!isAdmin && !isBuyer) throw new AppError('Non autorisé', 403);
 
     res.json({
       orderId: order.id,
@@ -454,6 +264,156 @@ router.get('/status/:orderId', authenticate, async (req, res, next) => {
       paymentStatus: order.paymentStatus,
       paymentMethod: order.paymentMethod,
       paidAt: order.paidAt,
+      status: order.paymentStatus,
+      successSource: getPaymentSuccessSource(order),
+      updatedAt: order.updatedAt,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * Check payment status
+ */
+router.get('/:orderId/status', authenticate, async (req, res, next) => {
+  try {
+    const order = await prisma.order.findUnique({ where: { id: req.params.orderId } });
+    if (!order) throw new AppError('Commande non trouvée', 404);
+
+    const isAdmin = req.user.role === 'ADMIN';
+    const isBuyer = req.user.role === 'BUYER' && order.userId === req.user.id;
+    if (!isAdmin && !isBuyer) throw new AppError('Non autorisé', 403);
+
+    res.json({
+      orderId: order.id,
+      status: order.paymentStatus,
+      successSource: getPaymentSuccessSource(order),
+      updatedAt: order.updatedAt,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * Manual payment recheck
+ */
+router.post('/:orderId/recheck', authenticate, async (req, res, next) => {
+  try {
+    if (!checkRecheckRateLimit(req.params.orderId)) {
+      return res.status(429).json({ error: 'Rate limit' });
+    }
+
+    logPaymentEvent('checkout_payment_recheck_called', {
+      orderId: req.params.orderId,
+      userId: req.user.id,
+    });
+
+    const order = await prisma.order.findUnique({ where: { id: req.params.orderId } });
+    if (!order) throw new AppError('Commande non trouvée', 404);
+
+    const isAdmin = req.user.role === 'ADMIN';
+    const isBuyer = req.user.role === 'BUYER' && order.userId === req.user.id;
+    if (!isAdmin && !isBuyer) throw new AppError('Non autorisé', 403);
+
+    if (order.paymentStatus === 'PAID') {
+      return res.json({
+        orderId: order.id,
+        status: order.paymentStatus,
+        successSource: getPaymentSuccessSource(order),
+        updatedAt: order.updatedAt,
+      });
+    }
+
+    if (order.paymentMethod === 'MONCASH') {
+      const payment = await moncashService.getPaymentByOrderId(order.orderNumber);
+      if (payment?.success && payment?.payment) {
+        const updated = await confirmPaymentIfNeeded({
+          order,
+          paymentId: payment.payment?.transactionId,
+          provider: 'moncash',
+          successSource: 'confirmed',
+        });
+        return res.json({
+          orderId: updated.id,
+          status: updated.paymentStatus,
+          successSource: getPaymentSuccessSource(updated),
+          updatedAt: updated.updatedAt,
+        });
+      }
+    }
+
+    if (order.paymentMethod === 'NATCASH') {
+      if (!order.paymentId) {
+        throw new AppError('Paiement NatCash introuvable', 400);
+      }
+      const payment = await natcashService.getPaymentStatus(order.paymentId);
+      if (payment.status === 'completed') {
+        const updated = await confirmPaymentIfNeeded({
+          order,
+          paymentId: payment.transactionId,
+          provider: 'natcash',
+          successSource: 'confirmed',
+        });
+        return res.json({
+          orderId: updated.id,
+          status: updated.paymentStatus,
+          successSource: getPaymentSuccessSource(updated),
+          updatedAt: updated.updatedAt,
+        });
+      }
+
+      if (['failed', 'expired'].includes(payment.status)) {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { paymentStatus: 'FAILED' },
+        });
+        logPaymentEvent('checkout_payment_failed_provider', {
+          orderId: order.id,
+          provider: 'natcash',
+          status: payment.status,
+        });
+      }
+    }
+
+    if (order.paymentMethod === 'CARD' && config.STRIPE_SECRET_KEY && order.paymentId) {
+      const stripe = require('stripe')(config.STRIPE_SECRET_KEY);
+      const intent = await stripe.paymentIntents.retrieve(order.paymentId);
+      if (intent?.status === 'succeeded') {
+        const updated = await confirmPaymentIfNeeded({
+          order,
+          paymentId: order.paymentId,
+          provider: 'stripe',
+          successSource: 'confirmed',
+        });
+        return res.json({
+          orderId: updated.id,
+          status: updated.paymentStatus,
+          successSource: getPaymentSuccessSource(updated),
+          updatedAt: updated.updatedAt,
+        });
+      }
+
+      if (['canceled', 'requires_payment_method'].includes(intent?.status)) {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { paymentStatus: 'FAILED' },
+        });
+        logPaymentEvent('checkout_payment_failed_provider', {
+          orderId: order.id,
+          provider: 'stripe',
+          status: intent?.status,
+        });
+      }
+    }
+
+    const refreshed = await prisma.order.findUnique({ where: { id: order.id } });
+    res.json({
+      orderId: refreshed.id,
+      status: refreshed.paymentStatus,
+      successSource: getPaymentSuccessSource(refreshed),
+      updatedAt: refreshed.updatedAt,
     });
   } catch (error) {
     next(error);
@@ -473,6 +433,11 @@ router.get('/callback/moncash', async (req, res, next) => {
 
     // Verify transaction with MonCash
     const payment = await moncashService.getPaymentByTransactionId(transactionId);
+
+    logPaymentEvent('checkout_payment_webhook_received', {
+      provider: 'moncash',
+      transactionId,
+    });
     
     if (payment.success && payment.payment) {
       const orderId = payment.payment.reference;
@@ -483,30 +448,22 @@ router.get('/callback/moncash', async (req, res, next) => {
         where: { orderNumber: orderId },
       });
 
-      if (order && order.paymentStatus !== 'PAID') {
-        const updated = await prisma.order.update({
-          where: { id: order.id },
-          data: {
-            paymentStatus: 'PAID',
-            paymentId: transactionId,
-            paidAt: new Date(),
-            status: 'CONFIRMED',
-          },
-        });
-
-        await redeemPointsOnPayment({ order: updated, paymentId: transactionId });
-        await awardCashbackAndPoints(updated);
-        await applyEscrowAndCommission(updated);
-
-        // Update store total sales
-        await prisma.store.update({
-          where: { id: order.storeId },
-          data: { totalSales: { increment: 1 } },
+      if (order) {
+        await confirmPaymentIfNeeded({
+          order,
+          paymentId: transactionId,
+          provider: 'moncash',
+          successSource: 'confirmed',
         });
       }
 
       return res.redirect(`${config.FRONTEND_URL}/order-confirmation?orderId=${order?.id}&status=success`);
     }
+
+    logPaymentEvent('checkout_payment_failed_provider', {
+      provider: 'moncash',
+      transactionId,
+    });
 
     res.redirect(`${config.FRONTEND_URL}/order-confirmation?status=pending`);
   } catch (error) {
@@ -529,30 +486,42 @@ router.post('/callback/natcash', async (req, res, next) => {
 
     const { paymentId, status, transactionId, orderId } = req.body;
 
+    logPaymentEvent('checkout_payment_webhook_received', {
+      provider: 'natcash',
+      orderNumber: orderId,
+      paymentId,
+      status,
+    });
+
     if (status === 'completed') {
       console.log('[NatCash] payment confirmed', { transactionId, orderId });
       const order = await prisma.order.findFirst({
         where: { orderNumber: orderId },
       });
 
-      if (order && order.paymentStatus !== 'PAID') {
-        const updated = await prisma.order.update({
-          where: { id: order.id },
-          data: {
-            paymentStatus: 'PAID',
-            paymentId: transactionId,
-            paidAt: new Date(),
-            status: 'CONFIRMED',
-          },
+      if (order) {
+        await confirmPaymentIfNeeded({
+          order,
+          paymentId: transactionId,
+          provider: 'natcash',
+          successSource: 'confirmed',
         });
+      }
+    }
 
-        await redeemPointsOnPayment({ order: updated, paymentId: transactionId });
-        await awardCashbackAndPoints(updated);
-        await applyEscrowAndCommission(updated);
-
-        await prisma.store.update({
-          where: { id: order.storeId },
-          data: { totalSales: { increment: 1 } },
+    if (['failed', 'expired'].includes(status)) {
+      const order = await prisma.order.findFirst({
+        where: { orderNumber: orderId },
+      });
+      if (order) {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { paymentStatus: 'FAILED' },
+        });
+        logPaymentEvent('checkout_payment_failed_provider', {
+          orderId: order.id,
+          provider: 'natcash',
+          status,
         });
       }
     }
@@ -582,6 +551,11 @@ router.post('/webhook/stripe', express.raw({ type: 'application/json' }), async 
       config.STRIPE_WEBHOOK_SECRET
     );
 
+    logPaymentEvent('checkout_payment_webhook_received', {
+      provider: 'stripe',
+      type: event.type,
+    });
+
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
       const orderId = session.metadata.orderId;
@@ -589,24 +563,27 @@ router.post('/webhook/stripe', express.raw({ type: 'application/json' }), async 
 
       const order = await prisma.order.findUnique({ where: { id: orderId } });
       
-      if (order && order.paymentStatus !== 'PAID') {
-        const updated = await prisma.order.update({
-          where: { id: orderId },
-          data: {
-            paymentStatus: 'PAID',
-            paymentId: session.payment_intent,
-            paidAt: new Date(),
-            status: 'CONFIRMED',
-          },
+      if (order) {
+        await confirmPaymentIfNeeded({
+          order,
+          paymentId: session.payment_intent,
+          provider: 'stripe',
+          successSource: 'confirmed',
         });
+      }
+    }
 
-        await redeemPointsOnPayment({ order: updated, paymentId: session.payment_intent });
-        await awardCashbackAndPoints(updated);
-        await applyEscrowAndCommission(updated);
-
-        await prisma.store.update({
-          where: { id: order.storeId },
-          data: { totalSales: { increment: 1 } },
+    if (event.type === 'payment_intent.payment_failed') {
+      const intent = event.data.object;
+      if (intent?.metadata?.orderId) {
+        await prisma.order.update({
+          where: { id: intent.metadata.orderId },
+          data: { paymentStatus: 'FAILED' },
+        });
+        logPaymentEvent('checkout_payment_failed_provider', {
+          orderId: intent.metadata.orderId,
+          provider: 'stripe',
+          status: intent.status,
         });
       }
     }
@@ -672,4 +649,4 @@ router.post('/confirm-manual', authenticate, async (req, res, next) => {
 });
 
 module.exports = router;
-module.exports.__test = { applyEscrowAndCommission };
+module.exports.__test = { applyEscrowAndCommission, recheckRateBuckets, checkRecheckRateLimit };
