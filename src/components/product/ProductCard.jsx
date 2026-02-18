@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, ShoppingCart, Heart, Zap, Eye } from 'lucide-react';
+import { Star, ShoppingCart, Heart, Zap, Eye, ShieldCheck, Truck, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useFavorites } from '../../contexts/FavoritesContext';
@@ -8,6 +8,7 @@ import { useToast } from '../ui/Toast';
 import Badge from '../ui/Badge';
 import TrustBadge from '../common/TrustBadge';
 import VerifiedSellerBadge from '../common/VerifiedSellerBadge';
+import TrustRow from '../common/TrustRow';
 import { getStoreTrust } from '../../services/trustService';
 
 const ProductCard = ({ product, onQuickView }) => {
@@ -61,6 +62,25 @@ const ProductCard = ({ product, onQuickView }) => {
             getStoreTrust(product.storeSlug).then(setTrust).catch(() => {});
         }
     }, [product?.storeSlug]);
+
+    const trustItems = [
+        {
+            icon: ShieldCheck,
+            label: t('secure_payment') || 'Paiement protégé',
+            tone: 'accent',
+        },
+        product?.type === 'digital'
+            ? {
+                icon: Download,
+                label: t('instant_access') || 'Accès instantané',
+            }
+            : {
+                icon: Truck,
+                label: product?.unionPlus
+                    ? (t('one_day_delivery') || 'Livraison 1 jour')
+                    : (t('tracked_delivery') || 'Livraison suivie'),
+            },
+    ];
 
     return (
         <div
@@ -248,6 +268,10 @@ const ProductCard = ({ product, onQuickView }) => {
                         )}
                     </div>
                 )}
+
+                <div className="mb-2 min-h-[28px] sm:min-h-[32px]">
+                    <TrustRow items={trustItems} size="sm" pill variant="light" />
+                </div>
 
                 {/* Rating */}
                 <div className="flex items-center gap-1 sm:gap-1.5 mb-2 sm:mb-3 min-h-[18px] sm:min-h-[20px]">

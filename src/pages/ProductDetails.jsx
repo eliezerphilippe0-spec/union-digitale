@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Check, Shirt, Loader, ThumbsUp } from 'lucide-react';
 import TrustBadge from '../components/common/TrustBadge';
 import VerifiedSellerBadge from '../components/common/VerifiedSellerBadge';
+import TrustRow from '../components/common/TrustRow';
 import { getStoreTrust } from '../services/trustService';
 import { useProducts } from '../hooks/useProducts';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -69,6 +70,28 @@ const ProductDetails = () => {
             getStoreTrust(product.storeSlug).then(setTrust).catch(() => {});
         }
     }, [product?.storeSlug]);
+
+    const trustItems = [
+        {
+            icon: Lock,
+            label: t('secure_payment') || 'Paiement protégé',
+            tone: 'accent',
+        },
+        isDigitalProduct
+            ? {
+                icon: Download,
+                label: t('instant_access') || 'Accès instantané',
+            }
+            : {
+                icon: Truck,
+                label: t('tracked_delivery') || 'Livraison suivie',
+            },
+        {
+            icon: ShieldCheck,
+            label: t('buyer_protection') || 'Protection acheteur',
+            tone: 'positive',
+        },
+    ];
 
     // Related products for bundles (same category, different product)
     const relatedProducts = products
@@ -236,6 +259,8 @@ const ProductDetails = () => {
                                 </div>
                             )}
                         </div>
+
+                        <TrustRow items={trustItems} size="md" pill variant="full" className="mb-4" />
 
                         <div className="mb-4">
                             <h3 className="font-bold mb-2">{t('about_item')}</h3>

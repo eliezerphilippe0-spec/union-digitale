@@ -9,7 +9,8 @@ import {
     Mail,
     Phone,
     ArrowLeft,
-    Filter
+    Filter,
+    ShieldCheck
 } from 'lucide-react';
 import { getVendor, getVendorStats } from '../services/vendorService';
 import { getVendorOffers } from '../services/offerService';
@@ -18,6 +19,7 @@ import './VendorShop.css';
 import SEO from '../components/common/SEO';
 import TrustBadge from '../components/common/TrustBadge';
 import VerifiedSellerBadge from '../components/common/VerifiedSellerBadge';
+import TrustRow from '../components/common/TrustRow';
 import { getStoreTrust } from '../services/trustService';
 
 const VendorShop = () => {
@@ -94,6 +96,29 @@ const VendorShop = () => {
         { key: 'accommodation', label: 'Hébergements', count: stats?.offersByType?.accommodation || 0 }
     ];
 
+    const trustItems = [
+        {
+            icon: ShieldCheck,
+            label: 'Paiements protégés',
+            tone: 'accent',
+        },
+        vendor?.verified
+            ? {
+                icon: CheckCircle,
+                label: 'Vendeur vérifié',
+                tone: 'positive',
+            }
+            : {
+                icon: CheckCircle,
+                label: 'Vendeur actif',
+            },
+        {
+            icon: Star,
+            label: `${vendor?.rating?.toFixed(1) || '0.0'}/5`,
+            value: `(${vendor?.reviewCount || 0} avis)`,
+        },
+    ];
+
     if (loading) {
         return (
             <div className="vendor-shop-loading">
@@ -159,6 +184,8 @@ const VendorShop = () => {
                                 <TrustBadge tier={trust.trustTier} />
                             </div>
                         )}
+
+                        <TrustRow items={trustItems} size="md" pill variant="medium" className="mt-3" />
 
                         <div className="vendor-meta">
                             {vendor.category && (
