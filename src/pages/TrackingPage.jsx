@@ -1,9 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Package, Truck, CheckCircle, Clock } from 'lucide-react';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useLanguage } from '../contexts/LanguageContext';
 import SEO from '../components/common/SEO';
 import TrackingMap from '../components/TrackingMap';
+import { db } from '../lib/firebase';
+
+const shouldLog = (key) => {
+    if (typeof window === 'undefined') return false;
+    try {
+        if (sessionStorage.getItem(key)) return false;
+        sessionStorage.setItem(key, '1');
+        return true;
+    } catch (e) {
+        return false;
+    }
+};
+
+const logTrackingEvent = async (eventName, orderId) => {
+    if (!eventName || !orderId) return;
+    const key = `tracking_${eventName}_${orderId}`;
+    if (!shouldLog(key)) return;
+
+    try {
+        await addDoc(collection(db, 'analytics_events'), {
+            eventName,
+            createdAt: serverTimestamp(),
+        });
+    } catch (e) {
+        // silent
+    }
+};
 
 const TrackingPage = () => {
     const { orderId } = useParams();
@@ -67,6 +95,12 @@ const TrackingPage = () => {
         return () => clearTimeout(timer);
     }, [orderId, t]);
 
+    useEffect(() => {
+        if (!trackingData || !orderId) return;
+        logTrackingEvent('tracking_summary_view', orderId);
+        logTrackingEvent('eta_visible', orderId);
+    }, [trackingData, orderId]);
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -92,6 +126,36 @@ const TrackingPage = () => {
             </div>
 
             <div className="container mx-auto px-4 py-8 max-w-5xl">
+                {/* Above-the-fold summary */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 mb-6">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <div className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">
+                                {t('estimated_delivery') || 'Livraison estimée'}
+                            </div>
+                            <div className="flex items-center gap-2 text-lg md:text-2xl font-extrabold text-gray-900">
+                                <Clock className="w-5 h-5 text-blue-600" />
+                                <span>{trackingData.estimatedDelivery}</span>
+                            </div>
+                            <div className="text-sm text-gray-500 mt-1">
+                                {t('tracking_number_label') || 'Commande'} #{orderId} • {trackingData.carrier}
+                            </div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <Link
+                                to="/customer-service"
+                                onClick={() => logTrackingEvent('tracking_support_cta_click', orderId)}
+                                className="inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-secondary text-white font-semibold hover:bg-secondary/90 transition-colors"
+                            >
+                                {t('contact_support') || 'Contacter le support'}
+                            </Link>
+                            <span className="inline-flex items-center justify-center px-3 py-2.5 rounded-lg bg-emerald-50 text-emerald-700 text-sm font-bold">
+                                {t('tracking_live') || 'Suivi en direct'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column: Status & Timeline */}
                     <div className="lg:col-span-1 space-y-6">
