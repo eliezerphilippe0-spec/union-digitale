@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
 import { useWallet } from '../../contexts/WalletContext';
 import { useAffiliation } from '../../contexts/AffiliationContext';
 import { paymentService } from '../../services/paymentService';
-import { useNavigate } from 'react-router-dom';
-import { Loader, Lock, ShieldCheck, CreditCard, Smartphone, Zap } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Loader, Lock, ShieldCheck, CreditCard, Smartphone, Zap, Truck, RefreshCw } from 'lucide-react';
+import { signInAnonymously } from 'firebase/auth';
+import { auth } from '../../lib/firebase';
 import AddressAutocomplete from '../../components/forms/AddressAutocomplete';
 import OrderBump from '../../components/OrderBump';
 import PickupPoints from '../../components/shipping/PickupPoints';
 import logger from '../../utils/logger';
+import { buildCheckoutPayload, logCheckoutEvent } from '../../utils/analytics';
 
 const OnePageCheckout = () => {
     const { currentUser } = useAuth();
@@ -24,11 +27,14 @@ const OnePageCheckout = () => {
     const [address, setAddress] = useState('');
     const [city, setCity] = useState('');
     const [department, setDepartment] = useState('Ouest');
-    const [deliveryNotes, setDeliveryNotes] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('moncash');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [selectedPickup, setSelectedPickup] = useState(null);
+    const [paymentFailures, setPaymentFailures] = useState(0);
+    const [guestReady, setGuestReady] = useState(false);
+    const checkoutCompletedRef = useRef(false);
+    const hasTrackedStart = useRef(false);
 
     const isPhysical = cartItems.some(item => item.type === 'physical' || !item.type);
 
@@ -68,17 +74,88 @@ const OnePageCheckout = () => {
         }
     }, [isPhysical, setShippingMethod]);
 
-    const handlePayment = async (e) => {
-        e.preventDefault();
+    useEffect(() => {
+        if (currentUser?.uid) {
+            setGuestReady(true);
+        }
+    }, [currentUser?.uid]);
+
+    useEffect(() => {
+        if (hasTrackedStart.current || cartItems.length === 0) return;
+        logCheckoutEvent('checkout_start', buildCheckoutPayload({
+            cartValue: finalTotal,
+            paymentMethod: 'unknown',
+            step: 'checkout'
+        }), {
+            key: `checkout_start:${finalTotal}:${cartItems.length}`
+        });
+        hasTrackedStart.current = true;
+    }, [cartItems.length, finalTotal]);
+
+    useEffect(() => {
+        return () => {
+            if (!checkoutCompletedRef.current && cartItems.length > 0) {
+                logCheckoutEvent('checkout_abandon', buildCheckoutPayload({
+                    cartValue: finalTotal,
+                    paymentMethod,
+                    step: 'checkout'
+                }), {
+                    key: `checkout_abandon:${finalTotal}:${cartItems.length}`
+                });
+            }
+        };
+    }, [cartItems.length, finalTotal, paymentMethod]);
+
+    const ensureCheckoutUser = async () => {
+        if (currentUser?.uid) return currentUser;
+        const result = await signInAnonymously(auth);
+        setGuestReady(true);
+        return result.user;
+    };
+
+    const handlePayment = async (e, options = {}) => {
+        e?.preventDefault?.();
         setLoading(true);
         setError('');
 
         try {
+            if (!phone) {
+                setError('Le téléphone est obligatoire pour finaliser la commande.');
+                setLoading(false);
+                return;
+            }
+
             if (shippingMethod === 'pickup' && !selectedPickup) {
                 setError('Veuillez sélectionner un point de retrait.');
                 setLoading(false);
                 return;
             }
+
+            if (shippingMethod === 'delivery' && (!address || !city)) {
+                setError('Veuillez compléter votre adresse de livraison.');
+                setLoading(false);
+                return;
+            }
+
+            const activeUser = await ensureCheckoutUser();
+
+            if (options.isRetry) {
+                logCheckoutEvent('checkout_payment_retry', buildCheckoutPayload({
+                    cartValue: finalTotal,
+                    paymentMethod,
+                    step: 'payment'
+                }), {
+                    key: `checkout_payment_retry:${paymentMethod}:${finalTotal}`
+                });
+            }
+
+            logCheckoutEvent('checkout_payment_attempt', buildCheckoutPayload({
+                cartValue: finalTotal,
+                paymentMethod,
+                step: 'payment'
+            }), {
+                key: `checkout_payment_attempt:${paymentMethod}:${finalTotal}`
+            });
 
             const pickupHubId = shippingMethod === 'pickup' && selectedPickup
                 ? selectedPickup.id
@@ -99,7 +176,7 @@ const OnePageCheckout = () => {
                 totalAmount: finalTotal,
                 currency: 'HTG',
                 customer: { name: fullName, email, phone },
-                shipping: shippingMethod === 'delivery' ? { address, city, department, notes: deliveryNotes } : null,
+                shipping: shippingMethod === 'delivery' ? { address, city, department } : null,
                 shippingMethod,
                 shippingAddress,
                 pickupHubId,
@@ -110,22 +187,41 @@ const OnePageCheckout = () => {
             const activeReferral = referralData ? { code: referralData.sellerId, campaign: referralData.campaign } : null;
 
             if (paymentMethod === 'moncash') {
-                const redirectUrl = await paymentService.processMonCashPayment(orderData, currentUser, activeReferral);
-                // In a real app, we might clear cart after confirmation, but for MonCash redirect we might wait.
-                // For now, assuming redirect happens immediately.
+                const redirectUrl = await paymentService.processMonCashPayment(orderData, activeUser, activeReferral);
                 if (redirectUrl) {
+                    checkoutCompletedRef.current = true;
+                    logCheckoutEvent('checkout_payment_success', buildCheckoutPayload({
+                        cartValue: finalTotal,
+                        paymentMethod,
+                        step: 'payment',
+                        successSource: 'redirect'
+                    }), {
+                        key: `checkout_payment_success:${paymentMethod}:${finalTotal}`
+                    });
                     window.location.href = redirectUrl;
                 }
             } else if (paymentMethod === 'wallet') {
                 if (balance < finalTotal) throw new Error("Solde insuffisant");
-                const orderId = await paymentService.createOrder({ ...orderData, status: 'paid' }, currentUser, activeReferral);
+                const orderId = await paymentService.createOrder({ ...orderData, status: 'paid' }, activeUser, activeReferral);
                 await pay(finalTotal, orderId);
+                checkoutCompletedRef.current = true;
+                logCheckoutEvent('checkout_payment_success', buildCheckoutPayload({
+                    cartValue: finalTotal,
+                    paymentMethod,
+                    step: 'payment',
+                    successSource: 'confirmed'
+                }), {
+                    key: `checkout_payment_success:${paymentMethod}:${finalTotal}`
+                });
                 clearCart();
-                navigate(`/upsell?orderId=${orderId}`); // Redirect to Upsell instead of Confirmation
+                navigate(`/upsell?orderId=${orderId}`);
             }
+
+            setPaymentFailures(0);
         } catch (err) {
             console.error(err);
-            setError(err.message || "Une erreur est survenue.");
+            setPaymentFailures((prev) => prev + 1);
+            setError(err.message || "Le paiement a échoué. Aucun débit n’a été effectué.");
         } finally {
             setLoading(false);
         }
@@ -159,7 +255,7 @@ const OnePageCheckout = () => {
                     </div>
                 </div>
 
-                <div className="text-center mb-8">
+                <div className="text-center mb-6">
                     <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 flex items-center justify-center gap-2">
                         <Lock className="w-6 h-6 text-green-600" />
                         Caisse Sécurisée
@@ -167,9 +263,62 @@ const OnePageCheckout = () => {
                     <p className="mt-1 text-gray-600">Finalisez votre commande en quelques secondes.</p>
                 </div>
 
+                <div className="flex flex-wrap justify-center gap-3 mb-6 text-xs font-semibold text-gray-700">
+                    <span className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-full border">
+                        <Lock className="w-3.5 h-3.5 text-green-600" /> Paiement sécurisé
+                    </span>
+                    <span className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-full border">
+                        <ShieldCheck className="w-3.5 h-3.5 text-blue-600" /> Garantie 72h
+                    </span>
+                    <span className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-full border">
+                        <Truck className="w-3.5 h-3.5 text-emerald-600" /> ETA estimée 2-4 jours
+                    </span>
+                </div>
+
+                {!currentUser && (
+                    <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="text-sm text-emerald-900">
+                            <div className="font-semibold">Continuer sans créer de compte</div>
+                            <div className="text-emerald-800 text-xs">Vous pourrez créer un compte après l’achat si vous le souhaitez.</div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    if (!guestReady) {
+                                        await ensureCheckoutUser();
+                                    }
+                                }}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg"
+                            >
+                                Continuer sans créer de compte
+                            </button>
+                            <Link to="/login" className="text-xs text-emerald-700 hover:underline">Se connecter</Link>
+                        </div>
+                    </div>
+                )}
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Left Column: Details & Payment */}
                     <div className="space-y-6">
+
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm flex items-center justify-between gap-3">
+                                <div>
+                                    <div className="font-semibold">Paiement non validé</div>
+                                    <div className="text-xs">{error} Vous pouvez réessayer ou choisir une autre méthode.</div>
+                                </div>
+                                {paymentFailures > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => handlePayment(e, { isRetry: true })}
+                                        className="flex items-center gap-1 text-xs bg-red-600 text-white px-3 py-2 rounded-md"
+                                    >
+                                        <RefreshCw className="w-3 h-3" /> Réessayer
+                                    </button>
+                                )}
+                            </div>
+                        )}
 
                         {/* ⚡ EXPRESS CHECKOUT - P1 FIX: En premier */}
                         <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-2xl border-2 border-green-200 shadow-sm">
@@ -232,6 +381,7 @@ const OnePageCheckout = () => {
                                         type="text"
                                         value={fullName}
                                         onChange={(e) => setFullName(e.target.value)}
+                                        autoComplete="name"
                                         className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border"
                                         placeholder="Jean Baptiste"
                                     />
@@ -242,6 +392,7 @@ const OnePageCheckout = () => {
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
+                                        autoComplete="email"
                                         className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border"
                                         placeholder="jean@example.com"
                                     />
@@ -252,9 +403,13 @@ const OnePageCheckout = () => {
                                         type="tel"
                                         value={phone}
                                         onChange={(e) => setPhone(e.target.value)}
+                                        autoComplete="tel"
+                                        inputMode="tel"
+                                        required
                                         className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border"
-                                        placeholder="509 3XXX XXXX"
+                                        placeholder="+509 3XXX XXXX"
                                     />
+                                    <p className="text-xs text-gray-500 mt-1">Numéro haïtien requis pour la livraison et le paiement.</p>
                                 </div>
                             </div>
                         </div>
@@ -307,6 +462,7 @@ const OnePageCheckout = () => {
                                                 onChange={setAddress}
                                                 department={department}
                                                 placeholder="Ex: Pétion-Ville, Delmas 33..."
+                                                autoComplete="street-address"
                                             />
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
@@ -316,6 +472,7 @@ const OnePageCheckout = () => {
                                                     type="text"
                                                     value={city}
                                                     onChange={(e) => setCity(e.target.value)}
+                                                    autoComplete="address-level2"
                                                     className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border"
                                                     placeholder="Port-au-Prince"
                                                     required
@@ -326,6 +483,7 @@ const OnePageCheckout = () => {
                                                 <select
                                                     value={department}
                                                     onChange={(e) => setDepartment(e.target.value)}
+                                                    autoComplete="address-level1"
                                                     className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border bg-white"
                                                 >
                                                     {departments.map(dept => (
@@ -333,16 +491,6 @@ const OnePageCheckout = () => {
                                                     ))}
                                                 </select>
                                             </div>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Instructions de livraison (optionnel)</label>
-                                            <textarea
-                                                value={deliveryNotes}
-                                                onChange={(e) => setDeliveryNotes(e.target.value)}
-                                                className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border"
-                                                placeholder="Ex: Près de l'église, portail bleu..."
-                                                rows={2}
-                                            />
                                         </div>
                                     </div>
                                 )}
@@ -406,6 +554,29 @@ const OnePageCheckout = () => {
                                         <CreditCard className="h-6 w-6 text-blue-600" />
                                     </div>
                                 </label>
+
+                                {paymentFailures >= 2 && (
+                                    <div className="bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-lg p-3">
+                                        <div className="font-semibold">Un souci persiste ?</div>
+                                        <div className="mt-1">Essayez une autre méthode de paiement pour finaliser rapidement.</div>
+                                        <div className="mt-2 flex flex-wrap gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => setPaymentMethod('moncash')}
+                                                className="px-3 py-1.5 bg-white border border-amber-200 rounded-full"
+                                            >
+                                                MonCash
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setPaymentMethod('wallet')}
+                                                className="px-3 py-1.5 bg-white border border-amber-200 rounded-full"
+                                            >
+                                                Portefeuille
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -442,6 +613,10 @@ const OnePageCheckout = () => {
                                     <span>{cartTotal.toLocaleString()} G</span>
                                 </div>
                                 <div className="flex justify-between text-sm text-gray-600">
+                                    <span>Livraison</span>
+                                    <span>{shippingCost === 0 ? 'Gratuite' : `${shippingCost.toLocaleString()} G`}</span>
+                                </div>
+                                <div className="flex justify-between text-sm text-gray-600">
                                     <span>Taxes</span>
                                     <span>{tax.toLocaleString()} G</span>
                                 </div>
@@ -449,6 +624,7 @@ const OnePageCheckout = () => {
                                     <span>Total</span>
                                     <span>{finalTotal.toLocaleString()} G</span>
                                 </div>
+                                <div className="text-xs text-emerald-700">🚚 ETA estimée : 2-4 jours</div>
                             </div>
 
                             {/* Order Bump */}

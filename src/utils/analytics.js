@@ -1,6 +1,69 @@
 import { logEvent } from "firebase/analytics";
 import { analytics } from "../lib/firebase";
 
+const RATE_LIMIT_MS = 5000;
+const rateLimitStore = new Map();
+
+export const shouldTrackEvent = (key, rateLimitMs = RATE_LIMIT_MS) => {
+    if (!key) return true;
+    const now = Date.now();
+    const last = rateLimitStore.get(key) || 0;
+    if (now - last < rateLimitMs) return false;
+    rateLimitStore.set(key, now);
+    return true;
+};
+
+export const resetEventRateLimit = (key) => {
+    if (!key) {
+        rateLimitStore.clear();
+        return;
+    }
+    rateLimitStore.delete(key);
+};
+
+export const getCheckoutSessionId = () => {
+    if (typeof window === 'undefined') return 'server';
+    const key = 'checkout_session_id';
+    let sessionId = localStorage.getItem(key);
+    if (!sessionId) {
+        sessionId = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+        localStorage.setItem(key, sessionId);
+    }
+    return sessionId;
+};
+
+export const buildCheckoutPayload = ({ cartValue = 0, paymentMethod = 'unknown', step = 'unknown', successSource } = {}) => ({
+    cartValue,
+    paymentMethod,
+    sessionId: getCheckoutSessionId(),
+    step,
+    ...(successSource ? { successSource } : {})
+});
+
+export const logCheckoutEvent = (eventName, payload = {}, options = {}) => {
+    if (!analytics) return;
+    const key = options.key || eventName;
+    const rateLimitMs = options.rateLimitMs || RATE_LIMIT_MS;
+    if (!shouldTrackEvent(key, rateLimitMs)) return;
+    logEvent(analytics, eventName, payload);
+};
+
+export const calculateCheckoutKpis = ({
+    cartViews = 0,
+    checkoutStarts = 0,
+    checkoutCompletions = 0,
+    paymentSuccesses = 0
+} = {}) => {
+    const safeRate = (num, den) => (den > 0 ? Number(((num / den) * 100).toFixed(2)) : 0);
+
+    return {
+        cart_to_checkout_rate: safeRate(checkoutStarts, cartViews),
+        checkout_completion_rate: safeRate(checkoutCompletions, checkoutStarts),
+        payment_success_rate: safeRate(paymentSuccesses, checkoutCompletions),
+        cart_abandon_rate: safeRate(cartViews - checkoutStarts, cartViews)
+    };
+};
+
 /**
  * Logs a page view event.
  * @param {string} pageName - The name or path of the page properly formatted.
