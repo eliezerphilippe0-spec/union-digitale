@@ -12,7 +12,7 @@ import AddressAutocomplete from '../../components/forms/AddressAutocomplete';
 import OrderBump from '../../components/OrderBump';
 import PickupPoints from '../../components/shipping/PickupPoints';
 import logger from '../../utils/logger';
-import { buildCheckoutPayload, logCheckoutEvent } from '../../utils/analytics';
+import { buildCheckoutPayload, getCheckoutSessionId, logCheckoutEvent } from '../../utils/analytics';
 
 const OnePageCheckout = () => {
     const { currentUser } = useAuth();
@@ -87,7 +87,7 @@ const OnePageCheckout = () => {
             paymentMethod: 'unknown',
             step: 'checkout'
         }), {
-            key: `checkout_start:${finalTotal}:${cartItems.length}`
+            key: `checkout_start:${getCheckoutSessionId()}`
         });
         hasTrackedStart.current = true;
     }, [cartItems.length, finalTotal]);
@@ -100,7 +100,7 @@ const OnePageCheckout = () => {
                     paymentMethod,
                     step: 'checkout'
                 }), {
-                    key: `checkout_abandon:${finalTotal}:${cartItems.length}`
+                    key: `checkout_abandon:${getCheckoutSessionId()}`
                 });
             }
         };
@@ -111,6 +111,18 @@ const OnePageCheckout = () => {
         const result = await signInAnonymously(auth);
         setGuestReady(true);
         return result.user;
+    };
+
+    const handlePaymentMethodSelect = (method) => {
+        setPaymentMethod(method);
+        logCheckoutEvent('checkout_payment_method_selected', buildCheckoutPayload({
+            cartValue: finalTotal,
+            paymentMethod: method,
+            step: 'payment'
+        }), {
+            key: `checkout_payment_method_selected:${method}:${getCheckoutSessionId()}`,
+            rateLimitMs: 60 * 1000
+        });
     };
 
     const handlePayment = async (e, options = {}) => {
@@ -196,7 +208,7 @@ const OnePageCheckout = () => {
                         step: 'payment',
                         successSource: 'redirect'
                     }), {
-                        key: `checkout_payment_success:${paymentMethod}:${finalTotal}`
+                        key: `checkout_payment_success:redirect:${paymentMethod}:${getCheckoutSessionId()}`
                     });
                     window.location.href = redirectUrl;
                 }
@@ -211,7 +223,7 @@ const OnePageCheckout = () => {
                     step: 'payment',
                     successSource: 'confirmed'
                 }), {
-                    key: `checkout_payment_success:${paymentMethod}:${finalTotal}`
+                    key: `checkout_payment_success:confirmed:${paymentMethod}:${getCheckoutSessionId()}`
                 });
                 clearCart();
                 navigate(`/upsell?orderId=${orderId}`);
@@ -331,7 +343,7 @@ const OnePageCheckout = () => {
                             <div className="grid grid-cols-2 gap-3">
                                 <button
                                     type="button"
-                                    onClick={() => setPaymentMethod('moncash')}
+                                    onClick={() => handlePaymentMethodSelect('moncash')}
                                     className={`h-14 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
                                         paymentMethod === 'moncash' 
                                             ? 'bg-red-500 text-white ring-2 ring-red-600 ring-offset-2' 
@@ -343,7 +355,7 @@ const OnePageCheckout = () => {
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => setPaymentMethod('natcash')}
+                                    onClick={() => handlePaymentMethodSelect('natcash')}
                                     className={`h-14 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
                                         paymentMethod === 'natcash' 
                                             ? 'bg-blue-500 text-white ring-2 ring-blue-600 ring-offset-2' 
@@ -357,7 +369,7 @@ const OnePageCheckout = () => {
                             <div className="mt-3 flex items-center gap-3 text-xs text-gray-500">
                                 <button
                                     type="button"
-                                    onClick={() => setPaymentMethod('wallet')}
+                                    onClick={() => handlePaymentMethodSelect('wallet')}
                                     className={`flex items-center gap-1 px-3 py-1.5 rounded-full transition-all ${
                                         paymentMethod === 'wallet' ? 'bg-purple-100 text-purple-700' : 'hover:bg-gray-100'
                                     }`}
@@ -527,7 +539,7 @@ const OnePageCheckout = () => {
                                         name="payment"
                                         value="moncash"
                                         checked={paymentMethod === 'moncash'}
-                                        onChange={() => setPaymentMethod('moncash')}
+                                        onChange={() => handlePaymentMethodSelect('moncash')}
                                         className="h-4 w-4 text-red-600 border-gray-300 focus:ring-red-500"
                                     />
                                     <div className="ml-3 flex items-center justify-between w-full">
@@ -543,7 +555,7 @@ const OnePageCheckout = () => {
                                         name="payment"
                                         value="wallet"
                                         checked={paymentMethod === 'wallet'}
-                                        onChange={() => setPaymentMethod('wallet')}
+                                        onChange={() => handlePaymentMethodSelect('wallet')}
                                         className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                                     />
                                     <div className="ml-3 flex items-center justify-between w-full">
@@ -562,14 +574,14 @@ const OnePageCheckout = () => {
                                         <div className="mt-2 flex flex-wrap gap-2">
                                             <button
                                                 type="button"
-                                                onClick={() => setPaymentMethod('moncash')}
+                                                onClick={() => handlePaymentMethodSelect('moncash')}
                                                 className="px-3 py-1.5 bg-white border border-amber-200 rounded-full"
                                             >
                                                 MonCash
                                             </button>
                                             <button
                                                 type="button"
-                                                onClick={() => setPaymentMethod('wallet')}
+                                                onClick={() => handlePaymentMethodSelect('wallet')}
                                                 className="px-3 py-1.5 bg-white border border-amber-200 rounded-full"
                                             >
                                                 Portefeuille
