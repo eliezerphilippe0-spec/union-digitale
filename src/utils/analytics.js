@@ -41,12 +41,45 @@ export const buildCheckoutPayload = ({ cartValue = 0, paymentMethod = 'unknown',
     ...(variant ? { variant } : {})
 });
 
+export const buildCartUpsellPayload = ({ productId, cartValue = 0, source } = {}) => ({
+    productId,
+    cartValue,
+    sessionId: getCheckoutSessionId(),
+    ...(source ? { source } : {})
+});
+
 export const logCheckoutEvent = (eventName, payload = {}, options = {}) => {
     if (!analytics) return;
     const key = options.key || eventName;
     const rateLimitMs = options.rateLimitMs || RATE_LIMIT_MS;
     if (!shouldTrackEvent(key, rateLimitMs)) return;
     logEvent(analytics, eventName, payload);
+};
+
+const buildProductEventPayload = ({ productId, price }) => ({
+    productId,
+    price,
+    sessionId: getCheckoutSessionId()
+});
+
+export const logProductCtaVisible = ({ productId, price } = {}) => {
+    if (!analytics || !productId) return;
+    const payload = buildProductEventPayload({ productId, price });
+    if (!shouldTrackEvent(`product_cta_visible_${productId}`, 60000)) return;
+    logEvent(analytics, 'product_cta_visible', payload);
+};
+
+export const logProductAddToCartClick = ({ productId, price } = {}) => {
+    if (!analytics || !productId) return;
+    const payload = buildProductEventPayload({ productId, price });
+    logEvent(analytics, 'product_add_to_cart_click', payload);
+};
+
+export const logProductStockLowVisible = ({ productId, price } = {}) => {
+    if (!analytics || !productId) return;
+    const payload = buildProductEventPayload({ productId, price });
+    if (!shouldTrackEvent(`product_stock_low_visible_${productId}`, 60000)) return;
+    logEvent(analytics, 'product_stock_low_visible', payload);
 };
 
 export const calculateCheckoutKpis = ({
