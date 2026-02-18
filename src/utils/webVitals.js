@@ -1,3 +1,6 @@
+import { logEvent } from 'firebase/analytics';
+import { analytics } from '../lib/firebase';
+
 /**
  * Simplified Web Vitals Monitoring (without external dependency)
  * Tracks basic performance metrics
@@ -8,6 +11,70 @@ class PerformanceMonitor {
     constructor() {
         this.metrics = {};
         this.observers = [];
+    }
+
+    emitPerfEvent(name) {
+        if (!analytics || typeof window === 'undefined') return;
+        try {
+            const route = window.location.pathname;
+            const sessionId = sessionStorage.getItem('perf_session_id') || (() => {
+                const id = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+                sessionStorage.setItem('perf_session_id', id);
+                return id;
+            })();
+            const key = `perf_${name}_${route}_${sessionId}`;
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+
+            const deviceType = window.innerWidth < 768 ? 'mobile' : 'desktop';
+            const connectionType = navigator.connection?.effectiveType || 'unknown';
+
+            const payloadBase = {
+                route,
+                deviceType,
+                connectionType,
+                sessionId,
+            };
+
+            if (name === 'perf_lcp_measured') {
+                logEvent(analytics, name, {
+                    ...payloadBase,
+                    lcpMs: this.metrics.LCP?.value ?? null,
+                });
+                return;
+            }
+            if (name === 'perf_cls_measured') {
+                logEvent(analytics, name, {
+                    ...payloadBase,
+                    cls: this.metrics.CLS?.value ?? null,
+                });
+                return;
+            }
+            if (name === 'perf_bundle_kb') {
+                logEvent(analytics, name, {
+                    route,
+                    sessionId,
+                    jsKb: this.metrics.bundleKb ?? null,
+                    cssKb: null,
+                });
+                return;
+            }
+        } catch (error) {
+            console.warn('Perf event logging failed:', error?.message || error);
+        }
+    }
+
+    measureBundleSize() {
+        if (typeof window === 'undefined' || !window.performance || !performance.getEntriesByType) return;
+        const entries = performance.getEntriesByType('resource') || [];
+        const scriptEntries = entries.filter((entry) => entry.initiatorType === 'script');
+        const totalBytes = scriptEntries.reduce((sum, entry) => {
+            const size = entry.transferSize || entry.encodedBodySize || 0;
+            return sum + size;
+        }, 0);
+        const bundleKb = Number((totalBytes / 1024).toFixed(1));
+        this.metrics.bundleKb = bundleKb;
+        this.emitPerfEvent('perf_bundle_kb');
     }
 
     // Track Largest Contentful Paint (LCP)
@@ -26,6 +93,7 @@ class PerformanceMonitor {
                 };
 
                 this.logMetric('LCP', this.metrics.LCP);
+                this.emitPerfEvent('perf_lcp_measured');
             });
 
             observer.observe({ entryTypes: ['largest-contentful-paint'] });
@@ -81,6 +149,7 @@ class PerformanceMonitor {
                 };
 
                 this.logMetric('CLS', this.metrics.CLS);
+                this.emitPerfEvent('perf_cls_measured');
             });
 
             observer.observe({ entryTypes: ['layout-shift'] });
@@ -141,6 +210,22 @@ class PerformanceMonitor {
         this.trackFID();
         this.trackCLS();
         this.trackTTFB();
+
+        if (typeof window !== 'undefined') {
+            const schedule = () => {
+                if ('requestIdleCallback' in window) {
+                    window.requestIdleCallback(() => this.measureBundleSize(), { timeout: 3000 });
+                } else {
+                    setTimeout(() => this.measureBundleSize(), 2000);
+                }
+            };
+
+            if (document.readyState === 'complete') {
+                schedule();
+            } else {
+                window.addEventListener('load', schedule, { once: true });
+            }
+        }
     }
 
     // Get all metrics
