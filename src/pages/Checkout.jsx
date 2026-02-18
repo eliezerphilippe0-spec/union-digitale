@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import useGeolocation from '../hooks/useGeolocation';
@@ -10,6 +10,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import SEO from '../components/common/SEO';
 import { useAffiliation } from '../contexts/AffiliationContext';
 import logger from '../utils/logger';
+import { buildCheckoutPayload, getCheckoutSessionId, logCheckoutEvent } from '../utils/analytics';
 
 // Payment Integrations
 import { Elements } from '@stripe/react-stripe-js';
@@ -32,6 +33,8 @@ const Checkout = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const { location: geoData, loading: geoLoading, getLocation } = useGeolocation();
+    const hasTrackedStart = useRef(false);
+    const hasTrackedReassurance = useRef(false);
 
     // Feature: Upsell (Order Bump)
     const [warrantyAdded, setWarrantyAdded] = useState(false);
@@ -47,6 +50,17 @@ const Checkout = () => {
     }, [cartItems, navigate]);
 
     useEffect(() => {
+        if (hasTrackedStart.current) return;
+        if (cartItems.length > 0) {
+            logCheckoutEvent('checkout_started', {
+                item_count: cartItems.length,
+                total_value: finalTotal
+            });
+            hasTrackedStart.current = true;
+        }
+    }, [cartItems.length, finalTotal]);
+
+    useEffect(() => {
         if (geoData) {
             // Update address logic would go here, potentially pre-filling form if we had one in state
             // For now we just log or could update a context if there was one for shipping address
@@ -54,9 +68,74 @@ const Checkout = () => {
         }
     }, [geoData]);
 
+    useEffect(() => {
+        if (hasTrackedReassurance.current) return;
+        logCheckoutEvent('checkout_payment_reassurance_visible', buildCheckoutPayload({
+            paymentMethod: paymentMethod || 'none',
+            step: 'payment'
+        }), {
+            key: 'checkout_payment_reassurance_visible',
+            rateLimitMs: 60000
+        });
+        hasTrackedReassurance.current = true;
+    }, [paymentMethod]);
+
+    const selectPaymentMethod = (method) => {
+        setPaymentMethod(method);
+        logCheckoutEvent('checkout_payment_method_selected', buildCheckoutPayload({
+            cartValue: totalWithBump,
+            paymentMethod: method,
+            step: 'payment'
+        }), {
+            key: `checkout_payment_method_selected:${method}:${getCheckoutSessionId()}`,
+            rateLimitMs: 60 * 1000
+        });
+    };
+
+    const handleWarrantyToggle = (checked) => {
+        setWarrantyAdded(checked);
+        logCheckoutEvent('checkout_order_bump_toggled', {
+            enabled: checked,
+            delta: WARRANTY_PRICE
+        }, {
+            key: `checkout_order_bump_toggled:${checked}`
+        });
+    };
+
+    const reportPaymentError = (message, methodOverride) => {
+        const method = methodOverride || paymentMethod || 'unknown';
+        logCheckoutEvent('checkout_payment_error', {
+            ...buildCheckoutPayload({ paymentMethod: method, step: 'payment' }),
+            reason: message ? String(message).slice(0, 120) : 'unknown'
+        }, {
+            key: `checkout_payment_error:${method}`
+        });
+        setError(message || t('payment_error') || "Erreur de paiement");
+    };
+
+    const handleRetryPayment = () => {
+        setError('');
+        if (paymentMethod === 'stripe' || paymentMethod === 'paypal') {
+            document.getElementById('payment-methods')?.scrollIntoView({ behavior: 'smooth' });
+            return;
+        }
+        handlePayment();
+    };
+
+    const handleSwitchMethod = () => {
+        setError('');
+        setPaymentMethod('');
+        document.getElementById('payment-methods')?.scrollIntoView({ behavior: 'smooth' });
+    };
 
     const handleGenericPaymentSuccess = async (method, transactionDetails = null) => {
         setLoading(true);
+        logCheckoutEvent('checkout_payment_attempt', {
+            method,
+            total_value: totalWithBump
+        }, {
+            key: `checkout_payment_attempt:${method}`
+        });
         try {
             const isPhysical = cartItems.some(item => item.type === 'physical' || !item.type);
             const orderItems = [...cartItems];
@@ -86,11 +165,26 @@ const Checkout = () => {
             };
 
             const orderId = await paymentService.createOrder(orderData, currentUser, referralData);
+            logCheckoutEvent('checkout_payment_success', {
+                method,
+                total_value: totalWithBump
+            }, {
+                key: `checkout_payment_success:${method}`
+            });
+            logCheckoutEvent('checkout_completed', {
+                total_value: totalWithBump
+            });
             clearCart();
             navigate(`/order-confirmation/${orderId}`);
         } catch (err) {
             console.error(err);
-            setError("Erreur lors de la finalisation de la commande.");
+            logCheckoutEvent('checkout_payment_failed', {
+                method,
+                reason: err?.message || 'unknown'
+            }, {
+                key: `checkout_payment_failed:${method}`
+            });
+            reportPaymentError("Erreur lors de la finalisation de la commande.", method);
         } finally {
             setLoading(false);
         }
@@ -114,6 +208,13 @@ const Checkout = () => {
             // We scroll to them or they are already visible
             return;
         }
+
+        logCheckoutEvent('checkout_payment_attempt', {
+            method: paymentMethod,
+            total_value: totalWithBump
+        }, {
+            key: `checkout_payment_attempt:${paymentMethod}`
+        });
 
         setLoading(true);
 
@@ -146,6 +247,12 @@ const Checkout = () => {
 
             if (paymentMethod === 'moncash') {
                 const redirectUrl = await paymentService.processMonCashPayment({ ...orderData, amount: totalWithBump }, currentUser, referralData);
+                logCheckoutEvent('checkout_payment_initiated', {
+                    method: 'moncash',
+                    total_value: totalWithBump
+                }, {
+                    key: 'checkout_payment_initiated:moncash'
+                });
                 clearCart();
                 if (redirectUrl.startsWith('/')) {
                     navigate(redirectUrl);
@@ -159,6 +266,15 @@ const Checkout = () => {
 
                 const orderId = await paymentService.createOrder({ ...orderData, paymentMethod: 'wallet', total: totalWithBump }, currentUser, referralData);
                 await pay(totalWithBump, orderId);
+                logCheckoutEvent('checkout_payment_success', {
+                    method: 'wallet',
+                    total_value: totalWithBump
+                }, {
+                    key: 'checkout_payment_success:wallet'
+                });
+                logCheckoutEvent('checkout_completed', {
+                    total_value: totalWithBump
+                });
                 clearCart();
                 navigate(`/order-confirmation/${orderId}`);
             } else if (paymentMethod === 'union_pay_3x') {
@@ -166,12 +282,30 @@ const Checkout = () => {
 
                 setTimeout(async () => {
                     const orderId = await paymentService.createOrder({ ...orderData, paymentMethod: 'union_pay_3x', total: totalWithBump }, currentUser, referralData);
+                    logCheckoutEvent('checkout_payment_success', {
+                        method: 'union_pay_3x',
+                        total_value: totalWithBump
+                    }, {
+                        key: 'checkout_payment_success:union_pay_3x'
+                    });
+                    logCheckoutEvent('checkout_completed', {
+                        total_value: totalWithBump
+                    });
                     clearCart();
                     navigate(`/order-confirmation/${orderId}`);
                 }, 1500);
             } else {
                 // Card generic fallback
                 setTimeout(() => {
+                    logCheckoutEvent('checkout_payment_success', {
+                        method: paymentMethod,
+                        total_value: totalWithBump
+                    }, {
+                        key: `checkout_payment_success:${paymentMethod}`
+                    });
+                    logCheckoutEvent('checkout_completed', {
+                        total_value: totalWithBump
+                    });
                     alert(`${paymentMethod} simulation: Success`);
                     clearCart();
                     navigate('/');
@@ -180,7 +314,13 @@ const Checkout = () => {
 
         } catch (err) {
             console.error(err);
-            setError(err.message || t('payment_error') || "Erreur de paiement");
+            logCheckoutEvent('checkout_payment_failed', {
+                method: paymentMethod,
+                reason: err?.message || 'unknown'
+            }, {
+                key: `checkout_payment_failed:${paymentMethod}`
+            });
+            reportPaymentError(err.message || t('payment_error') || "Erreur de paiement");
         } finally {
             setLoading(false);
         }
@@ -203,7 +343,7 @@ const Checkout = () => {
                     <PayPalPayment
                         amount={totalWithBump}
                         onSuccess={(details) => handleGenericPaymentSuccess('paypal', details)}
-                        onError={(err) => setError("Erreur PayPal: " + err)}
+                        onError={(err) => reportPaymentError("Erreur PayPal", 'paypal')}
                     />
                 </div>
             );
@@ -226,8 +366,27 @@ const Checkout = () => {
                 </div>
 
                 {error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 flex items-center gap-2">
-                        <AlertCircle className="w-5 h-5" /> {error}
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+                        <div className="flex items-center gap-2">
+                            <AlertCircle className="w-5 h-5" />
+                            <span>{error}</span>
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                            <button
+                                type="button"
+                                onClick={handleRetryPayment}
+                                className="px-3 py-1.5 rounded-md bg-red-600 text-white text-xs font-semibold hover:bg-red-700"
+                            >
+                                Réessayer le paiement
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleSwitchMethod}
+                                className="px-3 py-1.5 rounded-md border border-red-300 text-red-700 text-xs font-semibold hover:bg-red-50"
+                            >
+                                Choisir une autre méthode
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -263,22 +422,29 @@ const Checkout = () => {
                         )}
 
                         {/* Payment Method */}
-                        <div className="bg-white p-6 rounded shadow-sm">
+                        <div className="bg-white p-6 rounded shadow-sm" id="payment-methods">
                             <h2 className="text-lg font-bold mb-4 flex justify-between">
                                 <span>{t('payment_method_title')}</span>
                             </h2>
+
+                            <div className="mb-4 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 flex flex-wrap items-center gap-3">
+                                <span className="font-semibold">Paiement 100% sécurisé</span>
+                                <span className="text-xs bg-white/70 px-2 py-1 rounded-full">Validation immédiate</span>
+                                <span className="text-xs bg-white/70 px-2 py-1 rounded-full">Assistance 7j/7</span>
+                                <span className="text-xs bg-white/70 px-2 py-1 rounded-full">Données chiffrées</span>
+                            </div>
 
                             <div className="space-y-4">
                                 {/* Union Pay 3x (BNPL) */}
                                 <div
                                     className={`border rounded-lg p-4 cursor-pointer flex items-center gap-4 transition-colors ${paymentMethod === 'union_pay_3x' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'}`}
-                                    onClick={() => setPaymentMethod('union_pay_3x')}
+                                    onClick={() => selectPaymentMethod('union_pay_3x')}
                                 >
                                     <input
                                         type="radio"
                                         name="payment"
                                         checked={paymentMethod === 'union_pay_3x'}
-                                        onChange={() => setPaymentMethod('union_pay_3x')}
+                                        onChange={() => selectPaymentMethod('union_pay_3x')}
                                         className="accent-primary w-5 h-5"
                                     />
                                     <div className="flex-1">
@@ -299,13 +465,13 @@ const Checkout = () => {
                                 {/* Wallet Option */}
                                 <div
                                     className={`border rounded-lg p-4 cursor-pointer flex items-center gap-4 transition-colors ${paymentMethod === 'wallet' ? 'border-secondary bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}
-                                    onClick={() => setPaymentMethod('wallet')}
+                                    onClick={() => selectPaymentMethod('wallet')}
                                 >
                                     <input
                                         type="radio"
                                         name="payment"
                                         checked={paymentMethod === 'wallet'}
-                                        onChange={() => setPaymentMethod('wallet')}
+                                        onChange={() => selectPaymentMethod('wallet')}
                                         className="accent-secondary w-5 h-5"
                                     />
                                     <div className="flex-1">
@@ -325,13 +491,13 @@ const Checkout = () => {
                                 {/* MonCash Option */}
                                 <div
                                     className={`border rounded-lg p-4 cursor-pointer flex items-center gap-4 transition-colors ${paymentMethod === 'moncash' ? 'border-red-600 bg-red-50' : 'border-gray-200 hover:border-gray-300'}`}
-                                    onClick={() => setPaymentMethod('moncash')}
+                                    onClick={() => selectPaymentMethod('moncash')}
                                 >
                                     <input
                                         type="radio"
                                         name="payment"
                                         checked={paymentMethod === 'moncash'}
-                                        onChange={() => setPaymentMethod('moncash')}
+                                        onChange={() => selectPaymentMethod('moncash')}
                                         className="accent-red-600 w-5 h-5"
                                     />
                                     <div className="flex-1">
@@ -346,13 +512,13 @@ const Checkout = () => {
                                 {/* Stripe Option */}
                                 <div
                                     className={`border rounded-lg p-4 cursor-pointer flex items-center gap-4 transition-colors ${paymentMethod === 'stripe' ? 'border-secondary bg-indigo-50 shadow-md' : 'border-gray-200 hover:border-gray-300'}`}
-                                    onClick={() => setPaymentMethod('stripe')}
+                                    onClick={() => selectPaymentMethod('stripe')}
                                 >
                                     <input
                                         type="radio"
                                         name="payment"
                                         checked={paymentMethod === 'stripe'}
-                                        onChange={() => setPaymentMethod('stripe')}
+                                        onChange={() => selectPaymentMethod('stripe')}
                                         className="accent-secondary w-5 h-5"
                                     />
                                     <div className="flex-1">
@@ -370,13 +536,13 @@ const Checkout = () => {
                                 {/* PayPal Option */}
                                 <div
                                     className={`border rounded-lg p-4 cursor-pointer flex items-center gap-4 transition-colors ${paymentMethod === 'paypal' ? 'border-secondary bg-blue-50 shadow-md' : 'border-gray-200 hover:border-gray-300'}`}
-                                    onClick={() => setPaymentMethod('paypal')}
+                                    onClick={() => selectPaymentMethod('paypal')}
                                 >
                                     <input
                                         type="radio"
                                         name="payment"
                                         checked={paymentMethod === 'paypal'}
-                                        onChange={() => setPaymentMethod('paypal')}
+                                        onChange={() => selectPaymentMethod('paypal')}
                                         className="accent-secondary w-5 h-5"
                                     />
                                     <div className="flex-1">
@@ -393,25 +559,6 @@ const Checkout = () => {
                             </div>
                         </div>
 
-                        {/* Review Items */}
-                        <div className="bg-white p-6 rounded shadow-sm">
-                            <h2 className="text-lg font-bold mb-4">{t('review_items_title')}</h2>
-                            <div className="border border-gray-200 rounded p-4 space-y-4">
-                                <div className="text-green-700 font-bold mb-2">{t('estimated_delivery')}</div>
-                                {cartItems.map((item) => (
-                                    <div key={item.id} className="flex gap-4">
-                                        <div className="w-20 h-20 bg-gray-100 flex items-center justify-center text-2xl text-gray-400 overflow-hidden rounded-lg">
-                                            {item.image ? <img src={item.image} alt={item.title} className="w-full h-full object-cover" /> : <span>{t('img_placeholder')}</span>}
-                                        </div>
-                                        <div>
-                                            <div className="font-bold text-sm">{item.title}</div>
-                                            <div className="text-sm text-red-700 font-bold">{item.price.toLocaleString()} G</div>
-                                            <div className="text-xs text-gray-500">{t('qty')} {item.quantity}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
 
                     </div>
 
@@ -425,7 +572,7 @@ const Checkout = () => {
                                     <input
                                         type="checkbox"
                                         checked={warrantyAdded}
-                                        onChange={(e) => setWarrantyAdded(e.target.checked)}
+                                        onChange={(e) => handleWarrantyToggle(e.target.checked)}
                                         className="mt-1 w-4 h-4 text-secondary rounded focus:ring-secondary"
                                     />
                                     <div className="text-sm">
@@ -491,6 +638,27 @@ const Checkout = () => {
                                     <span>{totalWithBump.toLocaleString()} G</span>
                                 </div>
                             </div>
+
+                            <details className="mt-5 border-t pt-4">
+                                <summary className="text-sm font-semibold text-gray-700 cursor-pointer">
+                                    {t('review_items_title')} ({cartItems.length})
+                                </summary>
+                                <div className="mt-3 space-y-3">
+                                    <div className="text-xs text-green-700 font-bold">{t('estimated_delivery')}</div>
+                                    {cartItems.map((item) => (
+                                        <div key={item.id} className="flex gap-3">
+                                            <div className="w-12 h-12 bg-gray-100 flex items-center justify-center text-xs text-gray-400 overflow-hidden rounded-md">
+                                                {item.image ? <img src={item.image} alt={item.title} className="w-full h-full object-cover" /> : <span>{t('img_placeholder')}</span>}
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold text-xs">{item.title}</div>
+                                                <div className="text-xs text-red-700 font-bold">{item.price.toLocaleString()} G</div>
+                                                <div className="text-[10px] text-gray-500">{t('qty')} {item.quantity}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </details>
                         </div>
                     </div>
                 </div>
