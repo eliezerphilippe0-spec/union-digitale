@@ -61,6 +61,7 @@ const ImageZoom = ({
                     className={`w-full h-full object-${objectFit} transition-transform duration-300`}
                     style={{
                         transform: isZooming ? 'scale(1.1)' : 'scale(1)',
+                        backgroundColor: '#f8f8f8'
                     }}
                 />
             ) : (
