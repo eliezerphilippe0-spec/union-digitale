@@ -8,6 +8,7 @@ import SEO from '../components/common/SEO';
 import { buildCheckoutPayload, getCheckoutSessionId, logCheckoutEvent } from '../utils/analytics';
 
 import FreeShippingProgress from '../components/marketing/FreeShippingProgress';
+import CartUpsell from '../components/CartUpsell';
 
 const Cart = () => {
     const { cartItems, removeFromCart, cartTotal, addToCart, shippingCost, tax, finalTotal } = useCart();
@@ -119,20 +120,6 @@ const Cart = () => {
                 <div className="lg:col-span-9 bg-white p-5 md:p-6 rounded-xl shadow-sm border border-gray-100">
                     <h1 className="text-2xl font-medium mb-4 border-b pb-2">{t('your_cart')}</h1>
 
-                    {/* Cart Upsell */}
-                    <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start justify-between gap-3">
-                        <div>
-                            <div className="text-sm font-semibold text-amber-800">Protection 2 ans</div>
-                            <div className="text-xs text-amber-700">Ajoutez une garantie étendue pour 500 G</div>
-                        </div>
-                        <button
-                            onClick={() => addToCart({ id: 'warranty-2y', title: 'Garantie Étendue (2 ans)', price: 500, quantity: 1, type: 'service' })}
-                            className="text-xs bg-amber-600 text-white px-3 py-1.5 rounded-lg"
-                        >
-                            Ajouter
-                        </button>
-                    </div>
-
                     {!currentUser && (
                         <div className="mb-4 bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm text-emerald-800">
                             Pas besoin de compte pour payer. Vous pourrez créer un compte après l’achat.
@@ -194,33 +181,8 @@ const Cart = () => {
                             </div>
                         ))}
                     </div>
-
                     <div className="text-right mt-4 text-lg">
                         {t('subtotal_items')} ({cartItems.length} {t('items_count')}) : <span className="font-bold">{cartTotal.toLocaleString()} G</span>
-                    </div>
-
-                    {/* Bundle suggestions */}
-                    <div className="mt-6 border-t pt-4">
-                        <h3 className="font-semibold text-gray-900 mb-3">Souvent achetés ensemble</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {[
-                                { id: 'bundle-cable', title: 'Câble USB‑C premium', price: 650 },
-                                { id: 'bundle-case', title: 'Étui de protection', price: 950 },
-                            ].map((item) => (
-                                <div key={item.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
-                                    <div>
-                                        <div className="text-sm font-medium text-gray-900">{item.title}</div>
-                                        <div className="text-xs text-gray-500">{item.price.toLocaleString()} G</div>
-                                    </div>
-                                    <button
-                                        onClick={() => addToCart({ ...item, quantity: 1 })}
-                                        className="text-xs bg-gray-900 text-white px-3 py-1.5 rounded-lg"
-                                    >
-                                        Ajouter
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
                     </div>
                 </div>
 
@@ -252,6 +214,7 @@ const Cart = () => {
                             <input type="checkbox" className="w-4 h-4 text-secondary rounded focus:ring-secondary" />
                             <span>{t('contains_gift')}</span>
                         </div>
+                        <CartUpsell cartItems={cartItems} cartTotal={finalTotal} addToCart={addToCart} position="above_cta" />
                         <Link to="/checkout" onClick={handleCartCtaClick} className="block w-full bg-secondary hover:bg-secondary-hover text-white text-center font-medium py-2 rounded-full shadow-sm transition-colors">
                             {currentUser ? t('proceed_to_checkout') : 'Continuer sans créer de compte'}
                         </Link>
@@ -270,6 +233,7 @@ const Cart = () => {
                 <div className="text-xs text-gray-900 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 mb-2">
                     {TRUST_COPY[trustVariant]}
                 </div>
+                <CartUpsell cartItems={cartItems} cartTotal={finalTotal} addToCart={addToCart} position="above_cta" />
                 <Link to="/checkout" onClick={handleCartCtaClick} className="block w-full bg-secondary hover:bg-secondary-hover text-white text-center font-medium py-2 rounded-lg shadow-sm transition-colors">
                     {currentUser ? t('proceed_to_checkout') : 'Continuer sans créer de compte'}
                 </Link>

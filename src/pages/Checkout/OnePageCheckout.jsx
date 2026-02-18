@@ -10,7 +10,7 @@ import { signInAnonymously } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
 import AddressAutocomplete from '../../components/forms/AddressAutocomplete';
 import OrderBump from '../../components/OrderBump';
-import PickupPoints from '../../components/shipping/PickupPoints';
+import PickupPoints, { PICKUP_POINTS } from '../../components/shipping/PickupPoints';
 import logger from '../../utils/logger';
 import { buildCheckoutPayload, getCheckoutSessionId, logCheckoutEvent } from '../../utils/analytics';
 
@@ -35,8 +35,14 @@ const OnePageCheckout = () => {
     const [guestReady, setGuestReady] = useState(false);
     const checkoutCompletedRef = useRef(false);
     const hasTrackedStart = useRef(false);
+    const hasTrackedReassurance = useRef(false);
+    const hasTrackedPickupVisible = useRef(false);
+    const hasTrackedPickupIncentive = useRef(false);
+    const hasAppliedPickupDefault = useRef(false);
+    const hasUserToggledPickup = useRef(false);
 
     const isPhysical = cartItems.some(item => item.type === 'physical' || !item.type);
+    const hasNearbyHub = isPhysical && PICKUP_POINTS?.some(point => point.available);
 
     const trackPickupEvent = (eventName, properties = {}) => {
         const key = `pickup_event_${eventName}`;
@@ -46,6 +52,14 @@ const OnePageCheckout = () => {
         localStorage.setItem(key, String(now));
         logger.event(eventName, properties);
     };
+
+    const PICKUP_ROLLOUT_VERSION = 'pickup_v2_rollout_1';
+    const buildPickupEventPayload = () => ({
+        orderValue: finalTotal,
+        sessionId: getCheckoutSessionId(),
+        rolloutVersion: PICKUP_ROLLOUT_VERSION,
+        hasNearbyHub
+    });
 
     const departments = [
         'Ouest', 'Nord', 'Nord-Est', 'Nord-Ouest', 'Artibonite',
@@ -67,12 +81,39 @@ const OnePageCheckout = () => {
             navigate('/cart');
         }
     }, [cartItems, navigate]);
-
     useEffect(() => {
         if (!isPhysical) {
             setShippingMethod('delivery');
+            return;
         }
-    }, [isPhysical, setShippingMethod]);
+        if (!hasNearbyHub || hasAppliedPickupDefault.current || hasUserToggledPickup.current) return;
+        if (shippingMethod !== 'pickup') {
+            setShippingMethod('pickup');
+            hasAppliedPickupDefault.current = true;
+            logCheckoutEvent('checkout_pickup_default_auto', buildPickupEventPayload(), {
+                key: `checkout_pickup_default_auto:${getCheckoutSessionId()}`,
+                rateLimitMs: 60 * 1000
+            });
+        }
+    }, [isPhysical, hasNearbyHub, shippingMethod, setShippingMethod]);
+
+    useEffect(() => {
+        if (!isPhysical || hasTrackedPickupVisible.current) return;
+        logCheckoutEvent('checkout_pickup_visible', buildPickupEventPayload(), {
+            key: `checkout_pickup_visible:${getCheckoutSessionId()}`,
+            rateLimitMs: 60 * 1000
+        });
+        hasTrackedPickupVisible.current = true;
+    }, [isPhysical, finalTotal, hasNearbyHub]);
+
+    useEffect(() => {
+        if (!isPhysical || !hasNearbyHub || hasTrackedPickupIncentive.current) return;
+        logCheckoutEvent('checkout_pickup_incentive_visible', buildPickupEventPayload(), {
+            key: `checkout_pickup_incentive_visible:${getCheckoutSessionId()}`,
+            rateLimitMs: 60 * 1000
+        });
+        hasTrackedPickupIncentive.current = true;
+    }, [isPhysical, hasNearbyHub, finalTotal]);
 
     useEffect(() => {
         if (currentUser?.uid) {
@@ -91,6 +132,18 @@ const OnePageCheckout = () => {
         });
         hasTrackedStart.current = true;
     }, [cartItems.length, finalTotal]);
+
+    useEffect(() => {
+        if (hasTrackedReassurance.current) return;
+        logCheckoutEvent('payment_reassurance_visible', {
+            paymentMethod,
+            sessionId: getCheckoutSessionId()
+        }, {
+            key: `payment_reassurance_visible:${getCheckoutSessionId()}`,
+            rateLimitMs: 60 * 1000
+        });
+        hasTrackedReassurance.current = true;
+    }, [paymentMethod]);
 
     useEffect(() => {
         return () => {
@@ -115,6 +168,13 @@ const OnePageCheckout = () => {
 
     const handlePaymentMethodSelect = (method) => {
         setPaymentMethod(method);
+        logCheckoutEvent('payment_method_selected', {
+            paymentMethod: method,
+            sessionId: getCheckoutSessionId()
+        }, {
+            key: `payment_method_selected:${method}:${getCheckoutSessionId()}`,
+            rateLimitMs: 60 * 1000
+        });
         logCheckoutEvent('checkout_payment_method_selected', buildCheckoutPayload({
             cartValue: finalTotal,
             paymentMethod: method,
@@ -122,6 +182,16 @@ const OnePageCheckout = () => {
         }), {
             key: `checkout_payment_method_selected:${method}:${getCheckoutSessionId()}`,
             rateLimitMs: 60 * 1000
+        });
+    };
+
+    const handlePaymentHelpClick = () => {
+        logCheckoutEvent('payment_help_clicked', {
+            paymentMethod,
+            sessionId: getCheckoutSessionId()
+        }, {
+            key: `payment_help_clicked:${paymentMethod}:${getCheckoutSessionId()}`,
+            rateLimitMs: 30 * 1000
         });
     };
 
@@ -287,6 +357,28 @@ const OnePageCheckout = () => {
                     </span>
                 </div>
 
+                <div className="mb-6 bg-white border border-emerald-100 rounded-2xl p-4 md:p-5 shadow-sm">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <div className="text-sm font-semibold text-gray-900">Paiement 100% sécurisé, aucun débit sans confirmation.</div>
+                            <div className="text-xs text-gray-600 mt-1">Vos informations sont chiffrées et protégées. Assistance rapide si besoin.</div>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handlePaymentHelpClick}
+                            className="inline-flex items-center justify-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-2 rounded-full"
+                        >
+                            Besoin d'aide paiement ?
+                        </button>
+                    </div>
+                    <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                        <span className="px-3 py-1 rounded-full bg-gray-50 border border-gray-200">MonCash</span>
+                        <span className="px-3 py-1 rounded-full bg-gray-50 border border-gray-200">NatCash</span>
+                        <span className="px-3 py-1 rounded-full bg-gray-50 border border-gray-200">Portefeuille UD</span>
+                        <span className="px-3 py-1 rounded-full bg-gray-50 border border-gray-200">🔒 SSL</span>
+                    </div>
+                </div>
+
                 {!currentUser && (
                     <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div className="text-sm text-emerald-900">
@@ -434,10 +526,11 @@ const OnePageCheckout = () => {
                                     <h2 className="text-xl font-bold text-gray-800">Livraison ou Retrait</h2>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-3 mb-5">
+                                <div className="grid grid-cols-2 gap-3 mb-2">
                                     <button
                                         type="button"
                                         onClick={() => {
+                                            hasUserToggledPickup.current = true;
                                             setShippingMethod('delivery');
                                             trackPickupEvent('pickup_toggle_delivery');
                                         }}
@@ -452,8 +545,13 @@ const OnePageCheckout = () => {
                                     <button
                                         type="button"
                                         onClick={() => {
+                                            hasUserToggledPickup.current = true;
                                             setShippingMethod('pickup');
                                             trackPickupEvent('pickup_toggle_pickup');
+                                            logCheckoutEvent('checkout_pickup_selected', buildPickupEventPayload(), {
+                                                key: `checkout_pickup_selected:${getCheckoutSessionId()}`,
+                                                rateLimitMs: 60 * 1000
+                                            });
                                         }}
                                         className={`h-12 rounded-xl font-semibold border-2 transition-all ${
                                             shippingMethod === 'pickup'
@@ -464,6 +562,22 @@ const OnePageCheckout = () => {
                                         Retrait
                                     </button>
                                 </div>
+
+                                <div className="grid grid-cols-2 gap-3 mb-4">
+                                    <div />
+                                    <div className="flex justify-center">
+                                        <span className="text-[11px] font-semibold uppercase tracking-wide text-amber-800 bg-amber-100 px-2 py-1 rounded-full">
+                                            Recommandé
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {hasNearbyHub && (
+                                    <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                                        <div className="font-semibold">Économisez sur la livraison</div>
+                                        <div className="mt-1">Retrait sécurisé en 24–48h, moins d'échecs de livraison.</div>
+                                    </div>
+                                )}
 
                                 {shippingMethod === 'delivery' && (
                                     <div className="space-y-4">

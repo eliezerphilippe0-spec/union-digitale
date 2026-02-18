@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { buildCartUpsellPayload, getCheckoutSessionId, logCheckoutEvent } from '../utils/analytics';
 
 const SUGGESTED_ITEMS = [
@@ -6,8 +6,12 @@ const SUGGESTED_ITEMS = [
     { id: 'upsell-case', title: 'Étui de protection', price: 950, categoryId: 'accessories', vendorId: 'default' }
 ];
 
-const CartUpsell = ({ cartItems = [], cartTotal = 0, addToCart }) => {
+const CartUpsell = ({ cartItems = [], cartTotal = 0, addToCart, position = 'above_cta' }) => {
     const itemsInCart = useMemo(() => new Set(cartItems.map((item) => item.id)), [cartItems]);
+    const [incentiveMessage, setIncentiveMessage] = useState('');
+    const ROLLOUT_VERSION = 'upsell_v2_rollout_1';
+    const MICRO_COPY = 'Complétez votre commande et économisez.';
+    const INCENTIVE_COPY = '✔ Livraison prioritaire incluse';
     const suggestions = useMemo(() => {
         const sameCategory = Array.from(new Set(cartItems
             .filter((item) => item.categoryId)
@@ -47,7 +51,9 @@ const CartUpsell = ({ cartItems = [], cartTotal = 0, addToCart }) => {
                             logCheckoutEvent('cart_upsell_visible', buildCartUpsellPayload({
                                 productId: item.id,
                                 cartValue: cartTotal,
-                                source: suggestions.source
+                                source: suggestions.source,
+                                position,
+                                rolloutVersion: ROLLOUT_VERSION
                             }), {
                                 key: `cart_upsell_visible:${item.id}:${getCheckoutSessionId()}`,
                                 rateLimitMs: 60 * 1000
@@ -62,33 +68,45 @@ const CartUpsell = ({ cartItems = [], cartTotal = 0, addToCart }) => {
         );
         observer.observe(upsellRef.current);
         return () => observer.disconnect();
-    }, [cartTotal, suggestions]);
+    }, [cartTotal, position, suggestions]);
+
+    useEffect(() => {
+        if (!incentiveMessage) return;
+        const timer = setTimeout(() => setIncentiveMessage(''), 3000);
+        return () => clearTimeout(timer);
+    }, [incentiveMessage]);
 
     if (suggestions.list.length === 0) return null;
 
     const handleAdd = (item) => {
         logCheckoutEvent('cart_upsell_click', buildCartUpsellPayload({
-                                productId: item.id,
-                                cartValue: cartTotal,
-                                source: suggestions.source
+            productId: item.id,
+            cartValue: cartTotal,
+            source: suggestions.source,
+                                position,
+                                rolloutVersion: ROLLOUT_VERSION
                             }), {
             key: `cart_upsell_click:${item.id}:${getCheckoutSessionId()}`,
             rateLimitMs: 5 * 1000
         });
         addToCart({ ...item, quantity: 1 });
         logCheckoutEvent('cart_upsell_added', buildCartUpsellPayload({
-                                productId: item.id,
-                                cartValue: cartTotal,
-                                source: suggestions.source
+            productId: item.id,
+            cartValue: cartTotal,
+            source: suggestions.source,
+                                position,
+                                rolloutVersion: ROLLOUT_VERSION
                             }), {
             key: `cart_upsell_added:${item.id}:${getCheckoutSessionId()}`,
             rateLimitMs: 5 * 1000
         });
+        setIncentiveMessage(INCENTIVE_COPY);
     };
 
     return (
         <div ref={upsellRef} className="mt-6 border-t pt-4">
-            <h3 className="font-semibold text-gray-900 mb-3">Complétez votre commande</h3>
+            <h3 className="font-semibold text-gray-900">Complétez votre commande</h3>
+            <p className="text-xs text-gray-500 mb-3">{MICRO_COPY}</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {suggestions.list.map((item) => (
                     <div key={item.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
@@ -105,6 +123,9 @@ const CartUpsell = ({ cartItems = [], cartTotal = 0, addToCart }) => {
                     </div>
                 ))}
             </div>
+            {incentiveMessage && (
+                <div className="mt-3 text-xs font-medium text-emerald-700">{incentiveMessage}</div>
+            )}
         </div>
     );
 };

@@ -41,11 +41,13 @@ export const buildCheckoutPayload = ({ cartValue = 0, paymentMethod = 'unknown',
     ...(variant ? { variant } : {})
 });
 
-export const buildCartUpsellPayload = ({ productId, cartValue = 0, source } = {}) => ({
+export const buildCartUpsellPayload = ({ productId, cartValue = 0, source, position, rolloutVersion } = {}) => ({
     productId,
     cartValue,
     sessionId: getCheckoutSessionId(),
-    ...(source ? { source } : {})
+    ...(source ? { source } : {}),
+    ...(position ? { position } : {}),
+    ...(rolloutVersion ? { rolloutVersion } : {})
 });
 
 export const logCheckoutEvent = (eventName, payload = {}, options = {}) => {
@@ -56,30 +58,38 @@ export const logCheckoutEvent = (eventName, payload = {}, options = {}) => {
     logEvent(analytics, eventName, payload);
 };
 
-const buildProductEventPayload = ({ productId, price }) => ({
+const buildProductEventPayload = ({ productId, price, stock }) => ({
     productId,
     price,
+    stock,
     sessionId: getCheckoutSessionId()
 });
 
-export const logProductCtaVisible = ({ productId, price } = {}) => {
+export const logProductCtaVisible = ({ productId, price, stock } = {}) => {
     if (!analytics || !productId) return;
-    const payload = buildProductEventPayload({ productId, price });
+    const payload = buildProductEventPayload({ productId, price, stock });
     if (!shouldTrackEvent(`product_cta_visible_${productId}`, 60000)) return;
     logEvent(analytics, 'product_cta_visible', payload);
 };
 
-export const logProductAddToCartClick = ({ productId, price } = {}) => {
+export const logProductAddToCartClick = ({ productId, price, stock } = {}) => {
     if (!analytics || !productId) return;
-    const payload = buildProductEventPayload({ productId, price });
+    const payload = buildProductEventPayload({ productId, price, stock });
     logEvent(analytics, 'product_add_to_cart_click', payload);
 };
 
-export const logProductStockLowVisible = ({ productId, price } = {}) => {
+export const logProductStockLowVisible = ({ productId, price, stock } = {}) => {
     if (!analytics || !productId) return;
-    const payload = buildProductEventPayload({ productId, price });
+    const payload = buildProductEventPayload({ productId, price, stock });
     if (!shouldTrackEvent(`product_stock_low_visible_${productId}`, 60000)) return;
     logEvent(analytics, 'product_stock_low_visible', payload);
+};
+
+export const logProductEtaVisible = ({ productId, price, stock } = {}) => {
+    if (!analytics || !productId) return;
+    const payload = buildProductEventPayload({ productId, price, stock });
+    if (!shouldTrackEvent(`product_eta_visible_${productId}`, 60000)) return;
+    logEvent(analytics, 'product_eta_visible', payload);
 };
 
 export const calculateCheckoutKpis = ({
