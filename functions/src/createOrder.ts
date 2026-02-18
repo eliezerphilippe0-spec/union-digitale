@@ -134,6 +134,21 @@ export const createOrder = onCall(async (request) => {
             vendorBpsMap.set(snap.id, Number.isFinite(bps) ? bps : defaultBps);
         });
 
+        const storeRefs = vendorIds.map((vid) => db.doc(`stores/${vid}`));
+        const storeSnaps = await db.getAll(...storeRefs);
+        const storeVerifiedMap = new Map<string, boolean>();
+        const missingStores: string[] = [];
+        storeSnaps.forEach((snap, idx) => {
+            const vendorId = vendorIds[idx];
+            if (!snap.exists) {
+                storeVerifiedMap.set(vendorId, false);
+                missingStores.push(vendorId);
+                return;
+            }
+            const data: any = snap.data();
+            storeVerifiedMap.set(vendorId, Boolean(data?.isVerifiedSeller));
+        });
+
         for (const vendorId of vendorIds) {
             const subRef = db.collection('orderSubs').doc();
             subOrderIds.push(subRef.id);
@@ -155,6 +170,8 @@ export const createOrder = onCall(async (request) => {
                 sellerNetAmount,
                 status: 'pending',
                 escrowStatus: 'PENDING',
+                isVerifiedSellerSnapshot: storeVerifiedMap.get(vendorId) ?? false,
+                verifiedAtSnapshot: admin.firestore.FieldValue.serverTimestamp(),
                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
             });
 
@@ -176,6 +193,18 @@ export const createOrder = onCall(async (request) => {
         }
 
         batch.update(orderRef, { subOrderIds });
+
+        if (missingStores.length > 0) {
+            missingStores.forEach((vendorId) => {
+                const eventRef = db.collection('system_events').doc();
+                batch.set(eventRef, {
+                    eventName: 'missing_store_for_vendorId',
+                    vendorId,
+                    orderId,
+                    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                });
+            });
+        }
 
         if (fulfillmentType === 'PICKUP') {
             const eventRef = db.collection('analytics_events').doc();
