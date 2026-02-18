@@ -68,6 +68,25 @@ const AdminMetrics = () => {
           <div className="text-xs text-slate-400 mt-1">
             Snapshot coverage: {formatPct(summary?.verifiedSellerUplift?.snapshot?.coverageRate)}
           </div>
+          {(() => {
+            const rate = summary?.verifiedSellerUplift?.snapshot?.coverageRate ?? 0;
+            const status = rate >= 0.8 ? { label: '🟢 Good', color: 'text-green-700 bg-green-50 border-green-200' }
+              : rate >= 0.5 ? { label: '🟡 Partial', color: 'text-yellow-800 bg-yellow-50 border-yellow-200' }
+              : { label: '🔴 Low', color: 'text-red-700 bg-red-50 border-red-200' };
+            return (
+              <div className="mt-1 flex items-center gap-2">
+                <span
+                  className={`text-[11px] px-2 py-0.5 rounded-full border ${status.color}`}
+                  title="% of converted subOrders with isVerifiedSellerSnapshot populated (true/false present). Thresholds: ≥80% good, ≥50% partial."
+                >
+                  {status.label}
+                </span>
+                {rate < 0.8 && (
+                  <span className="text-[11px] text-slate-400">Some legacy subOrders may be missing snapshot.</span>
+                )}
+              </div>
+            );
+          })()}
         </div>
         <Card label="Redirect drop" value={formatPct(summary?.redirectDropRate)} />
       </div>
