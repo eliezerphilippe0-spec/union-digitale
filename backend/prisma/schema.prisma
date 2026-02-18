@@ -329,6 +329,21 @@ model SellerAnalyticsEvent {
   @@index([eventName, createdAt])
 }
 
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  provider    String
+  externalId  String
+  eventType   String
+  payloadHash String
+  receivedAt  DateTime @default(now())
+  processedAt DateTime?
+  status      String   @default("RECEIVED")
+  errorMessage String?
+
+  @@unique([provider, externalId])
+  @@index([status])
+}
+
 model UserSegmentEvent {
   id          String   @id @default(cuid())
   userId      String

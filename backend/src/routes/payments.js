@@ -13,6 +13,7 @@ const natcashService = require('../services/natcashService');
 const validate = require('../middleware/validate');
 const { body } = require('express-validator');
 const { redeemPointsOnPayment, awardCashbackAndPoints, applyEscrowAndCommission } = require('../services/paymentCompletion');
+const crypto = require('crypto');
 
 const router = express.Router();
 
@@ -24,9 +25,70 @@ const logPaymentEvent = (event, payload = {}) => {
   }
 };
 
+const hashPayload = (payload) => {
+  if (!payload) return null;
+  const buffer = Buffer.isBuffer(payload) ? payload : Buffer.from(JSON.stringify(payload));
+  return crypto.createHash('sha256').update(buffer).digest('hex');
+};
+
+const registerWebhookEvent = async ({ provider, externalId, eventType, payloadHash }) => {
+  const safeExternalId = externalId || payloadHash || 'unknown';
+  try {
+    const record = await prisma.webhookEvent.create({
+      data: {
+        provider,
+        externalId: safeExternalId,
+        eventType: eventType || 'unknown',
+        payloadHash: payloadHash || 'unknown',
+        status: 'RECEIVED',
+      },
+    });
+    logPaymentEvent('webhook_received', { provider, externalId: safeExternalId, eventType });
+    return { duplicate: false, record };
+  } catch (error) {
+    if (error?.code === 'P2002') {
+      logPaymentEvent('webhook_duplicate_ignored', { provider, externalId: safeExternalId, eventType });
+      return { duplicate: true };
+    }
+    throw error;
+  }
+};
+
+const markWebhookEvent = async (id, status, errorMessage) => {
+  if (!id) return;
+  await prisma.webhookEvent.update({
+    where: { id },
+    data: {
+      status,
+      processedAt: new Date(),
+      errorMessage: errorMessage ? String(errorMessage).slice(0, 200) : null,
+    },
+  });
+};
+
 const getPaymentSuccessSource = (order) => {
   if (!order) return null;
   return order.paymentStatus === 'PAID' ? 'confirmed' : null;
+};
+
+const clampValue = (value, min, max) => Math.max(min, Math.min(max, value));
+
+const normalizePaymentProvider = (paymentMethod) => {
+  if (!paymentMethod) return 'unknown';
+  switch (paymentMethod) {
+    case 'CARD':
+      return 'stripe';
+    case 'MONCASH':
+      return 'moncash';
+    case 'NATCASH':
+      return 'natcash';
+    case 'CASH_ON_DELIVERY':
+      return 'cod';
+    case 'BANK_TRANSFER':
+      return 'bank_transfer';
+    default:
+      return String(paymentMethod).toLowerCase();
+  }
 };
 
 const recheckRateBuckets = new Map();
@@ -297,25 +359,77 @@ router.get('/:orderId/status', authenticate, async (req, res, next) => {
 });
 
 /**
- * Manual payment recheck
+ * Confirmation delay metric
  */
-router.post('/:orderId/recheck', authenticate, async (req, res, next) => {
+router.post('/:orderId/confirmation-delay', authenticate, async (req, res, next) => {
   try {
-    if (!checkRecheckRateLimit(req.params.orderId)) {
-      return res.status(429).json({ error: 'Rate limit' });
-    }
-
-    logPaymentEvent('checkout_payment_recheck_called', {
-      orderId: req.params.orderId,
-      userId: req.user.id,
-    });
-
     const order = await prisma.order.findUnique({ where: { id: req.params.orderId } });
     if (!order) throw new AppError('Commande non trouvée', 404);
 
     const isAdmin = req.user.role === 'ADMIN';
     const isBuyer = req.user.role === 'BUYER' && order.userId === req.user.id;
     if (!isAdmin && !isBuyer) throw new AppError('Non autorisé', 403);
+
+    const rawDelay = Number(req.body?.delayMs);
+    if (!Number.isFinite(rawDelay)) {
+      throw new AppError('delayMs invalide', 400);
+    }
+
+    if (order.paymentStatus !== 'PAID') {
+      return res.json({
+        orderId: order.id,
+        status: order.paymentStatus,
+      });
+    }
+
+    const delayMs = clampValue(rawDelay, 0, 10 * 60 * 1000);
+    const sessionId = req.body?.sessionId || req.headers['x-checkout-session-id'] || 'unknown';
+
+    logPaymentEvent('checkout_payment_confirmation_delay_measured', {
+      orderId: order.id,
+      delayMs,
+      provider: normalizePaymentProvider(order.paymentMethod),
+      sessionId,
+    });
+
+    res.json({
+      orderId: order.id,
+      delayMs,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * Manual payment recheck
+ */
+router.post('/:orderId/recheck', authenticate, async (req, res, next) => {
+  try {
+    const order = await prisma.order.findUnique({ where: { id: req.params.orderId } });
+    if (!order) throw new AppError('Commande non trouvée', 404);
+
+    const isAdmin = req.user.role === 'ADMIN';
+    const isBuyer = req.user.role === 'BUYER' && order.userId === req.user.id;
+    if (!isAdmin && !isBuyer) throw new AppError('Non autorisé', 403);
+
+    if (!checkRecheckRateLimit(order.id)) {
+      logPaymentEvent('checkout_payment_recheck_rate_limited', {
+        orderId: order.id,
+        userId: req.user.id,
+      });
+      return res.json({
+        orderId: order.id,
+        status: order.paymentStatus,
+        successSource: getPaymentSuccessSource(order),
+        updatedAt: order.updatedAt,
+      });
+    }
+
+    logPaymentEvent('checkout_payment_recheck_called', {
+      orderId: order.id,
+      userId: req.user.id,
+    });
 
     if (order.paymentStatus === 'PAID') {
       return res.json({
@@ -486,6 +600,18 @@ router.post('/callback/natcash', async (req, res, next) => {
 
     const { paymentId, status, transactionId, orderId } = req.body;
 
+    const payloadHash = hashPayload(req.body);
+    const { duplicate, record } = await registerWebhookEvent({
+      provider: 'natcash',
+      externalId: transactionId || paymentId || orderId,
+      eventType: status,
+      payloadHash,
+    });
+
+    if (duplicate) {
+      return res.json({ received: true });
+    }
+
     logPaymentEvent('checkout_payment_webhook_received', {
       provider: 'natcash',
       orderNumber: orderId,
@@ -526,9 +652,24 @@ router.post('/callback/natcash', async (req, res, next) => {
       }
     }
 
+    await markWebhookEvent(record?.id, 'PROCESSED');
+    logPaymentEvent('webhook_processed', { provider: 'natcash', externalId: transactionId || paymentId || orderId });
+
     res.json({ received: true });
   } catch (error) {
     console.error('NatCash webhook error:', error);
+    try {
+      const payloadHash = hashPayload(req.body);
+      const externalId = req.body?.transactionId || req.body?.paymentId || req.body?.orderId || payloadHash;
+      const event = await prisma.webhookEvent.findFirst({
+        where: { provider: 'natcash', externalId },
+        orderBy: { receivedAt: 'desc' },
+      });
+      await markWebhookEvent(event?.id, 'FAILED', error?.message || 'Webhook failed');
+    } catch (markErr) {
+      console.error('NatCash webhook mark failed:', markErr);
+    }
+    logPaymentEvent('webhook_failed', { provider: 'natcash', error: error?.message });
     res.status(500).json({ error: 'Webhook processing failed' });
   }
 });
@@ -550,6 +691,18 @@ router.post('/webhook/stripe', express.raw({ type: 'application/json' }), async 
       sig, 
       config.STRIPE_WEBHOOK_SECRET
     );
+
+    const payloadHash = hashPayload(req.body);
+    const { duplicate, record } = await registerWebhookEvent({
+      provider: 'stripe',
+      externalId: event.id,
+      eventType: event.type,
+      payloadHash,
+    });
+
+    if (duplicate) {
+      return res.json({ received: true });
+    }
 
     logPaymentEvent('checkout_payment_webhook_received', {
       provider: 'stripe',
@@ -588,9 +741,23 @@ router.post('/webhook/stripe', express.raw({ type: 'application/json' }), async 
       }
     }
 
+    await markWebhookEvent(record?.id, 'PROCESSED');
+    logPaymentEvent('webhook_processed', { provider: 'stripe', externalId: event.id, type: event.type });
+
     res.json({ received: true });
   } catch (err) {
     console.error('Stripe webhook error:', err);
+    try {
+      const payloadHash = hashPayload(req.body);
+      const event = await prisma.webhookEvent.findFirst({
+        where: { provider: 'stripe', payloadHash },
+        orderBy: { receivedAt: 'desc' },
+      });
+      await markWebhookEvent(event?.id, 'FAILED', err?.message || 'Webhook failed');
+    } catch (markErr) {
+      console.error('Stripe webhook mark failed:', markErr);
+    }
+    logPaymentEvent('webhook_failed', { provider: 'stripe', error: err?.message });
     res.status(400).send(`Webhook Error: ${err.message}`);
   }
 });

@@ -3,6 +3,14 @@ const prisma = require('../lib/prisma');
 const config = require('../config');
 const { computeRiskLevel } = require('../services/riskEngine');
 
+const logCronEvent = (event, payload = {}) => {
+  try {
+    console.log(JSON.stringify({ event, ...payload }));
+  } catch (error) {
+    console.log(JSON.stringify({ event, error: 'event_log_failed' }));
+  }
+};
+
 const acquireJobLock = async ({ key, lockedBy, ttlMs }) => {
   const now = new Date();
   const expiresAt = new Date(now.getTime() + ttlMs);
@@ -10,6 +18,7 @@ const acquireJobLock = async ({ key, lockedBy, ttlMs }) => {
   return prisma.$transaction(async (tx) => {
     const existing = await tx.jobLock.findUnique({ where: { key } });
     if (existing?.expiresAt && existing.expiresAt > now) {
+      logCronEvent('cron_lock_conflict', { job: key, lockedBy: existing.lockedBy });
       return null;
     }
 
@@ -19,6 +28,7 @@ const acquireJobLock = async ({ key, lockedBy, ttlMs }) => {
       create: { key, lockedBy, lockedAt: now, expiresAt },
     });
 
+    logCronEvent('cron_lock_acquired', { job: key, lockedBy });
     return updated;
   });
 };
