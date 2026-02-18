@@ -89,6 +89,7 @@ const computeVerifiedSellerUpliftFirestore = async ({
   const end = new Date(to);
 
   const vendorAgg = new Map();
+  let hasSnapshot = false;
 
   while (cursorFrom < end) {
     if (Date.now() - started > budgetMs) {
@@ -103,7 +104,7 @@ const computeVerifiedSellerUpliftFirestore = async ({
       .collection('orderSubs')
       .where('createdAt', '>=', cursorFrom)
       .where('createdAt', '<', cursorTo)
-      .select('vendorId', 'createdAt', 'status', 'paymentStatus');
+      .select('vendorId', 'createdAt', 'status', 'paymentStatus', 'isVerifiedSellerSnapshot');
 
     const snap = await q.get();
 
@@ -113,9 +114,13 @@ const computeVerifiedSellerUpliftFirestore = async ({
       const d = doc.data();
       const vendorId = String(d.vendorId || '');
       if (!vendorId) continue;
-      const agg = vendorAgg.get(vendorId) || { total: 0, converted: 0 };
+      if (typeof d.isVerifiedSellerSnapshot === 'boolean') hasSnapshot = true;
+      const agg = vendorAgg.get(vendorId) || { total: 0, converted: 0, snapshot: null };
       agg.total += 1;
       if (isConvertedSubOrder(d)) agg.converted += 1;
+      if (agg.snapshot === null && typeof d.isVerifiedSellerSnapshot === 'boolean') {
+        agg.snapshot = d.isVerifiedSellerSnapshot;
+      }
       vendorAgg.set(vendorId, agg);
     }
 
@@ -123,18 +128,25 @@ const computeVerifiedSellerUpliftFirestore = async ({
   }
 
   if (vendorAgg.size === 0) {
+
     const emptyValue = {
       window: { from: from.toISOString(), to: to.toISOString() },
-      verified: { stores: 0, subOrders: 0, converted: 0, rate: 0 },
-      nonVerified: { stores: 0, subOrders: 0, converted: 0, rate: 0 },
-      upliftAbs: 0,
-      upliftRel: 0,
+      status: 'EMPTY',
+      counts: {
+        verified: { subs: 0, converted: 0, conversionRate: 0 },
+        nonVerified: { subs: 0, converted: 0, conversionRate: 0 },
+      },
+      uplift: { conversionDelta: null, conversionLiftPct: null },
     };
     cacheSet(cacheKey, emptyValue);
     return { status: 'EMPTY', data: emptyValue, scanned, cache: 'MISS' };
   }
 
-  const verifiedMap = await getVerifiedMapForVendors(vendorAgg.keys(), { STORE_KEY_MODE });
+  let verifiedMap = null;
+  let status = hasSnapshot ? 'SNAPSHOT' : 'FALLBACK_JOIN';
+  if (!hasSnapshot) {
+    verifiedMap = await getVerifiedMapForVendors(vendorAgg.keys(), { STORE_KEY_MODE });
+  }
 
   let vSub = 0;
   let vConv = 0;
@@ -142,7 +154,7 @@ const computeVerifiedSellerUpliftFirestore = async ({
   let nvConv = 0;
 
   for (const [vendorId, agg] of vendorAgg.entries()) {
-    const isVerified = Boolean(verifiedMap.get(vendorId));
+    const isVerified = hasSnapshot ? Boolean(agg.snapshot) : Boolean(verifiedMap?.get(vendorId));
     if (isVerified) {
       vSub += agg.total;
       vConv += agg.converted;
@@ -156,14 +168,19 @@ const computeVerifiedSellerUpliftFirestore = async ({
   const rateNV = nvSub > 0 ? nvConv / nvSub : 0;
   const data = {
     window: { from: from.toISOString(), to: to.toISOString() },
-    verified: { stores: verifiedMap.size, subOrders: vSub, converted: vConv, rate: clamp01(rateV) },
-    nonVerified: { stores: vendorAgg.size - verifiedMap.size, subOrders: nvSub, converted: nvConv, rate: clamp01(rateNV) },
-    upliftAbs: clamp01(rateV) - clamp01(rateNV),
-    upliftRel: rateNV > 0 ? safeDiv(rateV, rateNV) - 1 : 0,
+    status,
+    counts: {
+      verified: { subs: vSub, converted: vConv, conversionRate: clamp01(rateV) },
+      nonVerified: { subs: nvSub, converted: nvConv, conversionRate: clamp01(rateNV) },
+    },
+    uplift: {
+      conversionDelta: (vSub + nvSub) > 0 ? (clamp01(rateV) - clamp01(rateNV)) : null,
+      conversionLiftPct: rateNV > 0 ? (rateV - rateNV) / rateNV : null,
+    },
   };
 
   cacheSet(cacheKey, data);
-  return { status: 'OK', data, scanned, cache: 'MISS' };
+  return { status, data, scanned, cache: 'MISS' };
 };
 
 module.exports = { computeVerifiedSellerUpliftFirestore };

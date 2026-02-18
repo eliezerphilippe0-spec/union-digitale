@@ -42,3 +42,16 @@ describe('Admin metrics uplift', () => {
     expect(res.body.verifiedSellerUplift).toBeNull();
   });
 });
+
+
+  test('returns SNAPSHOT status when snapshot present', async () => {
+    prisma.$queryRaw.mockResolvedValueOnce([{ cartCheckoutClicks: 0, checkoutStarts: 0, checkoutCompletions: 0, paymentSuccessConfirmed: 0, paymentSuccessRedirect: 0, upsellVisible: 0, upsellAdded: 0, pickupOrders: 0, trustVisible: 0, trustClick: 0, trackingSupportClicks: 0, sessions: 0 }]);
+    prisma.order.aggregate.mockResolvedValueOnce({ _sum: { total: 0 }, _count: { _all: 0 } });
+    computeVerifiedSellerUpliftFirestore.mockResolvedValueOnce({ status: 'SNAPSHOT', data: { status: 'SNAPSHOT', counts: { verified: { subs: 1, converted: 1, conversionRate: 1 }, nonVerified: { subs: 1, converted: 0, conversionRate: 0 } }, uplift: { conversionDelta: 1, conversionLiftPct: null } } });
+
+    const res = await request(app).get('/api/admin/metrics/summary?window=7d');
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.verifiedUpliftStatus).toBe('SNAPSHOT');
+    expect(res.body.verifiedSellerUplift).toHaveProperty('counts');
+  });
