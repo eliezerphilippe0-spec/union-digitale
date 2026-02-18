@@ -16,6 +16,20 @@ const Cart = () => {
     const hasTrackedEstimate = useRef(false);
     const hasTrackedTrust = useRef(false);
     const trustRef = useRef(null);
+    const getTrustVariant = () => {
+        const key = 'cart_trust_variant';
+        let v = sessionStorage.getItem(key);
+        if (!v) {
+            v = Math.random() < 0.5 ? 'A' : 'B';
+            sessionStorage.setItem(key, v);
+        }
+        return v;
+    };
+    const trustVariant = getTrustVariant();
+    const TRUST_COPY = {
+        A: '🔒 Paiement sécurisé • ↩️ 72h • 🚚 2–4j',
+        B: '🔒 Achat sans risque • ↩️ Retour 72h • 🚚 2–4j'
+    };
 
     useEffect(() => {
         if (hasTrackedEstimate.current || cartItems.length === 0) return;
@@ -38,9 +52,10 @@ const Cart = () => {
                         logCheckoutEvent('cart_trust_visible', buildCheckoutPayload({
                             cartValue: finalTotal,
                             paymentMethod: 'unknown',
-                            step: 'cart'
+                            step: 'cart',
+                            variant: trustVariant
                         }), {
-                            key: `cart_trust_visible:${getCheckoutSessionId()}`,
+                            key: `cart_trust_visible:${trustVariant}:${getCheckoutSessionId()}`,
                             rateLimitMs: 60 * 1000
                         });
                         hasTrackedTrust.current = true;
@@ -87,9 +102,10 @@ const Cart = () => {
         logCheckoutEvent('cart_checkout_cta_click', buildCheckoutPayload({
             cartValue: finalTotal,
             paymentMethod: 'unknown',
-            step: 'cart'
+            step: 'cart',
+            variant: trustVariant
         }), {
-            key: `cart_checkout_cta_click:${getCheckoutSessionId()}`,
+            key: `cart_checkout_cta_click:${trustVariant}:${getCheckoutSessionId()}`,
             rateLimitMs: 60 * 1000
         });
     };
@@ -230,7 +246,7 @@ const Cart = () => {
                             <div className="text-xs text-emerald-700">🚚 Estimation livraison : 2-4 jours</div>
                         </div>
                         <div ref={trustRef} className="text-xs text-gray-900 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 mb-3">
-                            🔒 Paiement sécurisé • ↩️ 72h • 🚚 2–4j
+                            {TRUST_COPY[trustVariant]}
                         </div>
                         <div className="flex items-center gap-2 mb-4 text-sm">
                             <input type="checkbox" className="w-4 h-4 text-secondary rounded focus:ring-secondary" />
@@ -252,7 +268,7 @@ const Cart = () => {
                 </div>
                 <div className="text-xs text-emerald-700 mb-2">🚚 Estimation livraison : 2-4 jours</div>
                 <div className="text-xs text-gray-900 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 mb-2">
-                    🔒 Paiement sécurisé • ↩️ 72h • 🚚 2–4j
+                    {TRUST_COPY[trustVariant]}
                 </div>
                 <Link to="/checkout" onClick={handleCartCtaClick} className="block w-full bg-secondary hover:bg-secondary-hover text-white text-center font-medium py-2 rounded-lg shadow-sm transition-colors">
                     {currentUser ? t('proceed_to_checkout') : 'Continuer sans créer de compte'}

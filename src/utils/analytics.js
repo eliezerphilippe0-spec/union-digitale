@@ -32,12 +32,13 @@ export const getCheckoutSessionId = () => {
     return sessionId;
 };
 
-export const buildCheckoutPayload = ({ cartValue = 0, paymentMethod = 'unknown', step = 'unknown', successSource } = {}) => ({
+export const buildCheckoutPayload = ({ cartValue = 0, paymentMethod = 'unknown', step = 'unknown', successSource, variant } = {}) => ({
     cartValue,
     paymentMethod,
     sessionId: getCheckoutSessionId(),
     step,
-    ...(successSource ? { successSource } : {})
+    ...(successSource ? { successSource } : {}),
+    ...(variant ? { variant } : {})
 });
 
 export const logCheckoutEvent = (eventName, payload = {}, options = {}) => {
