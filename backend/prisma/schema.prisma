@@ -25,6 +25,14 @@ enum UserStatus {
   BANNED
 }
 
+enum UserSegment {
+  NEW
+  RETURNING
+  HIGH_INTENT
+  HIGH_VALUE
+  POWER
+}
+
 model User {
   id            String     @id @default(uuid())
   email         String     @unique
@@ -37,6 +45,11 @@ model User {
   status        UserStatus @default(PENDING)
   emailVerified Boolean    @default(false)
   phoneVerified Boolean    @default(false)
+
+  acquisitionDate  DateTime?
+  firstPurchaseDate DateTime?
+  userSegment      UserSegment? @default(NEW)
+  segmentUpdatedAt DateTime?
   
   // Loyalty
   loyaltyPoints Int        @default(0)
@@ -64,6 +77,7 @@ model User {
   notifications Notification[]
   cashbackTransactions CashbackTransaction[]
   pointsLedger PointsLedger[]
+  userSegmentEvents UserSegmentEvent[]
   
   @@index([email])
   @@index([phone])
@@ -116,6 +130,13 @@ enum RiskLevel {
   FROZEN
 }
 
+enum SellerTier {
+  NONE
+  VERIFIED
+  VERIFIED_PLUS
+  ELITE
+}
+
 model Store {
   id              String      @id @default(uuid())
   userId          String      @unique
@@ -145,6 +166,18 @@ model Store {
   trustFormulaUpdatedAt DateTime?
   listingBoostFactor Float      @default(1.0)
   payoutDelayHours   Int        @default(72)
+
+  sellerTier         SellerTier @default(NONE)
+  sellerTierUpdatedAt DateTime?
+  sellerPerformanceSnapshot Json?
+
+  sellerRiskScore              Int      @default(100)
+  deliveryReliabilityScore     Int      @default(100)
+  refundRate                   Float    @default(0)
+  disputeRate                  Float    @default(0)
+  lateRate                     Float    @default(0)
+  cancellationRate             Float    @default(0)
+  sellerIntelligenceUpdatedAt  DateTime?
   
   // Contact
   email           String?
@@ -296,6 +329,25 @@ model SellerAnalyticsEvent {
   @@index([eventName, createdAt])
 }
 
+model UserSegmentEvent {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventName   String
+  eventVersion String @default("v1")
+  fromSegment String?
+  toSegment   String
+  reason      String?
+  windowDays  Int?
+  computedAt  DateTime?
+  jobRunId    String?
+  metadata    Json
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([eventName, createdAt])
+  @@index([toSegment, createdAt])
+}
 
 // ============== SKILLS ==============
 
