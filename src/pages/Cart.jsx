@@ -1,17 +1,58 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Trash2, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import SEO from '../components/common/SEO';
+import { buildCheckoutPayload, getCheckoutSessionId, logCheckoutEvent } from '../utils/analytics';
 
 import FreeShippingProgress from '../components/marketing/FreeShippingProgress';
 
 const Cart = () => {
-    const { cartItems, removeFromCart, cartTotal, addToCart } = useCart();
+    const { cartItems, removeFromCart, cartTotal, addToCart, shippingCost, tax, finalTotal } = useCart();
     const { t } = useLanguage();
     const { currentUser } = useAuth();
+    const hasTrackedEstimate = useRef(false);
+    const hasTrackedTrust = useRef(false);
+    const trustRef = useRef(null);
+
+    useEffect(() => {
+        if (hasTrackedEstimate.current || cartItems.length === 0) return;
+        logCheckoutEvent('checkout_shipping_estimated', buildCheckoutPayload({
+            cartValue: finalTotal,
+            paymentMethod: 'unknown',
+            step: 'cart'
+        }), {
+            key: `checkout_shipping_estimated:${finalTotal}:${cartItems.length}`
+        });
+        hasTrackedEstimate.current = true;
+    }, [cartItems.length, finalTotal]);
+
+    useEffect(() => {
+        if (hasTrackedTrust.current || cartTotal <= 0 || !trustRef.current) return;
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting && entry.intersectionRatio >= 0.5 && !hasTrackedTrust.current) {
+                        logCheckoutEvent('cart_trust_visible', buildCheckoutPayload({
+                            cartValue: finalTotal,
+                            paymentMethod: 'unknown',
+                            step: 'cart'
+                        }), {
+                            key: `cart_trust_visible:${getCheckoutSessionId()}`,
+                            rateLimitMs: 60 * 1000
+                        });
+                        hasTrackedTrust.current = true;
+                        observer.disconnect();
+                    }
+                });
+            },
+            { threshold: [0.5] }
+        );
+        observer.observe(trustRef.current);
+        return () => observer.disconnect();
+    }, [cartTotal, finalTotal]);
 
     if (cartItems.length === 0) {
         return (
@@ -42,6 +83,17 @@ const Cart = () => {
         );
     }
 
+    const handleCartCtaClick = () => {
+        logCheckoutEvent('cart_checkout_cta_click', buildCheckoutPayload({
+            cartValue: finalTotal,
+            paymentMethod: 'unknown',
+            step: 'cart'
+        }), {
+            key: `cart_checkout_cta_click:${getCheckoutSessionId()}`,
+            rateLimitMs: 60 * 1000
+        });
+    };
+
     return (
         <div className="bg-gray-100 min-h-screen py-8">
             <SEO title="Panier" description="Vérifiez votre panier et passez à la caisse." />
@@ -66,8 +118,8 @@ const Cart = () => {
                     </div>
 
                     {!currentUser && (
-                        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">
-                            Connectez-vous pour sauvegarder votre panier et recevoir un rappel en cas d’abandon.
+                        <div className="mb-4 bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm text-emerald-800">
+                            Pas besoin de compte pour payer. Vous pourrez créer un compte après l’achat.
                         </div>
                     )}
 
@@ -162,12 +214,30 @@ const Cart = () => {
                         <div className="text-lg mb-4">
                             {t('subtotal_items')} ({cartItems.length} {t('items_count')}) : <span className="font-bold">{cartTotal.toLocaleString()} G</span>
                         </div>
+                        <div className="space-y-2 text-sm text-gray-600 mb-4">
+                            <div className="flex justify-between">
+                                <span>{t('shipping_total')}</span>
+                                <span>{shippingCost === 0 ? <span className="text-green-600 font-bold">{t('free_shipping')}</span> : `${shippingCost.toLocaleString()} G`}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>{t('tax')}</span>
+                                <span>{tax.toLocaleString()} G</span>
+                            </div>
+                            <div className="flex justify-between font-bold text-gray-900 border-t pt-2">
+                                <span>{t('total_amount')}</span>
+                                <span>{finalTotal.toLocaleString()} G</span>
+                            </div>
+                            <div className="text-xs text-emerald-700">🚚 Estimation livraison : 2-4 jours</div>
+                        </div>
+                        <div ref={trustRef} className="text-xs text-gray-900 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 mb-3">
+                            🔒 Paiement sécurisé • ↩️ 72h • 🚚 2–4j
+                        </div>
                         <div className="flex items-center gap-2 mb-4 text-sm">
                             <input type="checkbox" className="w-4 h-4 text-secondary rounded focus:ring-secondary" />
                             <span>{t('contains_gift')}</span>
                         </div>
-                        <Link to="/checkout" className="block w-full bg-secondary hover:bg-secondary-hover text-white text-center font-medium py-2 rounded-full shadow-sm transition-colors">
-                            {t('proceed_to_checkout')}
+                        <Link to="/checkout" onClick={handleCartCtaClick} className="block w-full bg-secondary hover:bg-secondary-hover text-white text-center font-medium py-2 rounded-full shadow-sm transition-colors">
+                            {currentUser ? t('proceed_to_checkout') : 'Continuer sans créer de compte'}
                         </Link>
                     </div>
                 </div>
@@ -177,11 +247,15 @@ const Cart = () => {
             {/* Mobile sticky checkout bar */}
             <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 z-50">
                 <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">{t('subtotal_items')} ({cartItems.length})</span>
-                    <span className="text-lg font-bold text-gray-900">{cartTotal.toLocaleString()} G</span>
+                    <span className="text-sm text-gray-600">{t('total_amount')} ({cartItems.length})</span>
+                    <span className="text-lg font-bold text-gray-900">{finalTotal.toLocaleString()} G</span>
                 </div>
-                <Link to="/checkout" className="block w-full bg-secondary hover:bg-secondary-hover text-white text-center font-medium py-2 rounded-lg shadow-sm transition-colors">
-                    {t('proceed_to_checkout')}
+                <div className="text-xs text-emerald-700 mb-2">🚚 Estimation livraison : 2-4 jours</div>
+                <div className="text-xs text-gray-900 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 mb-2">
+                    🔒 Paiement sécurisé • ↩️ 72h • 🚚 2–4j
+                </div>
+                <Link to="/checkout" onClick={handleCartCtaClick} className="block w-full bg-secondary hover:bg-secondary-hover text-white text-center font-medium py-2 rounded-lg shadow-sm transition-colors">
+                    {currentUser ? t('proceed_to_checkout') : 'Continuer sans créer de compte'}
                 </Link>
             </div>
         </div>
