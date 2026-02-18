@@ -61,13 +61,19 @@ export const ShippingAddressSchema = z.object({
     country: z.string().default('Haiti')
 });
 
+export const PickupOptionSchema = z.object({
+    hubId: z.string().min(1, 'Pickup hub ID is required')
+});
+
 export const OrderSchema = z.object({
     userId: z.string().min(1, 'User ID is required'),
     items: z.array(OrderItemSchema).min(1, 'At least one item required').max(50, 'Too many items'),
     totalAmount: z.number().positive('Total must be positive').max(10000000, 'Total exceeds maximum'),
     currency: z.string().default('HTG'),
     paymentMethod: z.enum(['moncash', 'natcash', 'stripe', 'wallet', 'cash_on_delivery']),
+    shippingMethod: z.enum(['delivery', 'pickup']).default('delivery'),
     shippingAddress: ShippingAddressSchema.optional(),
+    pickupHubId: z.string().optional(),
     status: z.enum(['pending_payment', 'paid', 'processing', 'shipped', 'delivered', 'cancelled']).default('pending_payment'),
     referral: z.object({
         ambassadorId: z.string(),
@@ -243,6 +249,7 @@ export default {
     OrderCreateSchema,
     OrderItemSchema,
     ShippingAddressSchema,
+    PickupOptionSchema,
     TransactionSchema,
     TransactionValidators,
     MonCashPaymentSchema,

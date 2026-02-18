@@ -8,10 +8,12 @@ import { useNavigate } from 'react-router-dom';
 import { Loader, Lock, ShieldCheck, CreditCard, Smartphone, Zap } from 'lucide-react';
 import AddressAutocomplete from '../../components/forms/AddressAutocomplete';
 import OrderBump from '../../components/OrderBump';
+import PickupPoints from '../../components/shipping/PickupPoints';
+import logger from '../../utils/logger';
 
 const OnePageCheckout = () => {
     const { currentUser } = useAuth();
-    const { cartItems, cartTotal, shippingCost, tax, finalTotal, clearCart } = useCart();
+    const { cartItems, cartTotal, shippingCost, tax, finalTotal, clearCart, shippingMethod, setShippingMethod } = useCart();
     const { balance, pay } = useWallet();
     const { referralData } = useAffiliation();
     const navigate = useNavigate();
@@ -26,6 +28,18 @@ const OnePageCheckout = () => {
     const [paymentMethod, setPaymentMethod] = useState('moncash');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [selectedPickup, setSelectedPickup] = useState(null);
+
+    const isPhysical = cartItems.some(item => item.type === 'physical' || !item.type);
+
+    const trackPickupEvent = (eventName, properties = {}) => {
+        const key = `pickup_event_${eventName}`;
+        const now = Date.now();
+        const last = Number(localStorage.getItem(key) || 0);
+        if (now - last < 2 * 60 * 1000) return; // 2 min rate-limit
+        localStorage.setItem(key, String(now));
+        logger.event(eventName, properties);
+    };
 
     const departments = [
         'Ouest', 'Nord', 'Nord-Est', 'Nord-Ouest', 'Artibonite',
@@ -48,17 +62,47 @@ const OnePageCheckout = () => {
         }
     }, [cartItems, navigate]);
 
+    useEffect(() => {
+        if (!isPhysical) {
+            setShippingMethod('delivery');
+        }
+    }, [isPhysical, setShippingMethod]);
+
     const handlePayment = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
         try {
+            if (shippingMethod === 'pickup' && !selectedPickup) {
+                setError('Veuillez sélectionner un point de retrait.');
+                setLoading(false);
+                return;
+            }
+
+            const pickupHubId = shippingMethod === 'pickup' && selectedPickup
+                ? selectedPickup.id
+                : null;
+
+            const shippingAddress = shippingMethod === 'delivery' ? {
+                fullName,
+                phone,
+                address,
+                city,
+                department,
+                country: 'Haiti'
+            } : null;
+
             const orderData = {
                 items: cartItems,
-                total: cartTotal,
+                total: finalTotal,
+                totalAmount: finalTotal,
+                currency: 'HTG',
                 customer: { name: fullName, email, phone },
-                shipping: { address, city, department, notes: deliveryNotes },
+                shipping: shippingMethod === 'delivery' ? { address, city, department, notes: deliveryNotes } : null,
+                shippingMethod,
+                shippingAddress,
+                pickupHubId,
                 paymentMethod
             };
 
@@ -215,60 +259,110 @@ const OnePageCheckout = () => {
                             </div>
                         </div>
 
-                        {/* Step 2: Shipping Address */}
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">2</div>
-                                <h2 className="text-xl font-bold text-gray-800">Adresse de Livraison</h2>
-                            </div>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Adresse complète *</label>
-                                    {/* P3 FIX: AddressAutocomplete */}
-                                    <AddressAutocomplete
-                                        value={address}
-                                        onChange={setAddress}
-                                        department={department}
-                                        placeholder="Ex: Pétion-Ville, Delmas 33..."
-                                    />
+                        {/* Step 2: Delivery vs Pickup */}
+                        {isPhysical && (
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">2</div>
+                                    <h2 className="text-xl font-bold text-gray-800">Livraison ou Retrait</h2>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Ville / Commune *</label>
-                                        <input
-                                            type="text"
-                                            value={city}
-                                            onChange={(e) => setCity(e.target.value)}
-                                            className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border"
-                                            placeholder="Port-au-Prince"
-                                            required
+
+                                <div className="grid grid-cols-2 gap-3 mb-5">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShippingMethod('delivery');
+                                            trackPickupEvent('pickup_toggle_delivery');
+                                        }}
+                                        className={`h-12 rounded-xl font-semibold border-2 transition-all ${
+                                            shippingMethod === 'delivery'
+                                                ? 'border-blue-600 bg-blue-50 text-blue-700'
+                                                : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        Livraison
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShippingMethod('pickup');
+                                            trackPickupEvent('pickup_toggle_pickup');
+                                        }}
+                                        className={`h-12 rounded-xl font-semibold border-2 transition-all ${
+                                            shippingMethod === 'pickup'
+                                                ? 'border-gold-500 bg-amber-50 text-amber-700'
+                                                : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        Retrait
+                                    </button>
+                                </div>
+
+                                {shippingMethod === 'delivery' && (
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Adresse complète *</label>
+                                            <AddressAutocomplete
+                                                value={address}
+                                                onChange={setAddress}
+                                                department={department}
+                                                placeholder="Ex: Pétion-Ville, Delmas 33..."
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Ville / Commune *</label>
+                                                <input
+                                                    type="text"
+                                                    value={city}
+                                                    onChange={(e) => setCity(e.target.value)}
+                                                    className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border"
+                                                    placeholder="Port-au-Prince"
+                                                    required
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Département *</label>
+                                                <select
+                                                    value={department}
+                                                    onChange={(e) => setDepartment(e.target.value)}
+                                                    className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border bg-white"
+                                                >
+                                                    {departments.map(dept => (
+                                                        <option key={dept} value={dept}>{dept}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Instructions de livraison (optionnel)</label>
+                                            <textarea
+                                                value={deliveryNotes}
+                                                onChange={(e) => setDeliveryNotes(e.target.value)}
+                                                className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border"
+                                                placeholder="Ex: Près de l'église, portail bleu..."
+                                                rows={2}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {shippingMethod === 'pickup' && (
+                                    <div className="space-y-4">
+                                        <div className="text-sm text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded-lg">
+                                            Retrait disponible dans 3 hubs pilotes. Code de retrait envoyé uniquement par SMS.
+                                        </div>
+                                        <PickupPoints
+                                            selectedPoint={selectedPickup}
+                                            onSelect={(point) => {
+                                                setSelectedPickup(point);
+                                                trackPickupEvent('pickup_hub_selected', { hubId: point.id, hubName: point.name });
+                                            }}
                                         />
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Département *</label>
-                                        <select
-                                            value={department}
-                                            onChange={(e) => setDepartment(e.target.value)}
-                                            className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border bg-white"
-                                        >
-                                            {departments.map(dept => (
-                                                <option key={dept} value={dept}>{dept}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Instructions de livraison (optionnel)</label>
-                                    <textarea
-                                        value={deliveryNotes}
-                                        onChange={(e) => setDeliveryNotes(e.target.value)}
-                                        className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 border"
-                                        placeholder="Ex: Près de l'église, portail bleu..."
-                                        rows={2}
-                                    />
-                                </div>
+                                )}
                             </div>
-                        </div>
+                        )}
 
                         {/* Step 3: Payment */}
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">

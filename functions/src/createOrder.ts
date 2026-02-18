@@ -16,6 +16,8 @@ interface CreateOrderRequest {
         email: string;
         phone: string;
     };
+    shippingMethod?: 'delivery' | 'pickup';
+    pickupHubId?: string;
 }
 
 export const createOrder = onCall(async (request) => {
@@ -23,7 +25,7 @@ export const createOrder = onCall(async (request) => {
         throw new HttpsError('unauthenticated', 'Auth required');
     }
 
-    const { items, customerDetails } = request.data as CreateOrderRequest;
+    const { items, customerDetails, shippingMethod, pickupHubId } = request.data as CreateOrderRequest;
     const userId = request.auth.uid;
 
     if (!items || items.length === 0) {
@@ -74,6 +76,29 @@ export const createOrder = onCall(async (request) => {
         const orderRef = db.collection('orders').doc();
         const orderId = orderRef.id;
 
+        let fulfillmentType: 'DELIVERY' | 'PICKUP' = 'DELIVERY';
+        let pickupSnapshot: any = null;
+
+        if ((shippingMethod || '').toLowerCase() === 'pickup') {
+            if (!pickupHubId) {
+                throw new HttpsError('invalid-argument', 'pickupHubId required');
+            }
+            const hubRef = db.doc(`pickup_hubs/${pickupHubId}`);
+            const hubSnap = await hubRef.get();
+            const hub = hubSnap.data();
+            if (!hubSnap.exists || !hub?.active || !hub?.pilotEnabled) {
+                throw new HttpsError('failed-precondition', 'Pickup hub invalid');
+            }
+            fulfillmentType = 'PICKUP';
+            pickupSnapshot = {
+                hubId: hubSnap.id,
+                hubName: hub.name,
+                hubAddress: hub.address,
+                hubPhone: hub.phone || null,
+                hubHours: hub.hours || null,
+            };
+        }
+
         const orderData = {
             orderId,
             buyerId: userId,
@@ -87,6 +112,8 @@ export const createOrder = onCall(async (request) => {
             subOrderIds: [],
             type: 'digital_checkout',
             subSummary,
+            fulfillmentType,
+            pickup: pickupSnapshot,
         };
 
         const batch = db.batch();
@@ -149,6 +176,17 @@ export const createOrder = onCall(async (request) => {
         }
 
         batch.update(orderRef, { subOrderIds });
+
+        if (fulfillmentType === 'PICKUP') {
+            const eventRef = db.collection('analytics_events').doc();
+            batch.set(eventRef, {
+                eventName: 'pickup_order_persisted',
+                orderId,
+                hubId: pickupSnapshot?.hubId || null,
+                fulfillmentType,
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
+        }
 
         await batch.commit();
         return { orderId, totalPrice };

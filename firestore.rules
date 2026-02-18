@@ -173,6 +173,12 @@ service cloud.firestore {
       allow create, update, delete: if false; // server only
     }
 
+    // Pickup hubs (pilot)
+    match /pickup_hubs/{hubId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+
     // Order Subs (per vendor)
     match /orderSubs/{subOrderId} {
       allow read: if isAuthenticated() && (
