@@ -1,0 +1,340 @@
+/**
+ * Payment Success Component Styles
+ * Includes spring animations and confetti effects
+ */
+
+.payment-success-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  overflow: hidden;
+}
+
+/* Confetti effect using pure CSS */
+.confetti-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  bottom: 0;
+  background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #4ecdc4, #a8e6cf);
+  opacity: 0.8;
+  animation: confetti-fall linear forwards;
+}
+
+@keyframes confetti-fall {
+  to {
+    transform: translateY(-100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.confetti:nth-child(1) {
+  left: 10%;
+  animation-delay: 0s;
+  animation-duration: 3s;
+  background: #ff6b6b;
+}
+
+.confetti:nth-child(2) {
+  left: 20%;
+  animation-delay: 0.2s;
+  animation-duration: 3.5s;
+  background: #ffd93d;
+}
+
+.confetti:nth-child(3) {
+  left: 30%;
+  animation-delay: 0.4s;
+  animation-duration: 3.2s;
+  background: #6bcf7f;
+}
+
+.confetti:nth-child(4) {
+  left: 40%;
+  animation-delay: 0.6s;
+  animation-duration: 3.7s;
+  background: #4ecdc4;
+}
+
+.confetti:nth-child(5) {
+  left: 50%;
+  animation-delay: 0.8s;
+  animation-duration: 3.3s;
+  background: #a8e6cf;
+}
+
+.confetti:nth-child(n + 6) {
+  animation-delay: var(--delay, 0s);
+  animation-duration: var(--duration, 3s);
+  left: calc(var(--left, 50) * 1%);
+}
+
+/* Main success content */
+.success-content {
+  position: relative;
+  z-index: 20;
+  background: white;
+  border-radius: 16px;
+  padding: 60px 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Checkmark styles */
+.checkmark-container {
+  position: relative;
+  margin: 0 auto 30px;
+  width: 100px;
+  height: 100px;
+}
+
+.checkmark {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 8px rgba(107, 199, 127, 0.3));
+}
+
+.checkmark-circle {
+  stroke: #6bcf7f;
+  stroke-width: 2;
+  stroke-linecap: round;
+  animation: strokeCircle 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+  stroke: #6bcf7f;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: strokeCheck 0.5s cubic-bezier(0.65, 0, 0.45, 1) 0.4s forwards;
+}
+
+@keyframes strokeCircle {
+  0% {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+  }
+  100% {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes strokeCheck {
+  0% {
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+  }
+  100% {
+    stroke-dasharray: 48;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Title */
+.success-title {
+  margin: 0 0 30px;
+  font-size: 32px;
+  font-weight: 700;
+  color: #2d3748;
+  letter-spacing: -0.5px;
+  animation: fadeInDown 0.5s ease-out 0.2s both;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Order details */
+.order-details {
+  background: #f7fafc;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 30px 0;
+  text-align: left;
+  animation: fadeIn 0.5s ease-out 0.4s both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 14px;
+  color: #718096;
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 16px;
+  color: #2d3748;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+/* Action buttons */
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin: 30px 0;
+  animation: fadeInUp 0.5s ease-out 0.5s both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.primary-button {
+  flex: 1;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.primary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.primary-button:active {
+  transform: translateY(0);
+}
+
+/* Info text */
+.info-text {
+  margin: 20px 0 0;
+  font-size: 14px;
+  color: #718096;
+  line-height: 1.6;
+  animation: fadeIn 0.5s ease-out 0.6s both;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .success-content {
+    padding: 40px 24px;
+    border-radius: 12px;
+  }
+
+  .success-title {
+    font-size: 24px;
+  }
+
+  .checkmark-container {
+    width: 80px;
+    height: 80px;
+  }
+
+  .order-details {
+    padding: 16px;
+  }
+
+  .detail-label,
+  .detail-value {
+    font-size: 14px;
+  }
+
+  .primary-button {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+
+  .payment-success-container {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .success-content {
+    padding: 32px 16px;
+  }
+
+  .success-title {
+    font-size: 20px;
+  }
+
+  .checkmark-container {
+    margin-bottom: 20px;
+  }
+
+  .order-details {
+    padding: 12px;
+    margin: 20px 0;
+  }
+
+  .detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .info-text {
+    font-size: 12px;
+  }
+}

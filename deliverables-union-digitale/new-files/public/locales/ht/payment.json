@@ -1,0 +1,80 @@
+{
+  "title": "Peman",
+  "select_method": "Chwazi fason ou vle peye",
+  "amount": "Montan",
+  "confirm": "Konfime Peman",
+  "processing": "N ap trete peman ou...",
+  "success": "Peman Reyisi! 🎉",
+  "error": "Peman Echwe",
+  "retry": "Eseye Ankò",
+  "cancel": "Anile",
+
+  "moncash": {
+    "label": "MonCash",
+    "description": "Peye ak nimewo MonCash ou (Digicel)",
+    "phone_placeholder": "Ekri nimewo ou (8 chif)",
+    "phone_label": "Nimewo MonCash",
+    "confirm_text": "N ap voye yon kòd konfirmasyon nan nimewo ou a",
+    "prefixes": "Nimewo ki kòmanse pa 30-38 oswa 46-48"
+  },
+
+  "natcash": {
+    "label": "NatCash",
+    "description": "Peye ak nimewo NatCash ou (Natcom)",
+    "phone_placeholder": "Ekri nimewo ou (8 chif)",
+    "phone_label": "Nimewo NatCash",
+    "confirm_text": "N ap voye yon kòd konfirmasyon nan nimewo ou a",
+    "prefixes": "Nimewo ki kòmanse pa 39-45 oswa 49"
+  },
+
+  "stripe": {
+    "label": "Kat Kredi / Debi",
+    "description": "Visa, Mastercard, American Express",
+    "card_label": "Detay Kat",
+    "processing": "Traitement...",
+    "secure_note": "Peman an sekirize pa Stripe 🔒"
+  },
+
+  "paypal": {
+    "label": "PayPal",
+    "description": "Pou diaspora ak kont PayPal",
+    "note": "Ou pral redirije nan PayPal pou konfime"
+  },
+
+  "errors": {
+    "invalid_phone": "Nimewo telefòn ou pa bon. Eseye yon lòt.",
+    "invalid_prefix_moncash": "Nimewo sa a pa MonCash. Nimewo MonCash kòmanse pa 30-38 oswa 46-48.",
+    "invalid_prefix_natcash": "Nimewo sa a pa NatCash. Nimewo NatCash kòmanse pa 39-45 oswa 49.",
+    "amount_too_low": "Montan minimòm se 10 goud.",
+    "amount_too_high": "Montan maksimòm se 500,000 goud.",
+    "rate_limit": "Trop eseye. Tann 1 minit epi eseye ankò.",
+    "rate_limit_seconds": "Ou te eseye twòp fwa. Tann {seconds} segonn epi eseye ankò.",
+    "network": "Pwoblèm koneksyon. Verifye entènèt ou epi eseye ankò.",
+    "generic": "Yon bagay mal pase. Tanpri eseye ankò.",
+    "order_not_found": "Nou pa jwenn kòmann ou a. Kontakte sipò yo.",
+    "insufficient_balance": "Balans ou pa ase pou peye.",
+    "payment_declined": "Peman an refize. Eseye yon lòt metòd peman.",
+    "timeout": "Peman an pran twò lontan. Eseye ankò.",
+    "boundary_payment": "Gen yon pwoblèm ak peman an. Panye ou sove.",
+    "boundary_app": "Aplication an rankontre yon pwoblèm. Tanpri rechaje paj la."
+  },
+
+  "success_messages": {
+    "title": "Peman Reyisi! 🎉",
+    "subtitle": "Kòmann ou konfime",
+    "order_number": "Nimewo kòmann",
+    "sms_sent": "Nou voye yon SMS konfirmasyon ban ou",
+    "whatsapp_sent": "Nou voye yon mesaj WhatsApp ban ou",
+    "track_order": "Swiv Kòmann Mwen",
+    "continue_shopping": "Kontinye Achte",
+    "delivery_note": "Livrezon: 2-5 jou ouvrab"
+  },
+
+  "trust": {
+    "secure": "Peman Sekirize 🔒",
+    "guarantee": "Livrezon Garanti 🚚",
+    "customers": "50k+ Kliyan ⭐",
+    "return": "Retounen 30 jou ↩️",
+    "escrow": "Lajan ou pwoteje jouk ou resevwa kòmann ou"
+  }
+}

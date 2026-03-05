@@ -1,0 +1,244 @@
+/* Union Digitale Design System - Design Tokens */
+
+:root {
+  /* ========================================
+     COLOR PALETTE - PRIMARY (Haiti Blue)
+     ======================================== */
+  --ud-primary-50: #E8F1FC;
+  --ud-primary-100: #D0E3F9;
+  --ud-primary-200: #A1C7F3;
+  --ud-primary-300: #72ABED;
+  --ud-primary-400: #438FE7;
+  --ud-primary-500: #1473DC;
+  --ud-primary-600: #0F5AC4;
+  --ud-primary-700: #003F87;
+
+  /* ========================================
+     COLOR PALETTE - ACCENT (Warm Gold)
+     ======================================== */
+  --ud-accent-400: #F59E0B;
+  --ud-accent-500: #F97316;
+
+  /* ========================================
+     SEMANTIC COLORS
+     ======================================== */
+  --ud-success: #10B981;
+  --ud-success-light: #D1FAE5;
+  --ud-danger: #EF4444;
+  --ud-danger-light: #FEE2E2;
+  --ud-warning: #F59E0B;
+  --ud-warning-light: #FEF3C7;
+  --ud-info: #3B82F6;
+  --ud-info-light: #DBEAFE;
+
+  /* ========================================
+     SURFACE COLORS (Neutral Gray Scale)
+     ======================================== */
+  --ud-surface-0: #FFFFFF;
+  --ud-surface-1: #F9FAFB;
+  --ud-surface-2: #F3F4F6;
+  --ud-surface-3: #E5E7EB;
+  --ud-surface-4: #D1D5DB;
+  --ud-surface-5: #9CA3AF;
+  --ud-surface-6: #6B7280;
+  --ud-surface-7: #374151;
+  --ud-surface-8: #1F2937;
+  --ud-surface-9: #111827;
+
+  /* ========================================
+     TEXT COLORS
+     ======================================== */
+  --ud-text-primary: #111827;
+  --ud-text-secondary: #6B7280;
+  --ud-text-tertiary: #9CA3AF;
+  --ud-text-inverse: #FFFFFF;
+  --ud-text-accent: #003F87;
+
+  /* ========================================
+     TYPOGRAPHY - FONT FAMILIES
+     ======================================== */
+  --ud-font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ud-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ud-font-mono: 'Fira Code', 'Courier New', monospace;
+
+  /* ========================================
+     TYPOGRAPHY - FLUID TYPE SCALE
+     Uses clamp(min, ideal, max) for responsive scaling
+     ======================================== */
+  --ud-text-xs: clamp(0.75rem, 1.5vw, 0.875rem);
+  --ud-text-sm: clamp(0.875rem, 1.75vw, 1rem);
+  --ud-text-base: clamp(1rem, 2vw, 1.125rem);
+  --ud-text-lg: clamp(1.125rem, 2.25vw, 1.25rem);
+  --ud-text-xl: clamp(1.25rem, 2.5vw, 1.5rem);
+  --ud-text-2xl: clamp(1.5rem, 3vw, 1.875rem);
+  --ud-text-3xl: clamp(1.875rem, 3.5vw, 2.25rem);
+  --ud-text-4xl: clamp(2.25rem, 4vw, 3rem);
+
+  /* ========================================
+     TYPOGRAPHY - LINE HEIGHTS
+     ======================================== */
+  --ud-leading-tight: 1.2;
+  --ud-leading-normal: 1.5;
+  --ud-leading-relaxed: 1.75;
+
+  /* ========================================
+     TYPOGRAPHY - FONT WEIGHTS
+     ======================================== */
+  --ud-fw-regular: 400;
+  --ud-fw-medium: 500;
+  --ud-fw-semibold: 600;
+  --ud-fw-bold: 700;
+  --ud-fw-extrabold: 800;
+
+  /* ========================================
+     SPACING - 8PT GRID SYSTEM
+     ======================================== */
+  --ud-space-0: 0;
+  --ud-space-1: 0.25rem;    /* 4px */
+  --ud-space-2: 0.5rem;     /* 8px */
+  --ud-space-3: 0.75rem;    /* 12px */
+  --ud-space-4: 1rem;       /* 16px */
+  --ud-space-5: 1.25rem;    /* 20px */
+  --ud-space-6: 1.5rem;     /* 24px */
+  --ud-space-7: 1.75rem;    /* 28px */
+  --ud-space-8: 2rem;       /* 32px */
+  --ud-space-9: 2.25rem;    /* 36px */
+  --ud-space-10: 2.5rem;    /* 40px */
+  --ud-space-11: 2.75rem;   /* 44px */
+  --ud-space-12: 3rem;      /* 48px */
+  --ud-space-14: 3.5rem;    /* 56px */
+  --ud-space-16: 4rem;      /* 64px */
+
+  /* ========================================
+     BORDER RADIUS
+     ======================================== */
+  --ud-radius-none: 0;
+  --ud-radius-sm: 0.25rem;  /* 4px - subtle curves */
+  --ud-radius-md: 0.5rem;   /* 8px - standard */
+  --ud-radius-lg: 0.75rem;  /* 12px - medium rounded */
+  --ud-radius-xl: 1rem;     /* 16px - large rounded */
+  --ud-radius-2xl: 1.5rem;  /* 24px - extra large */
+  --ud-radius-full: 9999px; /* pill-shaped */
+
+  /* ========================================
+     SHADOWS - APPLE-STYLE DEPTH
+     ======================================== */
+  --ud-shadow-none: none;
+  --ud-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --ud-shadow-md: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --ud-shadow-lg: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --ud-shadow-xl: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --ud-shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  
+  /* Interactive shadow */
+  --ud-shadow-focus: 
+    0 0 0 3px rgba(20, 115, 220, 0.1),
+    0 0 0 2px rgba(20, 115, 220, 0.5);
+
+  /* ========================================
+     ANIMATION - EASING FUNCTIONS
+     ======================================== */
+  --ud-ease-linear: linear;
+  --ud-ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ud-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ud-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ud-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ud-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* ========================================
+     ANIMATION - DURATIONS
+     ======================================== */
+  --ud-duration-fast: 150ms;
+  --ud-duration-normal: 250ms;
+  --ud-duration-slow: 400ms;
+  --ud-duration-slower: 600ms;
+
+  /* ========================================
+     BORDER WIDTH
+     ======================================== */
+  --ud-border-thin: 1px;
+  --ud-border-base: 1.5px;
+  --ud-border-thick: 2px;
+
+  /* ========================================
+     Z-INDEX SCALE
+     ======================================== */
+  --ud-z-hide: -1;
+  --ud-z-base: 0;
+  --ud-z-dropdown: 10;
+  --ud-z-sticky: 20;
+  --ud-z-fixed: 30;
+  --ud-z-modal-backdrop: 40;
+  --ud-z-modal: 50;
+  --ud-z-popover: 60;
+  --ud-z-tooltip: 70;
+  --ud-z-notification: 80;
+
+  /* ========================================
+     BREAKPOINTS (for responsive design)
+     ======================================== */
+  --ud-breakpoint-xs: 320px;
+  --ud-breakpoint-sm: 640px;
+  --ud-breakpoint-md: 768px;
+  --ud-breakpoint-lg: 1024px;
+  --ud-breakpoint-xl: 1280px;
+  --ud-breakpoint-2xl: 1536px;
+
+  /* ========================================
+     CONTAINER QUERIES
+     ======================================== */
+  --ud-container-max-width: 1280px;
+  --ud-container-padding: var(--ud-space-4);
+}
+
+/* ========================================
+   DARK MODE OVERRIDES
+   ======================================== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ud-surface-0: #111827;
+    --ud-surface-1: #1F2937;
+    --ud-surface-2: #374151;
+    --ud-surface-3: #4B5563;
+    --ud-surface-4: #6B7280;
+    --ud-surface-5: #9CA3AF;
+    --ud-surface-6: #D1D5DB;
+    --ud-surface-7: #E5E7EB;
+    --ud-surface-8: #F3F4F6;
+    --ud-surface-9: #F9FAFB;
+
+    --ud-text-primary: #F9FAFB;
+    --ud-text-secondary: #D1D5DB;
+    --ud-text-tertiary: #9CA3AF;
+    --ud-text-inverse: #111827;
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY - HIGH CONTRAST MODE
+   ======================================== */
+@media (prefers-contrast: more) {
+  :root {
+    --ud-primary-700: #001F4D;
+    --ud-surface-9: #000000;
+    --ud-text-primary: #000000;
+  }
+}
+
+/* ========================================
+   REDUCED MOTION
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ud-duration-fast: 0ms;
+    --ud-duration-normal: 0ms;
+    --ud-duration-slow: 0ms;
+    --ud-duration-slower: 0ms;
+  }
+}

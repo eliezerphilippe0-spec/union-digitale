@@ -1,0 +1,126 @@
+{
+  "app_name": "Union Digitale",
+  "tagline": "Marketplace Ayisyen #1",
+  "tagline_sub": "Achte ak Vann Fasil an Ayiti",
+
+  "nav": {
+    "home": "Dakèy",
+    "search": "Chèche",
+    "cart": "Panye",
+    "favorites": "Favori",
+    "account": "Kont",
+    "orders": "Kòmann yo",
+    "sellers": "Vandè",
+    "categories": "Kategori"
+  },
+
+  "actions": {
+    "add_to_cart": "Mete nan Panye",
+    "buy_now": "Achte Kounye a",
+    "view_details": "Wè Detay",
+    "save": "Sove",
+    "cancel": "Anile",
+    "confirm": "Konfime",
+    "edit": "Modifye",
+    "delete": "Efase",
+    "search": "Chèche",
+    "filter": "Filtre",
+    "sort": "Triye",
+    "load_more": "Chaje Plis",
+    "back": "Tounen",
+    "next": "Swivan",
+    "submit": "Voye",
+    "share": "Pataje",
+    "copy_link": "Kopye Lyen"
+  },
+
+  "status": {
+    "loading": "Chajman...",
+    "error": "Yon bagay mal pase",
+    "empty": "Pa gen rezilta",
+    "success": "Reyisi!",
+    "pending": "An Atant",
+    "processing": "N ap trete...",
+    "completed": "Konplete",
+    "cancelled": "Anile",
+    "refunded": "Ranbouse"
+  },
+
+  "cart": {
+    "title": "Panye Ou",
+    "empty": "Panye ou vid",
+    "empty_sub": "Ajoute pwodui pou kòmanse achte",
+    "items": "{{count}} atik",
+    "subtotal": "Soutotal",
+    "shipping": "Livrezon",
+    "total": "Total",
+    "checkout": "Peye Kounye a",
+    "continue": "Kontinye Achte",
+    "remove": "Retire",
+    "quantity": "Kantite"
+  },
+
+  "product": {
+    "price": "Pri",
+    "in_stock": "Disponib",
+    "out_of_stock": "Pa Disponib",
+    "pre_order": "Pre-Kòmann",
+    "free_shipping": "Livrezon Gratis",
+    "ships_from": "Voye depi",
+    "sold_by": "Vann pa",
+    "rating": "{{value}} zetwal ({{count}} avis)",
+    "reviews": "Kòmantè",
+    "share": "Pataje Pwodui Sa",
+    "report": "Rapòte Pwodui Sa"
+  },
+
+  "order": {
+    "title": "Kòmann",
+    "number": "Nimewo Kòmann",
+    "date": "Dat",
+    "status": "Eta",
+    "items": "Atik yo",
+    "shipping_address": "Adrès Livrezon",
+    "payment_method": "Metòd Peman",
+    "track": "Swiv Kòmann",
+    "history": "Istorik Kòmann",
+    "no_orders": "Ou poko gen kòmann"
+  },
+
+  "errors": {
+    "network": "Verifye koneksyon entènèt ou epi eseye ankò",
+    "not_found": "Paj la pa egziste",
+    "unauthorized": "Ou bezwen konekte pou fè sa",
+    "server": "Pwoblèm sèvè. N ap travay pou rezoud li.",
+    "generic": "Yon bagay mal pase. Tanpri eseye ankò.",
+    "retry": "Eseye Ankò"
+  },
+
+  "auth": {
+    "login": "Konekte",
+    "logout": "Dekonekte",
+    "register": "Kreye Kont",
+    "forgot_password": "Bliye Modpas?",
+    "email": "Imel",
+    "password": "Modpas",
+    "name": "Non",
+    "phone": "Telefòn",
+    "welcome_back": "Bon Retou!",
+    "create_account": "Kreye Kont Gratis"
+  },
+
+  "search": {
+    "placeholder": "Chèche pwodui, vandè...",
+    "results": "{{count}} rezilta pou \"{{query}}\"",
+    "no_results": "Pa gen rezilta pou \"{{query}}\"",
+    "suggestions": "Sijesyon",
+    "recent": "Rechèch Resan"
+  },
+
+  "footer": {
+    "rights": "© {{year}} Union Digitale. Tout dwa rezève.",
+    "made_in": "Fèt ak ❤️ pou Ayiti",
+    "support": "Sipò 24/7",
+    "whatsapp": "Kontakte nou sou WhatsApp"
+  }
+}
