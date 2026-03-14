@@ -31,7 +31,7 @@ const Checkout = () => {
     const [paymentMethod, setPaymentMethod] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const { location: geoData, loading: geoLoading, getLocation } = useGeolocation();
+
 
     // Feature: Upsell (Order Bump)
     const [warrantyAdded, setWarrantyAdded] = useState(false);
@@ -40,6 +40,25 @@ const Checkout = () => {
     const totalWithBump = finalTotal + (warrantyAdded ? WARRANTY_PRICE : 0);
     const monthlyPayment = Math.ceil(totalWithBump / 3);
 
+    const [shippingAddress, setShippingAddress] = useState({
+        name: currentUser?.displayName || '',
+        address: '',
+        city: '',
+        country: 'Haïti'
+    });
+
+    const { location: geoData, address: geoAddress, loading: geoLoading, getLocation } = useGeolocation();
+
+    useEffect(() => {
+        if (geoAddress) {
+            setShippingAddress(prev => ({
+                ...prev,
+                address: geoAddress.street || prev.address,
+                city: geoAddress.city || prev.city
+            }));
+        }
+    }, [geoAddress]);
+    
     useEffect(() => {
         if (cartItems.length === 0) {
             // navigate('/cart');
@@ -76,12 +95,7 @@ const Checkout = () => {
                 total: totalWithBump,
                 finalTotal: totalWithBump,
                 paymentMethod: method,
-                shippingAddress: isPhysical ? {
-                    name: currentUser.displayName || 'Client',
-                    address: '15 Rue Pan-Américaine',
-                    city: 'Pétion-Ville',
-                    country: 'Haïti'
-                } : null,
+                shippingAddress: isPhysical ? shippingAddress : null,
                 transactionDetails
             };
 
@@ -136,12 +150,7 @@ const Checkout = () => {
                 items: orderItems,
                 total: cartTotal + (warrantyAdded ? WARRANTY_PRICE : 0),
                 finalTotal: totalWithBump,
-                shippingAddress: isPhysical ? {
-                    name: currentUser.displayName || 'Client',
-                    address: '15 Rue Pan-Américaine',
-                    city: 'Pétion-Ville',
-                    country: 'Haïti'
-                } : null
+                shippingAddress: isPhysical ? shippingAddress : null
             };
 
             if (paymentMethod === 'moncash') {
@@ -253,11 +262,46 @@ const Checkout = () => {
                                         <span className="text-blue-600 text-sm font-normal cursor-pointer hover:underline">{t('edit')}</span>
                                     </div>
                                 </h2>
-                                <div className="text-sm text-gray-700">
-                                    <p>{currentUser?.displayName || t('shipping_guest')}</p>
-                                    <p>15 Rue Pan-Américaine</p>
-                                    <p>Pétion-Ville, Ouest</p>
-                                    <p>Haïti</p>
+                                <div className="text-sm text-gray-700 space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs text-gray-500 mb-1">{t('recipient_name') || 'Nom du destinataire'}</label>
+                                            <input 
+                                                type="text" 
+                                                value={shippingAddress.name} 
+                                                onChange={e => setShippingAddress({...shippingAddress, name: e.target.value})}
+                                                className="w-full p-2 border rounded-md"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-gray-500 mb-1">{t('address') || 'Adresse'}</label>
+                                            <input 
+                                                type="text" 
+                                                value={shippingAddress.address} 
+                                                onChange={e => setShippingAddress({...shippingAddress, address: e.target.value})}
+                                                className="w-full p-2 border rounded-md"
+                                                placeholder="Rue, #..."
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-gray-500 mb-1">{t('city')}</label>
+                                            <input 
+                                                type="text" 
+                                                value={shippingAddress.city} 
+                                                onChange={e => setShippingAddress({...shippingAddress, city: e.target.value})}
+                                                className="w-full p-2 border rounded-md"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-gray-500 mb-1">{t('country')}</label>
+                                            <input 
+                                                type="text" 
+                                                value={shippingAddress.country} 
+                                                readOnly
+                                                className="w-full p-2 border rounded-md bg-gray-50"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}

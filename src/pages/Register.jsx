@@ -36,18 +36,23 @@ const Register = () => {
         zip: ''
     });
 
-    const { location: geoData, loading: geoLoading, getLocation } = useGeolocation();
+    const { location: geoData, address: geoAddress, loading: geoLoading, getLocation } = useGeolocation();
 
     React.useEffect(() => {
         if (geoData) {
             setAddress(prev => ({
                 ...prev,
                 lat: geoData.lat,
-                lng: geoData.lng
-                // In a real app, we would call a Reverse Geocoding API here to fill city/state
+                lng: geoData.lng,
+                ...(geoAddress && {
+                    street: geoAddress.street || prev.street,
+                    city: geoAddress.city || prev.city,
+                    state: geoAddress.state || prev.state,
+                    zip: geoAddress.zip || prev.zip
+                })
             }));
         }
-    }, [geoData]);
+    }, [geoData, geoAddress]);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
