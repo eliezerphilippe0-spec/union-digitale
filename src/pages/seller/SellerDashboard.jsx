@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
     DollarSign, Package, ShoppingCart, TrendingUp, TrendingDown, ArrowUpRight,
     Star, Bell, Clock, Wallet, CreditCard, Eye, AlertTriangle, CheckCircle2,
@@ -14,6 +14,7 @@ import {
 } from 'recharts';
 import { useVendorOrders, useVendorOrderStats } from '../../hooks/useVendorOrders';
 import { paymentService } from '../../services/paymentService';
+import { useMemo } from 'react';
 
 const SellerDashboard = () => {
     const { t } = useLanguage();
@@ -39,7 +40,14 @@ const SellerDashboard = () => {
         memberSince: 'Aujourd\'hui'
     };
 
-    // Derived stats injected into the dashboard UI
+    // --- Active Products (computed separately to avoid circular reference) ---
+    const { orders: allOrders } = useVendorOrders({ limitCount: 500 });
+    const activeProducts = useMemo(() => {
+        const ids = new Set();
+        allOrders.forEach(o => (o.items || []).forEach(item => ids.add(item.id)));
+        return ids.size || 0;
+    }, [allOrders]);
+
     const stats = {
         totalRevenue: realStats?.totalRevenue || 0,
         pendingBalance: realStats?.pendingBalance || 0,
@@ -49,47 +57,74 @@ const SellerDashboard = () => {
         pendingOrders: realStats?.pendingOrders || 0,
         shippedOrders: realOrders.filter(o => o.status === 'shipped').length || 0,
         deliveredOrders: realStats?.completedOrders || 0,
-        activeProducts: 5, // Mocked until Product hook integration
-        lowStockProducts: 1,
+        lowStockProducts: 0,
         outOfStock: 0,
-        conversionRate: 2.5,
-        views: 120,
+        conversionRate: realStats?.totalOrders > 0 ? ((realStats.completedOrders / realStats.totalOrders) * 100).toFixed(1) : 0,
+        views: 0,
         avgOrderValue: realStats?.totalOrders ? Math.round(realStats.totalRevenue / realStats.totalOrders) : 0
     };
 
-    // Graphique revenus
-    const revenueData = [
-        { name: t('seller_dashboard_week_1'), revenue: 450000, orders: 85 },
-        { name: t('seller_dashboard_week_2'), revenue: 520000, orders: 98 },
-        { name: t('seller_dashboard_week_3'), revenue: 480000, orders: 91 },
-        { name: t('seller_dashboard_week_4'), revenue: 610000, orders: 115 },
-    ];
+    // --- Real Revenue Chart Data (aggregated from Firestore orders) ---
+    const revenueData = useMemo(() => {
+        const weeks = [
+            { name: t('seller_dashboard_week_1'), revenue: 0, orders: 0 },
+            { name: t('seller_dashboard_week_2'), revenue: 0, orders: 0 },
+            { name: t('seller_dashboard_week_3'), revenue: 0, orders: 0 },
+            { name: t('seller_dashboard_week_4'), revenue: 0, orders: 0 },
+        ];
+        const now = new Date();
+        realOrders.forEach(o => {
+            const orderDate = o.createdAt?.toDate ? o.createdAt.toDate() : new Date(o.createdAt || Date.now());
+            const diffMs = now - orderDate;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const weekIndex = diffDays < 7 ? 3 : diffDays < 14 ? 2 : diffDays < 21 ? 1 : 0;
+            if (weekIndex >= 0) {
+                weeks[weekIndex].revenue += (o.vendorAmount || o.subtotal || 0);
+                weeks[weekIndex].orders += 1;
+            }
+        });
+        return weeks;
+    }, [realOrders, t]);
 
-    // Top produits
-    const topProducts = [
-        { id: 1, name: 'iPhone 15 Pro Max', sales: 45, revenue: 585000, stock: 12, trend: 'up' },
-        { id: 2, name: 'MacBook Air M2', sales: 28, revenue: 392000, stock: 8, trend: 'up' },
-        { id: 3, name: 'AirPods Pro 2', sales: 62, revenue: 248000, stock: 25, trend: 'down' },
-        { id: 4, name: 'Apple Watch Series 9', sales: 34, revenue: 204000, stock: 15, trend: 'up' },
-    ];
+    // --- Real Top Products (aggregated from Firestore orders) ---
+    const topProducts = useMemo(() => {
+        const productMap = {};
+        realOrders.forEach(o => {
+            const items = o.items || [];
+            items.forEach(item => {
+                const key = item.id || item.title || 'unknown';
+                if (!productMap[key]) {
+                    productMap[key] = { id: key, name: item.title || item.name || 'Produit', sales: 0, revenue: 0, stock: item.stock ?? '?', trend: 'up' };
+                }
+                productMap[key].sales += item.quantity || 1;
+                productMap[key].revenue += (item.price || 0) * (item.quantity || 1);
+            });
+        });
+        return Object.values(productMap)
+            .sort((a, b) => b.revenue - a.revenue)
+            .slice(0, 4);
+    }, [realOrders]);
 
-    // Commandes récentes formatées pour l'UI
-    const recentOrders = realOrders.slice(0, 5).map(o => ({
+    // --- Recent Orders (real, formatted for UI) ---
+    const recentOrders = useMemo(() => realOrders.slice(0, 5).map(o => ({
         id: o.orderId || o.id,
-        // Fallback for mock/old structure
         product: o.items && o.items.length > 0 ? o.items[0].name || o.items[0].title || 'Produit' : 'Commande',
-        customer: o.buyerCity || 'Client HD',
+        customer: o.buyerCity || 'Client',
         amount: o.vendorAmount || o.subtotal || 0,
         status: o.status || 'pending',
         time: new Date(o.createdAt?.toDate ? o.createdAt.toDate() : Date.now()).toLocaleDateString()
-    }));
+    })), [realOrders]);
 
-    // Notifications mockées temporairement
-    const notifications = [
-        { id: 1, type: 'order', title: t('seller_dashboard_notif_new_order'), message: t('seller_dashboard_notif_new_order_msg'), time: t('seller_dashboard_time_30m'), unread: true },
-        { id: 2, type: 'stock', title: t('seller_dashboard_notif_low_stock'), message: t('seller_dashboard_notif_low_stock_msg'), time: t('seller_dashboard_time_2h'), unread: true },
-        { id: 3, type: 'payout', title: t('seller_dashboard_notif_payout_done'), message: t('seller_dashboard_notif_payout_done_msg'), time: t('seller_dashboard_time_yesterday'), unread: false },
-    ];
+    // --- Notifications (derived from real order data) ---
+    const notifications = useMemo(() => {
+        const notifs = [];
+        const pendingCount = realOrders.filter(o => o.status === 'pending').length;
+        if (pendingCount > 0) {
+            notifs.push({ id: 'orders', type: 'order', title: `${pendingCount} nouvelle${pendingCount > 1 ? 's' : ''} commande${pendingCount > 1 ? 's' : ''}`, message: 'À expédier rapidement', time: 'Maintenant', unread: true });
+        }
+        notifs.push({ id: 'payout', type: 'payout', title: t('seller_dashboard_notif_payout_done'), message: t('seller_dashboard_notif_payout_done_msg'), time: t('seller_dashboard_time_yesterday'), unread: false });
+        return notifs;
+    }, [realOrders, t]);
 
     const loading = statsLoading || ordersLoading;
 
