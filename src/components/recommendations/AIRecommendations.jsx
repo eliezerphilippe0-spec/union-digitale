@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AI Recommendations Component
  * Displays personalized product recommendations
  */
@@ -13,20 +13,20 @@ import { useProducts } from '../../hooks/useProducts';
 const RecommendationSection = ({ title, subtitle, icon: Icon, products, onSeeAll, loading }) => {
     if (loading) {
         return (
-            <div className="py-6">
-                <div className="flex items-center gap-3 mb-4 px-4">
-                    <div className="w-10 h-10 bg-gray-200 rounded-xl animate-pulse" />
+            <div className="py-4 border-b border-gray-100 last:border-0">
+                <div className="flex items-center gap-3 mb-3 px-4">
+                    <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse" />
                     <div>
-                        <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />
-                        <div className="h-4 w-48 bg-gray-100 rounded animate-pulse mt-1" />
+                        <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+                        <div className="h-3 w-48 bg-gray-100 rounded animate-pulse mt-1" />
                     </div>
                 </div>
-                <div className="flex gap-4 overflow-x-auto px-4 pb-4">
+                <div className="flex gap-3 overflow-x-auto px-4 pb-2">
                     {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="w-44 flex-shrink-0">
+                        <div key={i} className="w-40 flex-shrink-0">
                             <div className="aspect-square bg-gray-200 rounded-xl animate-pulse" />
                             <div className="h-4 w-full bg-gray-200 rounded animate-pulse mt-2" />
-                            <div className="h-4 w-2/3 bg-gray-200 rounded animate-pulse mt-1" />
+                            <div className="h-3 w-2/3 bg-gray-200 rounded animate-pulse mt-1" />
                         </div>
                     ))}
                 </div>
@@ -37,30 +37,30 @@ const RecommendationSection = ({ title, subtitle, icon: Icon, products, onSeeAll
     if (!products || products.length === 0) return null;
 
     return (
-        <div className="py-6">
-            <div className="flex items-center justify-between mb-4 px-4">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-gold-400 to-gold-600 rounded-xl flex items-center justify-center">
-                        <Icon className="w-5 h-5 text-white" />
+        <div className="py-6 border-b border-gray-100 last:border-0 bg-white">
+            <div className="flex items-center justify-between mb-4 px-4 w-full">
+                <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center text-primary-600">
+                        <Icon className="w-4 h-4" />
                     </div>
                     <div>
-                        <h2 className="font-bold text-gray-900">{title}</h2>
-                        {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+                        <h2 className="font-bold text-gray-900 text-lg leading-tight">{title}</h2>
+                        {subtitle && <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>}
                     </div>
                 </div>
                 {onSeeAll && (
                     <button 
                         onClick={onSeeAll}
-                        className="flex items-center gap-1 text-gold-600 text-sm font-medium hover:text-gold-700"
+                        className="flex items-center gap-1 text-primary-600 text-sm font-semibold hover:underline"
                     >
                         Voir tout <ChevronRight className="w-4 h-4" />
                     </button>
                 )}
             </div>
             
-            <div className="flex gap-4 overflow-x-auto px-4 pb-4 scrollbar-hide">
+            <div className="flex gap-3 overflow-x-auto px-4 pb-4 scrollbar-hide">
                 {products.map(product => (
-                    <div key={product.id} className="w-44 flex-shrink-0">
+                    <div key={product.id} className="w-40 sm:w-48 flex-shrink-0">
                         <ProductCard product={product} compact />
                     </div>
                 ))}
@@ -132,7 +132,7 @@ const AIRecommendations = ({ currentProduct = null, limit = 8 }) => {
 
     if (loading) {
         return (
-            <div className="space-y-6">
+            <div className="space-y-2 bg-white rounded-xl border border-gray-100 overflow-hidden">
                 <RecommendationSection loading />
                 <RecommendationSection loading />
             </div>
@@ -140,18 +140,20 @@ const AIRecommendations = ({ currentProduct = null, limit = 8 }) => {
     }
 
     return (
-        <div className="space-y-2">
-            {/* Refresh Button */}
-            <div className="flex justify-end px-4">
-                <button
-                    onClick={generateRecommendations}
-                    disabled={isRefreshing}
-                    className="flex items-center gap-1 text-sm text-gray-500 hover:text-gold-600 transition-colors"
-                >
-                    <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                    Actualiser
-                </button>
-            </div>
+        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden mb-8">
+            {/* Refresh Button - Hidden if currentProduct is set (usually means we are on product page) */}
+            {!currentProduct && (
+                <div className="flex justify-end pt-3 px-4 bg-white">
+                    <button
+                        onClick={generateRecommendations}
+                        disabled={isRefreshing}
+                        className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-primary-600 transition-colors bg-gray-50 px-2.5 py-1.5 rounded-md border border-gray-200"
+                    >
+                        <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                        Actualiser
+                    </button>
+                </div>
+            )}
 
             {/* Similar Products (if viewing a product) */}
             {currentProduct && recommendations.similar.length > 0 && (
@@ -165,36 +167,58 @@ const AIRecommendations = ({ currentProduct = null, limit = 8 }) => {
 
             {/* Frequently Bought Together (if viewing a product) */}
             {currentProduct && recommendations.boughtTogether.length > 0 && (
-                <div className="mx-4 bg-gradient-to-r from-gold-50 to-amber-50 rounded-2xl p-4 border border-gold-100">
-                    <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-gold-500" />
+                <div className="px-4 py-6 border-b border-gray-100 bg-gray-50">
+                    <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2 text-lg">
+                        <Sparkles className="w-5 h-5 text-gold-500 fill-gold-500" />
                         Souvent achetés ensemble
                     </h3>
-                    <div className="flex items-center gap-3 overflow-x-auto pb-2">
-                        {/* Current product */}
-                        <div className="flex-shrink-0 w-20 h-20 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                            <span className="text-3xl">{currentProduct.image || '📦'}</span>
-                        </div>
-                        <span className="text-2xl text-gray-400">+</span>
-                        {/* Recommended products */}
-                        {recommendations.boughtTogether.map((product, index) => (
-                            <React.Fragment key={product.id}>
-                                <div className="flex-shrink-0 w-20 h-20 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                                    <span className="text-3xl">{product.image || '📦'}</span>
-                                </div>
-                                {index < recommendations.boughtTogether.length - 1 && (
-                                    <span className="text-2xl text-gray-400">+</span>
+                    <div className="flex flex-col md:flex-row items-start md:items-center gap-4 bg-white p-4 rounded-xl border border-gray-200">
+                        <div className="flex items-center gap-3 overflow-x-auto pb-2 flex-nowrap w-full md:w-auto">
+                            {/* Current product */}
+                            <div className="flex-shrink-0 w-20 h-20 bg-gray-50 rounded-lg flex items-center justify-center border border-gray-100 p-2">
+                                {currentProduct.images && currentProduct.images[0] ? (
+                                    <img src={currentProduct.images[0]} alt={currentProduct.title} className="w-full h-full object-contain" />
+                                ) : (
+                                    <span className="text-3xl text-gray-300">📦</span>
                                 )}
-                            </React.Fragment>
-                        ))}
-                        <span className="text-2xl text-gray-400">=</span>
-                        <div className="flex-shrink-0 bg-gold-500 text-white px-4 py-2 rounded-xl font-bold">
-                            Économisez 15%
+                            </div>
+                            <span className="text-xl text-gray-400 font-light">+</span>
+                            
+                            {/* Recommended products */}
+                            {recommendations.boughtTogether.map((product, index) => (
+                                <React.Fragment key={product.id}>
+                                    <div className="flex-shrink-0 w-20 h-20 bg-gray-50 rounded-lg flex items-center justify-center border border-gray-100 p-2 relative group cursor-pointer" onClick={() => window.location.href=`/product/${product.id}`}>
+                                         {product.images && product.images[0] ? (
+                                            <img src={product.images[0]} alt={product.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform" />
+                                        ) : (
+                                            <span className="text-3xl text-gray-300">📦</span>
+                                        )}
+                                    </div>
+                                    {index < recommendations.boughtTogether.length - 1 && (
+                                        <span className="text-xl text-gray-400 font-light">+</span>
+                                    )}
+                                </React.Fragment>
+                            ))}
+                        </div>
+                        
+                        <div className="w-full md:w-px md:h-20 bg-gray-200 mx-2 hidden md:block"></div>
+                        
+                        <div className="w-full md:w-auto flex flex-col gap-3 ml-auto shrink-0">
+                            <div className="flex items-center justify-between md:justify-start gap-3">
+                                <span className="text-sm text-gray-600">Prix total:</span>
+                                <span className="text-lg font-bold text-gray-900">
+                                   {/* Mock total calculation */}
+                                   {((currentProduct.price + recommendations.boughtTogether.reduce((sum, p) => sum + p.price, 0)) * 0.85).toLocaleString()} HTG
+                                </span>
+                            </div>
+                            <div className="bg-green-50 text-green-700 px-3 py-1 rounded text-xs font-bold inline-block w-fit mb-1 border border-green-200">
+                                Économisez 15% en lot
+                            </div>
+                            <button className="w-full md:w-auto bg-primary-600 hover:bg-primary-700 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors text-sm">
+                                Ajouter le lot au panier
+                            </button>
                         </div>
                     </div>
-                    <button className="w-full mt-3 bg-gold-500 hover:bg-gold-600 text-white font-bold py-3 rounded-xl transition-colors">
-                        Ajouter tout au panier
-                    </button>
                 </div>
             )}
 
@@ -219,8 +243,8 @@ const AIRecommendations = ({ currentProduct = null, limit = 8 }) => {
 
             {/* Trending */}
             <RecommendationSection
-                title="Tendances"
-                subtitle="Les plus populaires du moment"
+                title="Tendances actuelles"
+                subtitle="Les plus populaires de la semaine"
                 icon={TrendingUp}
                 products={recommendations.trending}
                 onSeeAll={() => window.location.href = '/best-sellers'}

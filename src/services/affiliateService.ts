@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Affiliate Service - Frontend
  * Calls Cloud Functions for affiliate operations
  */

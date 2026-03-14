@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Certificate Viewer Component
  * Displays and manages course completion certificates
  */
@@ -324,7 +324,7 @@ export function CertificateVerification({ certificateNumber }: { certificateNumb
 
         <div className="bg-gray-50 px-6 py-4 border-t">
           <p className="text-center text-sm text-gray-500">
-            Vérifié par <span className="font-semibold text-orange-500">Union Digitale</span>
+            Vérifié par <span className="font-semibold text-orange-500">Zabely</span>
           </p>
         </div>
       </div>

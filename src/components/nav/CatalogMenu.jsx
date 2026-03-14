@@ -1,6 +1,6 @@
-/**
+﻿/**
  * CatalogMenu Component - Premium 10/10
- * Mobile-first, accessible navigation menu for Union Digitale
+ * Mobile-first, accessible navigation menu for Zabely
  *
  * Features:
  * - Mobile: Full-screen Drawer with accordion sections
@@ -198,7 +198,7 @@ const StickyCTAZone = memo(({ currentUser, t, onNavigate }) => {
         "
       >
         <Store className="w-5 h-5" />
-        <span>{primaryLabel || 'Vendez sur Union Digitale'}</span>
+        <span>{primaryLabel || 'Vendez sur Zabely'}</span>
       </Link>
 
       {/* Secondary CTA Button */}
@@ -305,7 +305,7 @@ const MobileDrawer = ({ isOpen, onClose, currentUser, logout, t }) => {
         ref={drawerRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Menu Union Digitale"
+        aria-label="Menu Zabely"
         className="
           fixed inset-y-0 left-0 z-50
           w-[85%] max-w-[380px]

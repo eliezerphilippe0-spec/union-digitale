@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Affiliation Context - Enhanced
  * Persistent cookie tracking (30 days) + promo codes + category commissions
  */

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { ShoppingBag, Truck, CreditCard, ArrowRight } from 'lucide-react';
 import Button from '../ui/Button';
 
@@ -34,7 +34,7 @@ const FullWidthCTA = () => {
                 <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 animate-fadeIn">
                     Prêt à découvrir{' '}
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 via-gold-400 to-amber-300">
-                        Union Digitale
+                        Zabely
                     </span> ?
                 </h2>
 

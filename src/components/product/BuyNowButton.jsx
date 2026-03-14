@@ -1,4 +1,4 @@
-/**
+﻿/**
  * BuyNowButton - Inspiré Amazon One-Click
  * Achat immédiat avec confirmation rapide
  */

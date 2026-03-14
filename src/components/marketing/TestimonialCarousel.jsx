@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import Card from '../ui/Card';
 
@@ -18,7 +18,7 @@ const TestimonialCarousel = ({ autoPlayInterval = 5000 }) => {
             role: 'Cliente Fidèle',
             avatar: '👩🏾',
             rating: 5,
-            text: 'Union Digitale a transformé ma façon de faire mes achats en ligne. Livraison rapide et produits de qualité !',
+            text: 'Zabely a transformé ma façon de faire mes achats en ligne. Livraison rapide et produits de qualité !',
             location: 'Port-au-Prince'
         },
         {
@@ -45,7 +45,7 @@ const TestimonialCarousel = ({ autoPlayInterval = 5000 }) => {
             role: 'Entrepreneur',
             avatar: '👨🏾',
             rating: 5,
-            text: 'Union Digitale m\'a permis de lancer mon business en ligne sans complications. Interface claire et support au top !',
+            text: 'Zabely m\'a permis de lancer mon business en ligne sans complications. Interface claire et support au top !',
             location: 'Jacmel'
         }
     ];

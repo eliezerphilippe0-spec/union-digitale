@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Smartphone, Monitor, Tablet, Store, ArrowRight, CheckCircle } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 

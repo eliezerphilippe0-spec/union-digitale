@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { useRealEstate } from '../../hooks/useRealEstate';
@@ -230,7 +230,7 @@ const AddRealEstate = () => {
                         <Shield className="w-10 h-10 text-blue-600 flex-shrink-0" />
                         <div>
                             <h3 className="font-bold text-blue-900">Validation Requise</h3>
-                            <p className="text-sm text-blue-800 mt-1">Conformément à la politique d'Union Digitale, votre annonce sera vérifiée par un administrateur avant publication. Vous devez être en mesure de fournir les titres de propriété ou mandats de gestion sur demande.</p>
+                            <p className="text-sm text-blue-800 mt-1">Conformément à la politique d'Zabely, votre annonce sera vérifiée par un administrateur avant publication. Vous devez être en mesure de fournir les titres de propriété ou mandats de gestion sur demande.</p>
                         </div>
                     </div>
 

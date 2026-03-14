@@ -1,8 +1,8 @@
-import { db } from '../lib/firebase';
+﻿import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, query, where, orderBy, getDocs } from 'firebase/firestore';
 
 /**
- * Transaction Logger for Union Digitale Financial Services
+ * Transaction Logger for Zabely Financial Services
  * Logs all financial transactions to Firestore with security and audit trail
  */
 

@@ -1,4 +1,4 @@
-import {
+﻿import {
     collection,
     query,
     where,
@@ -12,7 +12,7 @@ import {
 import { db } from './firebase';
 
 /**
- * Optimized Query Library for Union Digitale Marketplace
+ * Optimized Query Library for Zabely Marketplace
  * Features:
  * - Trending products in Haiti
  * - Redis caching for hot queries (>1k tx/day)

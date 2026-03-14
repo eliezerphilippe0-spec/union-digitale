@@ -1,8 +1,8 @@
-import { z } from 'zod';
+﻿import { z } from 'zod';
 
 /**
  * Validation Schemas for Vendor Commission & Payout System
- * Union Digitale Marketplace
+ * Zabely Marketplace
  */
 
 // ============================================================================

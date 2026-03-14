@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
 /**
@@ -9,7 +9,7 @@ const StructuredData = () => {
     const organizationSchema = {
         "@context": "https://schema.org",
         "@type": "Organization",
-        "name": "Union Digitale",
+        "name": "Zabely",
         "url": "https://uniondigitale.com",
         "logo": "https://uniondigitale.com/logo.png",
         "description": "La première plateforme e-commerce en Haïti. Achetez et vendez en toute sécurité avec MonCash et NatCash.",
@@ -34,7 +34,7 @@ const StructuredData = () => {
     const websiteSchema = {
         "@context": "https://schema.org",
         "@type": "WebSite",
-        "name": "Union Digitale",
+        "name": "Zabely",
         "url": "https://uniondigitale.com",
         "potentialAction": {
             "@type": "SearchAction",

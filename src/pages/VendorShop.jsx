@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Star,
@@ -116,7 +116,7 @@ const VendorShop = () => {
 
     return (
         <div className="vendor-shop">
-            <SEO title={vendor?.name ? `${vendor.name} | Boutique` : 'Boutique'} description={vendor?.description || 'Découvrez cette boutique sur Union Digitale.'} />
+            <SEO title={vendor?.name ? `${vendor.name} | Boutique` : 'Boutique'} description={vendor?.description || 'Découvrez cette boutique sur Zabely.'} />
             {/* Header with banner */}
             <div className="vendor-banner">
                 {vendor.shopBanner ? (

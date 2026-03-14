@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Package, Truck, CheckCircle, Clock } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -9,62 +9,85 @@ const TrackingPage = () => {
     const { orderId } = useParams();
     const { t } = useLanguage();
 
-    // Mock Data for the simulation
     const [trackingData, setTrackingData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Simulate API call
-        const timer = setTimeout(() => {
-            setTrackingData({
-                orderId: orderId,
-                status: 'in_transit',
-                estimatedDelivery: 'Aujourd\'hui, 14:00 - 16:00',
-                carrier: 'Union Express',
-                currentLocation: [18.5200, -72.3000], // Near Delmas 65
-                steps: [
-                    {
-                        id: 1,
-                        title: t('order_placed') || 'Commande validée',
-                        date: '26 Jan, 10:30',
-                        completed: true,
-                        icon: Package
-                    },
-                    {
-                        id: 2,
-                        title: t('shipped') || 'Expédié',
-                        date: '27 Jan, 08:00',
-                        completed: true,
-                        icon: Truck
-                    },
-                    {
-                        id: 3,
-                        title: t('out_for_delivery') || 'En cours de livraison',
-                        date: '27 Jan, 13:15',
-                        completed: true,
-                        icon: Clock // Usually a truck icon again or clock
-                    },
-                    {
-                        id: 4,
-                        title: t('delivered') || 'Livré',
-                        date: '-',
-                        completed: false,
-                        icon: CheckCircle
-                    },
-                ],
-                // Route: Port-au-Prince -> Delmas -> Petion-Ville
-                route: [
-                    [18.5392, -72.3364], // Port-au-Prince (Warehouse)
-                    [18.5350, -72.3200],
-                    [18.5280, -72.3100],
-                    [18.5200, -72.3000], // Current (Delmas)
-                    [18.5125, -72.2850]  // Petion-Ville (Customer)
-                ]
-            });
-            setLoading(false);
-        }, 1000);
+        const fetchOrder = async () => {
+            try {
+                // Fetch real order data from Firestore (Priority 3)
+                const { doc, getDoc } = await import('firebase/firestore');
+                const { db } = await import('../lib/firebase');
 
-        return () => clearTimeout(timer);
+                const orderRef = doc(db, 'orders', orderId);
+                const orderSnap = await getDoc(orderRef);
+
+                if (!orderSnap.exists()) {
+                    throw new Error("Commande introuvable");
+                }
+
+                const order = orderSnap.data();
+                const status = order.status || 'pending';
+
+                // Map database status to visual steps
+                const isShipped = status === 'shipped' || status === 'delivered';
+                const isDelivered = status === 'delivered';
+
+                setTrackingData({
+                    orderId: orderId,
+                    status: status,
+                    estimatedDelivery: isDelivered ? 'Livré' : 'Généralement sous 2 à 4 jours',
+                    carrier: 'Union Express',
+                    currentLocation: isDelivered ? [18.5125, -72.2850] : (isShipped ? [18.5200, -72.3000] : [18.5392, -72.3364]),
+                    steps: [
+                        {
+                            id: 1,
+                            title: t('order_placed') || 'Commande validée',
+                            date: new Date(order.createdAt?.toDate ? order.createdAt.toDate() : Date.now()).toLocaleDateString(),
+                            completed: true,
+                            icon: Package
+                        },
+                        {
+                            id: 2,
+                            title: t('shipped') || 'Expédié',
+                            date: isShipped ? '-' : '',
+                            completed: isShipped,
+                            icon: Truck
+                        },
+                        {
+                            id: 3,
+                            title: t('out_for_delivery') || 'En cours de livraison',
+                            date: isDelivered ? '-' : '',
+                            completed: isDelivered,
+                            icon: Clock
+                        },
+                        {
+                            id: 4,
+                            title: t('delivered') || 'Livré',
+                            date: isDelivered ? new Date(order.updatedAt?.toDate ? order.updatedAt.toDate() : Date.now()).toLocaleDateString() : '',
+                            completed: isDelivered,
+                            icon: CheckCircle
+                        },
+                    ],
+                    // Standard route mock for the map UI
+                    route: [
+                        [18.5392, -72.3364], // Port-au-Prince (Warehouse)
+                        [18.5350, -72.3200],
+                        [18.5280, -72.3100],
+                        [18.5200, -72.3000], // Current (Delmas)
+                        [18.5125, -72.2850]  // Petion-Ville (Customer)
+                    ]
+                });
+            } catch (err) {
+                console.error('Error fetching tracking:', err);
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOrder();
     }, [orderId, t]);
 
     if (loading) {
@@ -75,9 +98,22 @@ const TrackingPage = () => {
         );
     }
 
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+                <Package className="w-16 h-16 text-gray-300 mb-4" />
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Erreur de suivi</h2>
+                <p className="text-gray-500 text-center">{error}</p>
+                <Link to="/orders" className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
+                    Retour aux commandes
+                </Link>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gray-50 pb-12">
-            <SEO title="Suivi de commande" description="Suivez vos livraisons Union Digitale en temps réel." />
+            <SEO title="Suivi de commande" description="Suivez vos livraisons Zabely en temps réel." />
             {/* Header */}
             <div className="bg-white shadow-sm sticky top-0 z-30">
                 <div className="container mx-auto px-4 py-4 flex items-center gap-4">

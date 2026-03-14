@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Store, Upload, Eye, EyeOff, Loader, CheckCircle, ArrowRight, ArrowLeft, MapPin } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -189,7 +189,7 @@ const SellerRegister = () => {
     return (
         <>
             <SEO
-                title="Inscription Vendeur - Union Digitale"
+                title="Inscription Vendeur - Zabely"
                 description="Créez votre boutique et commencez à vendre en ligne"
             />
 

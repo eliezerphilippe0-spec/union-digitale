@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Usage Stats Service
  * Track real usage statistics for AI features, products created, etc.
  * Persists to localStorage and syncs to Firestore when available

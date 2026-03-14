@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { X, Ruler, TrendingUp, AlertCircle, Check, ChevronRight } from 'lucide-react';
 import { useFittingRoom } from '../contexts/FittingRoomContext';
 import { recommendSize } from '../services/sizeRecommendationService';

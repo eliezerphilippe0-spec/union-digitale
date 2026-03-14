@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ImageZoom - P2 Fix: Zoom on hover
  * Loupe effect like Amazon/Shopify
  */

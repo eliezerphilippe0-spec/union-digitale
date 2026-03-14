@@ -1,4 +1,4 @@
-export { default as Hero } from './Hero';
+﻿export { default as Hero } from './Hero';
 export { default as PromoBanner } from './PromoBanner';
 export { default as SocialProof } from './SocialProof';
 export { default as SocialProofLive } from './SocialProofLive';

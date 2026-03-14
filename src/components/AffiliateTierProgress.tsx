@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Affiliate Tier Progress Component
  * Shows current tier, progress to next tier, and milestones
  */

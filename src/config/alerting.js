@@ -1,5 +1,5 @@
-/**
- * Union Digitale Alerting Configuration
+﻿/**
+ * Zabely Alerting Configuration
  * 
  * Configure your alert channels here.
  */
@@ -27,7 +27,7 @@ export const ALERT_CONFIG = {
         enabled: true,
         collection: 'mail', // Collection watched by Firebase Extension
         to: ['admin@uniondigitale.ht', 'tech@antigravity.ht'],
-        from: 'Union Digitale System <no-reply@uniondigitale.ht>'
+        from: 'Zabely System <no-reply@uniondigitale.ht>'
     },
 
     // 3. Thresholds

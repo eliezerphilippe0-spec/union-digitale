@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Save, HelpCircle } from 'lucide-react';
 import { validateMeasurements, MEASUREMENT_RANGES, getMeasurementInstructions } from '../../utils/measurementUtils';
 import Button from '../ui/Button';

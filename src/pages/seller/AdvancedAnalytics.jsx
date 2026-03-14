@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Advanced Analytics Dashboard for Sellers
  * Inspired by: Shopify Analytics, Google Analytics, Stripe Dashboard
  */

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 // Base Skeleton component with shimmer animation
 const Skeleton = ({ className = '', variant = 'rect', ...props }) => {

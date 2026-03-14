@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 const JobStatusCard = ({ status, onRun, onDryRun, loading }: { status: any; onRun: () => void; onDryRun: () => void; loading: boolean }) => {
   const report = status?.lastReport;

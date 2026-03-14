@@ -1,4 +1,4 @@
-/**
+﻿/**
  * VideoUploader - Upload et gestion de vidéos pour vendeurs
  * Support: Vidéo de boutique, Vidéos de produits, Vidéos Live
  */

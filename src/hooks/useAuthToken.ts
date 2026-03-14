@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+﻿import { useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 export const useAuthToken = () => {

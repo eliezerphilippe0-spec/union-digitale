@@ -1,4 +1,4 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 import logger from '../utils/logger';
 
 /**
@@ -72,7 +72,7 @@ export async function processMonCashPayout(payoutData) {
         const payoutRequest = {
             amount: amount,
             receiver: phoneNumber,
-            desc: `Payout Union Digitale - ${payoutId}`,
+            desc: `Payout Zabely - ${payoutId}`,
             orderId: payoutId
         };
 

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Express Checkout - 1-Click Purchase
  * Inspired by: Shop Pay, Amazon 1-Click, Apple Pay
  */

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Rocket, DollarSign, Users, Award, CheckCircle } from 'lucide-react';
@@ -13,7 +13,7 @@ const AmbassadorLanding = () => {
                 <div className="max-w-4xl mx-auto">
                     <span className="bg-blue-800 text-blue-200 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4 inline-block">{t('ambassador_official_program')}</span>
                     <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
-                        {t('ambassador_hero_title_1')} <span className="text-yellow-400">Union Digitale</span>
+                        {t('ambassador_hero_title_1')} <span className="text-yellow-400">Zabely</span>
                     </h1>
                     <p className="text-xl md:text-2xl text-white mb-10 max-w-2xl mx-auto">
                         {t('ambassador_hero_desc')}

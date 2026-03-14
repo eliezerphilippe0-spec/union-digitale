@@ -1,4 +1,4 @@
-export { default as ProductCard } from './ProductCard';
+﻿export { default as ProductCard } from './ProductCard';
 export { default as QuickViewModal } from './QuickViewModal';
 export { default as ImageZoom } from './ImageZoom';
 export { default as ProductVariants } from './ProductVariants';

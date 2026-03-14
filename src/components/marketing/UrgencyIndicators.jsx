@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Eye, Package, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
 
 // Stock Warning Badge

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Live Shopping Component - Real-time Shopping Experience
  * Inspired by: TikTok Shop, Amazon Live, Taobao Live
  */

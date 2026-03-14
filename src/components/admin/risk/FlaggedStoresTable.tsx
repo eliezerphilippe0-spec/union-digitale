@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import RiskLevelBadge from './RiskLevelBadge';
 import SeverityBadge from './SeverityBadge';
 import PayoutFrozenPill from './PayoutFrozenPill';

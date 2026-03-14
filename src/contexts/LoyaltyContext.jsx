@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Loyalty Program Context - Gamified Rewards System
  * Inspired by: Grab Rewards, Starbucks Rewards, Amazon Prime
  */

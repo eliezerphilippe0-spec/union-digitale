@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Certificate Service - Frontend
  * Handles course certificate generation and verification
  */
@@ -113,7 +113,7 @@ export async function shareCertificate(certificate: Certificate): Promise<void> 
   if (navigator.share) {
     await navigator.share({
       title: `Certificat - ${certificate.courseName}`,
-      text: `J'ai obtenu mon certificat pour "${certificate.courseName}" sur Union Digitale! 🎓`,
+      text: `J'ai obtenu mon certificat pour "${certificate.courseName}" sur Zabely! 🎓`,
       url: `https://uniondigitale.ht/verify/${certificate.certificateNumber}`,
     });
   } else {

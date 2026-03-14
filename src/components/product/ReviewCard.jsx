@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Star, ThumbsUp, ThumbsDown, CheckCircle, AlertCircle, X } from 'lucide-react';
 import { voteHelpful, reportReview } from '../../services/reviewService';
 import { useAuth } from '../../contexts/AuthContext';

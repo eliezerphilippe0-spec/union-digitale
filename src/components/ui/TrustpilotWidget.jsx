@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+﻿import React, { useEffect, useRef } from 'react';
 
 const TrustpilotWidget = ({
     templateId = '5419b6a8b0d04a076446a9ad', // Example Micro Combo template

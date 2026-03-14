@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { 
   Star, Gift, TrendingUp, Award, Target,
   Clock, ChevronRight, Zap, Shield, Wallet

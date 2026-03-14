@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DigitalProductFeatures - Inspiré Gumroad/Udemy
  * Features spécifiques aux produits numériques
  */

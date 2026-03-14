@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 
 const ManualRiskDialog = ({ store, onClose, onSubmit }: any) => {
   const [riskLevel, setRiskLevel] = useState('WATCH');

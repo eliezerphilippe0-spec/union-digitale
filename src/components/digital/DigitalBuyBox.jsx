@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DigitalBuyBox - Inspiré Gumroad/Hotmart
  * Buy box spécialisé pour produits numériques
  */
@@ -69,14 +69,14 @@ const DigitalBuyBox = ({ product }) => {
     };
 
     return (
-        <div className="bg-white border-2 border-indigo-100 rounded-2xl overflow-hidden shadow-xl">
+        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
             {/* Header */}
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 text-center">
+            <div className="bg-gray-900 text-white p-4 text-center">
                 <div className="flex items-center justify-center gap-2 mb-1">
-                    <Zap className="w-5 h-5" />
+                    <Zap className="w-5 h-5 text-gold-400" />
                     <span className="font-bold">Accès Instantané</span>
                 </div>
-                <p className="text-indigo-200 text-sm">Téléchargement immédiat après paiement</p>
+                <p className="text-gray-300 text-sm">Téléchargement immédiat après paiement</p>
             </div>
 
             <div className="p-6 space-y-6">
@@ -166,7 +166,7 @@ const DigitalBuyBox = ({ product }) => {
                 <div className="space-y-3">
                     <button
                         onClick={handleBuyNow}
-                        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all"
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
                     >
                         <Download className="w-5 h-5" />
                         Acheter maintenant

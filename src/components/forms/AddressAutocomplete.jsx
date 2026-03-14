@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AddressAutocomplete - P3 Fix
  * Suggestions d'adresses communes en Haïti
  */

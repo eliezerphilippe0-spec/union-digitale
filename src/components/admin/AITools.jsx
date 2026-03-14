@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Sparkles, Copy, RefreshCw, MessageSquare } from 'lucide-react';
 import { geminiService } from '../../services/geminiService';
 

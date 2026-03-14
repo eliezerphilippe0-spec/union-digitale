@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { X } from 'lucide-react';
 import { getMeasurementInstructions } from '../../utils/measurementUtils';
 

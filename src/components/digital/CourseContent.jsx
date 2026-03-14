@@ -1,4 +1,4 @@
-/**
+﻿/**
  * CourseContent - Inspiré Udemy/Coursera
  * Table des matières pour cours en ligne
  */
@@ -83,9 +83,9 @@ const CourseContent = ({ course }) => {
     return (
         <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
             {/* Header */}
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
-                <h3 className="text-xl font-bold mb-2">Contenu de la formation</h3>
-                <div className="flex items-center gap-4 text-indigo-100 text-sm">
+            <div className="bg-gray-50 border-b border-gray-200 p-6">
+                <h3 className="text-xl font-bold mb-2 text-gray-900">Contenu de la formation</h3>
+                <div className="flex items-center gap-4 text-gray-600 text-sm">
                     <span className="flex items-center gap-1">
                         <Video className="w-4 h-4" />
                         {sections.length} sections

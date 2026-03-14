@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import SEO from '../../components/common/SEO';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, Shield, Clock, CheckCircle, User, Phone, DollarSign } from 'lucide-react';
@@ -116,7 +116,7 @@ const TransfertArgent = () => {
                     <div className="service-header-content">
                         <h1 className="service-title">Transfert d'argent</h1>
                         <div className="service-provider">
-                            <span>Fournisseur : Union Digitale</span>
+                            <span>Fournisseur : Zabely</span>
                             <span className="verified-badge">✓ Vérifié</span>
                         </div>
                     </div>

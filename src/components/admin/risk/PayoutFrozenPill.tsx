@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Snowflake } from 'lucide-react';
 
 const PayoutFrozenPill = ({ frozen }: { frozen: boolean }) => {

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Shield, CheckCircle, Lock, Users, CreditCard, MapPin } from 'lucide-react';
 import './TrustBadges.css';
 

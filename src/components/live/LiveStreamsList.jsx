@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Live Streams List - Shows active live shopping streams
  */
 

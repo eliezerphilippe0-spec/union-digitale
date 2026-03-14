@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Product Reviews Component
  * Displays reviews with ratings, sorting, and submission form
  */

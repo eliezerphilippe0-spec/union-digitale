@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import {
     DollarSign, Package, ShoppingCart, TrendingUp, TrendingDown, ArrowUpRight,
     Star, Bell, Clock, Wallet, CreditCard, Eye, AlertTriangle, CheckCircle2,
@@ -12,43 +12,50 @@ import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     BarChart, Bar
 } from 'recharts';
+import { useVendorOrders, useVendorOrderStats } from '../../hooks/useVendorOrders';
+import { paymentService } from '../../services/paymentService';
 
 const SellerDashboard = () => {
     const { t } = useLanguage();
     const { currentUser } = useAuth();
-    const [loading, setLoading] = useState(true);
     const [period, setPeriod] = useState('30');
+    
+    // MOCK: Keep commission check simple
     const [commissionSummary, setCommissionSummary] = useState({ totalCommission: 0, totalOrders: 0 });
     const [commissionLoading, setCommissionLoading] = useState(false);
 
-    // Données vendeur
-    const [vendorData, setVendorData] = useState({
-        name: 'TechHub Haiti',
-        level: 'Gold',
-        levelProgress: 78,
-        nextLevel: 'Platinum',
-        rating: 4.8,
-        reviewCount: 342,
-        memberSince: t('seller_dashboard_member_since_value')
-    });
+    // REAL DATA INTEGRATION (Priority 1 & 2)
+    const { stats: realStats, loading: statsLoading } = useVendorOrderStats();
+    const { orders: realOrders, loading: ordersLoading } = useVendorOrders({ realtime: true, limitCount: 5 });
 
-    // Stats principales
-    const [stats, setStats] = useState({
-        totalRevenue: 2450000,
-        pendingBalance: 185000,
-        availableBalance: 890000,
+    // Vendor profile data
+    const vendorData = {
+        name: currentUser?.displayName || 'Boutique Vendeur',
+        level: 'Standard',
+        levelProgress: 15,
+        nextLevel: 'Premium',
+        rating: 5.0,
+        reviewCount: 0,
+        memberSince: 'Aujourd\'hui'
+    };
+
+    // Derived stats injected into the dashboard UI
+    const stats = {
+        totalRevenue: realStats?.totalRevenue || 0,
+        pendingBalance: realStats?.pendingBalance || 0,
+        availableBalance: realStats?.availableBalance || 0,
         nextPayout: t('seller_dashboard_next_payout_value'),
-        totalOrders: 485,
-        pendingOrders: 12,
-        shippedOrders: 8,
-        deliveredOrders: 465,
-        activeProducts: 124,
-        lowStockProducts: 5,
-        outOfStock: 2,
-        conversionRate: 3.8,
-        views: 12450,
-        avgOrderValue: 5050
-    });
+        totalOrders: realStats?.totalOrders || 0,
+        pendingOrders: realStats?.pendingOrders || 0,
+        shippedOrders: realOrders.filter(o => o.status === 'shipped').length || 0,
+        deliveredOrders: realStats?.completedOrders || 0,
+        activeProducts: 5, // Mocked until Product hook integration
+        lowStockProducts: 1,
+        outOfStock: 0,
+        conversionRate: 2.5,
+        views: 120,
+        avgOrderValue: realStats?.totalOrders ? Math.round(realStats.totalRevenue / realStats.totalOrders) : 0
+    };
 
     // Graphique revenus
     const revenueData = [
@@ -66,23 +73,35 @@ const SellerDashboard = () => {
         { id: 4, name: 'Apple Watch Series 9', sales: 34, revenue: 204000, stock: 15, trend: 'up' },
     ];
 
-    // Commandes récentes
-    const recentOrders = [
-        { id: '#UD-9842', product: 'iPhone 15 Pro', customer: 'Jean B.', amount: 125000, status: 'pending', time: t('seller_dashboard_time_30m') },
-        { id: '#UD-9841', product: 'MacBook Air M2', customer: 'Marie C.', amount: 185000, status: 'shipped', time: t('seller_dashboard_time_2h') },
-        { id: '#UD-9840', product: 'AirPods Pro', customer: 'Pierre L.', amount: 35000, status: 'delivered', time: t('seller_dashboard_time_5h') },
-    ];
+    // Commandes récentes formatées pour l'UI
+    const recentOrders = realOrders.slice(0, 5).map(o => ({
+        id: o.orderId || o.id,
+        // Fallback for mock/old structure
+        product: o.items && o.items.length > 0 ? o.items[0].name || o.items[0].title || 'Produit' : 'Commande',
+        customer: o.buyerCity || 'Client HD',
+        amount: o.vendorAmount || o.subtotal || 0,
+        status: o.status || 'pending',
+        time: new Date(o.createdAt?.toDate ? o.createdAt.toDate() : Date.now()).toLocaleDateString()
+    }));
 
-    // Notifications
+    // Notifications mockées temporairement
     const notifications = [
         { id: 1, type: 'order', title: t('seller_dashboard_notif_new_order'), message: t('seller_dashboard_notif_new_order_msg'), time: t('seller_dashboard_time_30m'), unread: true },
         { id: 2, type: 'stock', title: t('seller_dashboard_notif_low_stock'), message: t('seller_dashboard_notif_low_stock_msg'), time: t('seller_dashboard_time_2h'), unread: true },
         { id: 3, type: 'payout', title: t('seller_dashboard_notif_payout_done'), message: t('seller_dashboard_notif_payout_done_msg'), time: t('seller_dashboard_time_yesterday'), unread: false },
     ];
 
-    useEffect(() => {
-        setTimeout(() => setLoading(false), 800);
-    }, []);
+    const loading = statsLoading || ordersLoading;
+
+    const handleUpdateOrderStatus = async (orderId, newStatus) => {
+        try {
+            await paymentService.updateOrderStatus(orderId, currentUser.uid, newStatus);
+            // Feedback for the user
+            alert(`Statut de la commande mis à jour vers: ${newStatus}`);
+        } catch (error) {
+            alert(error.message);
+        }
+    };
 
     useEffect(() => {
         const fetchCommissions = async () => {
@@ -541,8 +560,13 @@ const SellerDashboard = () => {
                                         </div>
                                     </div>
                                     {order.status === 'pending' && (
-                                        <button className="mt-3 w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition-colors">
-                                            {t('seller_dashboard_process_order')}
+                                        <button onClick={() => handleUpdateOrderStatus(order.id, 'shipped')} className="mt-3 w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                                            📦 Expédier la commande
+                                        </button>
+                                    )}
+                                    {order.status === 'shipped' && (
+                                        <button onClick={() => handleUpdateOrderStatus(order.id, 'delivered')} className="mt-3 w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                                            ✅ Confirmer Livraison (Débloque Fonds)
                                         </button>
                                     )}
                                 </div>

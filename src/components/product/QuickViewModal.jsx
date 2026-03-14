@@ -1,4 +1,4 @@
-/**
+﻿/**
  * QuickViewModal - P2 Fix: Aperçu rapide produit
  * Modal avec infos essentielles sans quitter la page
  */

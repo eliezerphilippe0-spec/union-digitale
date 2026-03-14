@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Digital Download Service - Frontend
  * Handles secure downloads for digital products
  */

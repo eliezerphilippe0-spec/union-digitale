@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Promo Code Input Component
  * For checkout - validates and applies affiliate promo codes
  */

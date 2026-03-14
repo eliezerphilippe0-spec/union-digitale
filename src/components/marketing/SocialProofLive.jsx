@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { ShoppingBag, MapPin } from 'lucide-react';
 
 // Sample Haitian names and cities for realistic social proof

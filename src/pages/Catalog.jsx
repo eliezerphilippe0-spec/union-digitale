@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import ProductCard from '../components/product/ProductCard';
 import QuickViewModal from '../components/product/QuickViewModal';
 import { useProducts } from '../hooks/useProducts';
@@ -172,7 +172,7 @@ const Catalog = ({ predefinedFilter }) => {
         <div className="bg-background min-h-screen py-8">
             <SEO
                 title={pageTitle}
-                description="Parcourez notre large sélection de produits : High-Tech, Maison, Mode et plus encore sur Union Digitale."
+                description="Parcourez notre large sélection de produits : High-Tech, Maison, Mode et plus encore sur Zabely."
             />
 
             {/* Mobile Filter Drawer */}

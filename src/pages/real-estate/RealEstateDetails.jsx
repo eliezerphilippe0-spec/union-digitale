@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useRealEstate } from '../../hooks/useRealEstate';
 import { MapPin, User, Check, Shield } from 'lucide-react';
@@ -96,7 +96,7 @@ const RealEstateDetails = () => {
 
                             <div className="mt-4 flex items-start gap-2 text-xs text-gray-400 bg-gray-50 p-3 rounded">
                                 <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                                <span>Garantie Union Digitale : Fonds séquestrés jusqu'à la validation de la transaction.</span>
+                                <span>Garantie Zabely : Fonds séquestrés jusqu'à la validation de la transaction.</span>
                             </div>
                         </div>
                     </div>

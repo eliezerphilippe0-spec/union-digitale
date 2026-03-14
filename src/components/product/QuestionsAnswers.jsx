@@ -1,4 +1,4 @@
-/**
+﻿/**
  * QuestionsAnswers - Inspiré Amazon Q&A
  * Section questions/réponses sur les produits
  */
@@ -39,7 +39,7 @@ const QuestionsAnswers = ({ productId, questions = [] }) => {
             author: "Pierre M.",
             date: "Il y a 2 semaines",
             helpful: 12,
-            answeredBy: "Union Digitale",
+            answeredBy: "Zabely",
         },
     ];
 

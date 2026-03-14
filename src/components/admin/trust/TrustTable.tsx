@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import TrustTierBadge from './TrustTierBadge';
 
 const TrustTable = ({ title, items, onSelect, onLoadMore, hasMore, loading, showReasons = false }: any) => (

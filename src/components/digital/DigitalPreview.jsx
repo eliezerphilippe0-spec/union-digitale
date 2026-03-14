@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DigitalPreview - Inspiré Gumroad/Envato
  * Preview/Demo du contenu digital
  */

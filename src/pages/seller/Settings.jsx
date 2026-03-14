@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { usageStatsService } from '../../services/usageStatsService';
@@ -200,12 +201,12 @@ const Settings = () => {
                     <p className="text-gray-600 dark:text-gray-400 mb-6">
                         {t('seller_settings_login_required')}
                     </p>
-                    <a
-                        href="/login"
+                    <Link
+                        to="/login"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-500 text-white rounded-xl font-semibold hover:bg-indigo-600 transition-colors"
                     >
                         {t('login')}
-                    </a>
+                    </Link>
                 </div>
             </div>
         );
@@ -217,8 +218,8 @@ const Settings = () => {
             <div className="bg-white dark:bg-neutral-800 border-b border-gray-200 dark:border-neutral-700">
                 <div className="container mx-auto px-4 py-6">
                     <div className="flex items-center gap-3">
-                        <div className="p-3 bg-gray-100 dark:bg-neutral-700 rounded-xl">
-                            <SettingsIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+                        <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800">
+                            <SettingsIcon className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                         </div>
                         <div>
                             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -290,7 +291,7 @@ const Settings = () => {
                                                 value={apiKey}
                                                 onChange={(e) => setApiKey(e.target.value)}
                                                 placeholder="AIzaSy..."
-                                                className="w-full p-3 pr-24 bg-gray-50 dark:bg-neutral-700 border border-gray-200 dark:border-neutral-600 rounded-xl text-gray-900 dark:text-white"
+                                                className="w-full p-3 pr-24 bg-white dark:bg-neutral-900 border border-gray-300 dark:border-neutral-600 rounded-xl text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all"
                                             />
                                             <button
                                                 onClick={() => setShowApiKey(!showApiKey)}
@@ -436,8 +437,8 @@ const Settings = () => {
                                         {t('seller_settings_subscription_title')}
                                     </h2>
 
-                                    <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl text-white mt-4">
-                                        <div className="p-3 bg-white/20 rounded-xl">
+                                    <div className="flex items-center gap-4 p-4 bg-indigo-600 rounded-xl text-white mt-4 border border-indigo-700">
+                                        <div className="p-3 bg-indigo-500 rounded-xl border border-indigo-400">
                                             <Crown className="w-8 h-8" />
                                         </div>
                                         <div className="flex-1">

@@ -1,4 +1,4 @@
-import { useAdminFetch } from '../hooks/useAdminFetch';
+﻿import { useAdminFetch } from '../hooks/useAdminFetch';
 
 export const useAdminRiskApi = () => {
   const { adminFetch } = useAdminFetch();

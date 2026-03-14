@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import KPICards from '../../components/admin/risk/KPICards';
 import FlaggedStoresTable from '../../components/admin/risk/FlaggedStoresTable';

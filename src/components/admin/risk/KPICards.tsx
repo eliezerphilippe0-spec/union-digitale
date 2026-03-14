@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 const KPICard = ({ label, value }: { label: string; value: string | number }) => (
   <div className="bg-white rounded-lg border p-4 shadow-sm">

@@ -1,11 +1,11 @@
-import {
+﻿import {
     Banknote, Plane, ShoppingBag, Smartphone, Crown,
     Send, Zap, Lightbulb, Droplets, Home, Car,
     CreditCard, Wallet, Gift, Package, BookOpen
 } from 'lucide-react';
 
 /**
- * Services Data Structure - Union Digitale Super-App
+ * Services Data Structure - Zabely Super-App
  * Organized by categories with unique visual identity
  */
 

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Centralized Error Logger
  * Handles error logging, reporting, and user notifications
  */

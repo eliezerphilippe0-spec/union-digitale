@@ -1,6 +1,6 @@
-/**
+﻿/**
  * Catalog Menu Data Structure - Premium 10/10
- * Data-driven menu configuration for Union Digitale
+ * Data-driven menu configuration for Zabely
  * Mobile-first, accessible, conversion-oriented
  */
 

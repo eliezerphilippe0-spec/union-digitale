@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { Upload, Plus, Trash2, Save, Shirt, Ruler, Loader } from 'lucide-react';
+﻿import { useLanguage } from '../../contexts/LanguageContext';
+import { Upload, Plus, Trash2, Save, Shirt, Ruler, Loader, Sparkles, Wand2 } from 'lucide-react';
 import { db, storage, auth } from '../../lib/firebase';
+import { geminiService } from '../../services/geminiService';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,8 @@ const AddProduct = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [aiGenerating, setAiGenerating] = useState(false);
+    const [aiTone, setAiTone] = useState('professional');
     const [imageFiles, setImageFiles] = useState([]);
 
     const [formData, setFormData] = useState({
@@ -69,6 +71,29 @@ const AddProduct = () => {
                 }
             }
         }));
+    };
+
+    const handleAIGenerate = async () => {
+        if (!formData.title) {
+            alert("Veuillez d'abord saisir un titre pour le produit.");
+            return;
+        }
+
+        setAiGenerating(true);
+        try {
+            // keywords can be extracted from title or category if not provided
+            const descriptiveKeywords = `${formData.category}, high quality, marketplace`;
+            const generated = await geminiService.generateProductDescription(formData.title, descriptiveKeywords, aiTone);
+            
+            if (generated) {
+                setFormData(prev => ({ ...prev, description: generated }));
+            }
+        } catch (error) {
+            console.error("AI Generation failed:", error);
+            alert("L'assistant IA est temporairement indisponible.");
+        } finally {
+            setAiGenerating(false);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -179,14 +204,41 @@ const AddProduct = () => {
                             </select>
                         </div>
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium mb-1">Description</label>
+                            <div className="flex items-center justify-between mb-1">
+                                <label className="block text-sm font-medium">Description</label>
+                                <div className="flex items-center gap-2">
+                                    <select 
+                                        value={aiTone}
+                                        onChange={(e) => setAiTone(e.target.value)}
+                                        className="text-xs border rounded p-1 bg-gray-50 outline-none focus:ring-1 focus:ring-indigo-500"
+                                    >
+                                        <option value="professional">Ton Pro</option>
+                                        <option value="excited">Ton Vendeur</option>
+                                        <option value="creative">Ton Créatif</option>
+                                    </select>
+                                    <button
+                                        type="button"
+                                        onClick={handleAIGenerate}
+                                        disabled={aiGenerating || !formData.title}
+                                        className="flex items-center gap-1.5 px-2 py-1 bg-indigo-50 text-indigo-700 rounded-md text-xs font-bold hover:bg-indigo-100 transition-colors disabled:opacity-50"
+                                    >
+                                        {aiGenerating ? <Loader className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+                                        Assistant IA
+                                    </button>
+                                </div>
+                            </div>
                             <textarea
                                 name="description"
                                 value={formData.description}
                                 onChange={handleChange}
-                                rows="4"
-                                className="w-full p-2 border rounded-lg"
+                                rows="6" // Increased for better writing space
+                                className="w-full p-2 border rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none"
+                                placeholder="Décrivez votre produit ici ou utilisez l'assistant IA..."
                             ></textarea>
+                            <p className="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
+                                <Sparkles className="w-2.5 h-2.5" />
+                                L'IA utilise votre titre pour rédiger une description optimisée.
+                            </p>
                         </div>
 
                         {/* Image Upload Section */}

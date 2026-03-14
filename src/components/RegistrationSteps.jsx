@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Check } from 'lucide-react';
 
 const RegistrationSteps = ({ currentStep, totalSteps, steps }) => {

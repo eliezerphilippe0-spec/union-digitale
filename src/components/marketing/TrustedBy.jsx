@@ -1,4 +1,4 @@
-/**
+﻿/**
  * TrustedBy - Social Proof Section
  * Shows stats, partner logos, and trust badges
  */

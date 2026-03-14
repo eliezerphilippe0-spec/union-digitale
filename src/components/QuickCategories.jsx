@@ -1,4 +1,4 @@
-import { Smartphone, ShoppingBag, Home, Sparkles } from 'lucide-react';
+﻿import { Smartphone, ShoppingBag, Home, Sparkles } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const QuickCategories = () => {

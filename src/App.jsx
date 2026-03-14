@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+﻿import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
@@ -248,7 +248,7 @@ function App() {
                                       <Route path="real-estate/:id" element={<RealEstateDetails />} />
 
                                       {/* Footer Static Pages */}
-                                      <Route path="about-us" element={<StaticPage title="À propos d'Union Digitale" content="<p>Union Digitale est la plateforme e-commerce leader en Haïti...</p>" />} />
+                                      <Route path="about-us" element={<StaticPage title="À propos d'Zabely" content="<p>Zabely est la plateforme e-commerce leader en Haïti...</p>" />} />
                                       <Route path="careers" element={<StaticPage title="Carrières" content="<p>Rejoignez notre équipe et aidez-nous à bâtir le futur du commerce haïtien.</p>" />} />
                                       <Route path="sustainability" element={<StaticPage title="Durabilité" content="<p>Nos engagements pour un environnement plus vert.</p>" />} />
                                       <Route path="sell-on-union" element={<StaticPage title="Vendre sur Union" content="<p>Ouvrez votre boutique en ligne dès aujourd'hui.</p>" />} />

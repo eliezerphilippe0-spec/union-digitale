@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+﻿import React, { Component } from 'react';
 import errorLogger from '../../utils/errorLogger';
 import ErrorFallback from './ErrorFallback';
 

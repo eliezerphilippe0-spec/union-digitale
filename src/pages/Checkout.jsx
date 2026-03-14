@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import useGeolocation from '../hooks/useGeolocation';
@@ -222,7 +222,7 @@ const Checkout = () => {
 
     return (
         <div className="bg-gray-100 min-h-screen py-8">
-            <SEO title="Checkout" description="Finalisez votre commande Union Digitale en toute sécurité." />
+            <SEO title="Checkout" description="Finalisez votre commande Zabely en toute sécurité." />
             <div className="container mx-auto px-4 max-w-5xl">
                 <div className="flex items-center justify-between mb-4">
                     <h1 className="text-2xl font-medium">{t('checkout_title')}</h1>

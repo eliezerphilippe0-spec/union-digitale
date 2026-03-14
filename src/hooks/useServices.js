@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import { db, storage } from '../lib/firebase';
 import {
     collection,
@@ -72,7 +72,7 @@ export const useServices = () => {
                     locationType: 'client_home',
                     rating: 4.5,
                     reviews: 42,
-                    ownerName: 'Union Digitale'
+                    ownerName: 'Zabely'
                 };
             }
 
@@ -95,7 +95,7 @@ export const useServices = () => {
                     locationType: 'client_home',
                     rating: 4.5,
                     reviews: 42,
-                    ownerName: 'Union Digitale'
+                    ownerName: 'Zabely'
                 };
             }
             throw err;

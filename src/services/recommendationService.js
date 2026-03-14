@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AI Recommendation Service
  * Inspired by: Amazon, Netflix, Spotify recommendations
  */

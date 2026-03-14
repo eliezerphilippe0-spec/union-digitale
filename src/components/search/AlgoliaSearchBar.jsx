@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { InstantSearch, SearchBox, Hits, Configure, RefinementList, Stats, Pagination } from 'react-instantsearch';
 import { searchClient } from '../../lib/algolia';
 import { Link } from 'react-router-dom';

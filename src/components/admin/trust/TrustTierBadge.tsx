@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 const tierStyles: Record<string, string> = {
   ELITE: 'bg-amber-100 text-amber-700 border-amber-200',

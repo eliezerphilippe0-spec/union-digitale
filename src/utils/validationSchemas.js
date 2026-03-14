@@ -1,7 +1,7 @@
-import { z } from 'zod';
+﻿import { z } from 'zod';
 
 /**
- * Validation Schemas for Union Digitale Backend
+ * Validation Schemas for Zabely Backend
  * Using Zod for runtime type validation and schema enforcement
  */
 

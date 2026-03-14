@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DeliveryEstimate - Inspiré Amazon/Mercado Libre
  * "Arrives tomorrow" - Estimation de livraison précise
  */

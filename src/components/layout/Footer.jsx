@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link } from 'react-router-dom';
 import { CreditCard } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -24,7 +24,7 @@ const Footer = () => {
                     <ul className="space-y-2">
                         <li>
                             <Link to="/about-us" className="text-neutral-200 hover:text-gold-400 transition-colors font-medium">
-                                {t('about_us') || 'À propos d\'Union Digitale'}
+                                {t('about_us') || 'À propos d\'Zabely'}
                             </Link>
                         </li>
                         <li>
@@ -47,12 +47,12 @@ const Footer = () => {
                     <ul className="space-y-2">
                         <li>
                             <Link to="/sell-on-union" className="text-neutral-200 hover:text-gold-400 transition-colors font-medium">
-                                {t('sell_on_union') || 'Vendez sur Union Digitale'}
+                                {t('sell_on_union') || 'Vendez sur Zabely'}
                             </Link>
                         </li>
                         <li>
                             <Link to="/sell-business" className="text-neutral-200 hover:text-gold-400 transition-colors font-medium">
-                                {t('sell_business') || 'Vendez sur Union Digitale Business'}
+                                {t('sell_business') || 'Vendez sur Zabely Business'}
                             </Link>
                         </li>
                         <li>
@@ -115,7 +115,7 @@ const Footer = () => {
                     </div>
 
                     <p className="text-sm text-white font-medium">
-                        {t('copyright') || '© 2024 Union Digitale. Tous droits réservés.'}
+                        {t('copyright') || '© 2024 Zabely. Tous droits réservés.'}
                     </p>
                 </div>
             </div>

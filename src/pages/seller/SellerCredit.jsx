@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { 
   DollarSign, Clock, CheckCircle, AlertCircle,
   TrendingUp, FileText, ArrowRight, Shield,

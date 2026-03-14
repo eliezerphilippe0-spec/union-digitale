@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Plus } from 'lucide-react';
 import { products } from '../../data/products';
 import { useLanguage } from '../../contexts/LanguageContext';

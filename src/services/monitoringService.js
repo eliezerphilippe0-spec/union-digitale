@@ -1,9 +1,9 @@
-import { db } from '../lib/firebase';
+﻿import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ALERT_CONFIG } from '../config/alerting';
 
 /**
- * Union Digitale Monitoring Service
+ * Zabely Monitoring Service
  * Tracks errors, performance metrics, and system health.
  */
 class MonitoringService {

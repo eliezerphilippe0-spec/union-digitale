@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import ServiceCard from './ServiceCard';
 import { serviceCategories, getServicesByCategory } from '../data/services-data';
 import { useLanguage } from '../contexts/LanguageContext';

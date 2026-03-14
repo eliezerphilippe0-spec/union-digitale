@@ -1,5 +1,5 @@
-/**
- * Sentry Configuration for Union Digitale
+﻿/**
+ * Sentry Configuration for Zabely
  * Modern Sentry SDK v8+ compatible
  */
 

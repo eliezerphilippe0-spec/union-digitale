@@ -1,4 +1,4 @@
-import { getFunctions, httpsCallable } from 'firebase/functions';
+﻿import { getFunctions, httpsCallable } from 'firebase/functions';
 import { functions } from '../lib/firebase'; // Assuming firebase init exports 'functions'
 
 export const geminiService = {

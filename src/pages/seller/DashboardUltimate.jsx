@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import {
     LayoutDashboard, Home, MessageSquare, Users, Bot, Settings,
     Zap, Send, Mic, Menu, X, CreditCard, Globe, ShoppingBag,

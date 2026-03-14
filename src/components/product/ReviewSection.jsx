@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Loader, MessageSquare } from 'lucide-react';
 import { getProductReviews, getReviewStats } from '../../services/reviewService';
 import ReviewStats from './ReviewStats';

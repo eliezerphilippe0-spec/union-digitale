@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MEASUREMENT UTILITIES
  * Helper functions for body measurements, conversions, and validations
  */

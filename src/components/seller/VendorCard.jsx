@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star, MapPin, CheckCircle, Package, TrendingUp } from 'lucide-react';
 import './VendorCard.css';

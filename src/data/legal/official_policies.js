@@ -1,4 +1,4 @@
-export const OFFICIAL_POLICIES = {
+﻿export const OFFICIAL_POLICIES = {
     policies: {
         version: "1.0",
         lastUpdate: "2025-01-01",
@@ -6,7 +6,7 @@ export const OFFICIAL_POLICIES = {
         sections: {
             introduction: {
                 title: "Objet des Politiques",
-                content: "Ces politiques définissent les conditions de retour, remboursement, annulation, obligations des vendeurs et acheteurs, et règles applicables aux produits physiques et digitaux vendus sur Union Digitale."
+                content: "Ces politiques définissent les conditions de retour, remboursement, annulation, obligations des vendeurs et acheteurs, et règles applicables aux produits physiques et digitaux vendus sur Zabely."
             },
             physical_products: {
                 title: "Retours et Remboursements – Produits Physiques",
@@ -88,7 +88,7 @@ export const OFFICIAL_POLICIES = {
             litigation: {
                 "title": "Litiges et Arbitrage",
                 "rules": [
-                    "Union Digitale agit comme arbitre neutre",
+                    "Zabely agit comme arbitre neutre",
                     "Décision finale exécutoire",
                     "Sanctions en cas de fraude"
                 ]

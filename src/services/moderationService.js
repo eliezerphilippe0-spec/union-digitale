@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MODERATION SERVICE
  * Automatic content moderation for reviews and user-generated content
  */

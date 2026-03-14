@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ProductVariants - Inspiré Shopify
  * Sélecteur de variants (taille, couleur) élégant
  */

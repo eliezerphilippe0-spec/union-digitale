@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FrequentlyBoughtTogether - Inspiré Amazon
  * "Achetés ensemble fréquemment" bundle avec réduction
  */

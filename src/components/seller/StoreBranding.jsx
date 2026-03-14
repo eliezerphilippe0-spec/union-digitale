@@ -1,4 +1,4 @@
-/**
+﻿/**
  * StoreBranding - Branding de boutique style Amazon
  * Nom personnalisé, logo, bannière, vidéo de présentation
  */

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Trash2, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
@@ -16,7 +16,7 @@ const Cart = () => {
     if (cartItems.length === 0) {
         return (
             <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-                <div className="bg-white p-8 rounded-2xl shadow-sm text-center max-w-lg w-full border border-gray-100">
+                <div className="bg-white p-8 rounded-2xl text-center max-w-lg w-full border border-gray-200">
                     <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                         <ShoppingBag className="w-12 h-12 text-gray-300" />
                     </div>
@@ -34,7 +34,7 @@ const Cart = () => {
                         </Link>
                     </div>
 
-                    <Link to="/" className="block w-full bg-secondary hover:bg-secondary-hover text-white font-bold py-3 px-6 rounded-xl transition-colors shadow-sm">
+                    <Link to="/" className="block w-full bg-secondary hover:bg-secondary-hover text-white font-bold py-3 px-6 rounded-xl transition-colors">
                         {t('continue_shopping')}
                     </Link>
                 </div>
@@ -48,8 +48,8 @@ const Cart = () => {
             <div className="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
                 {/* Cart Items (Left) */}
-                <div className="lg:col-span-9 bg-white p-5 md:p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h1 className="text-2xl font-medium mb-4 border-b pb-2">{t('your_cart')}</h1>
+                <div className="lg:col-span-9 bg-white p-5 md:p-6 rounded-xl border border-gray-200">
+                    <h1 className="text-2xl font-medium mb-4 border-b border-gray-200 pb-2">{t('your_cart')}</h1>
 
                     {/* Cart Upsell */}
                     <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start justify-between gap-3">
@@ -101,7 +101,7 @@ const Cart = () => {
                                                 <div className="text-xs text-gray-500 mt-1">{t('instant_download')}</div>
                                             )}
                                             <div className="flex items-center gap-4 mt-4 text-sm">
-                                                <div className="flex items-center gap-2 bg-gray-50 border rounded px-2 py-1 shadow-sm">
+                                                <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded px-2 py-1">
                                                     {t('qty')} <span className="font-bold">{item.quantity}</span>
                                                 </div>
                                                 <button
@@ -158,7 +158,7 @@ const Cart = () => {
 
                 {/* Checkout Sidebar (Right) */}
                 <div className="lg:col-span-3">
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 sticky top-4">
+                    <div className="bg-white p-6 rounded-xl border border-gray-200 sticky top-4">
                         <div className="text-lg mb-4">
                             {t('subtotal_items')} ({cartItems.length} {t('items_count')}) : <span className="font-bold">{cartTotal.toLocaleString()} G</span>
                         </div>
@@ -166,7 +166,7 @@ const Cart = () => {
                             <input type="checkbox" className="w-4 h-4 text-secondary rounded focus:ring-secondary" />
                             <span>{t('contains_gift')}</span>
                         </div>
-                        <Link to="/checkout" className="block w-full bg-secondary hover:bg-secondary-hover text-white text-center font-medium py-2 rounded-full shadow-sm transition-colors">
+                        <Link to="/checkout" className="block w-full bg-secondary hover:bg-secondary-hover text-white text-center font-medium py-2 rounded-full transition-colors">
                             {t('proceed_to_checkout')}
                         </Link>
                     </div>
@@ -180,7 +180,7 @@ const Cart = () => {
                     <span className="text-sm text-gray-600">{t('subtotal_items')} ({cartItems.length})</span>
                     <span className="text-lg font-bold text-gray-900">{cartTotal.toLocaleString()} G</span>
                 </div>
-                <Link to="/checkout" className="block w-full bg-secondary hover:bg-secondary-hover text-white text-center font-medium py-2 rounded-lg shadow-sm transition-colors">
+                <Link to="/checkout" className="block w-full bg-secondary hover:bg-secondary-hover text-white text-center font-medium py-2 rounded-lg transition-colors">
                     {t('proceed_to_checkout')}
                 </Link>
             </div>

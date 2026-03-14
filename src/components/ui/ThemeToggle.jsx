@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Theme Toggle Component
  * Switch between light and dark mode with smooth animation
  */

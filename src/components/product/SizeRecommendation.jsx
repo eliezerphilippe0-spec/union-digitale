@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Check, AlertTriangle, TrendingUp } from 'lucide-react';
 import Card from '../ui/Card';
 import Badge from '../ui/Badge';

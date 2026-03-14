@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Accessibility Utilities
  * Helper functions for ARIA labels, keyboard navigation, and focus management
  */

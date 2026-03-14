@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Plus, Trash2, Move, Settings, Eye } from 'lucide-react';
 
 const FunnelEditor = () => {

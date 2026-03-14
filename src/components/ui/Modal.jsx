@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+﻿import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { createFocusTrap, isEscapeKey, generateId } from '../../utils/accessibility';
 

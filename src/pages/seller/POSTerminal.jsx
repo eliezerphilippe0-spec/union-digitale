@@ -1,4 +1,4 @@
-/**
+﻿/**
  * POS Terminal - Point of Sale for In-Person Sales
  * Inspired by: Shopify POS, Square, Toast
  */

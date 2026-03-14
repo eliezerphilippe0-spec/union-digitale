@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star, MapPin, Calendar, Download, Wrench, Car, Home, Package } from 'lucide-react';
 import './OfferCard.css';

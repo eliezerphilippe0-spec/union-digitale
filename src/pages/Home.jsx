@@ -1,23 +1,26 @@
-/**
- * Home Page - Union Digitale
+﻿/**
+ * Home Page - Zabely
  * Optimized for conversion and Haitian market
  */
 
+import React, { lazy, Suspense } from 'react';
 import { useProducts } from '../hooks/useProducts';
 import FlashSaleCountdown from '../components/marketing/FlashSaleCountdown';
 import Hero from '../components/marketing/Hero';
 import ProductCard from '../components/product/ProductCard';
 import FullWidthCTA from '../components/marketing/FullWidthCTA';
-import HowItWorks from '../components/marketing/HowItWorks';
-import TestimonialCarousel from '../components/marketing/TestimonialCarousel';
 import TrustedBy from '../components/marketing/TrustedBy';
-import ServicesPreview from '../components/ServicesPreview';
 import StructuredData from '../components/common/StructuredData';
 import SEO from '../components/common/SEO';
 import SocialProofLive from '../components/marketing/SocialProofLive';
 import PromoBanner from '../components/marketing/PromoBanner';
-import AIRecommendations from '../components/recommendations/AIRecommendations';
-import LiveStreamsList from '../components/live/LiveStreamsList';
+
+// Lazy loading below-the-fold components for performance
+const HowItWorks = lazy(() => import('../components/marketing/HowItWorks'));
+const TestimonialCarousel = lazy(() => import('../components/marketing/TestimonialCarousel'));
+const ServicesPreview = lazy(() => import('../components/ServicesPreview'));
+const AIRecommendations = lazy(() => import('../components/recommendations/AIRecommendations'));
+const LiveStreamsList = lazy(() => import('../components/live/LiveStreamsList'));
 
 import {
     Loader, ArrowRight, Star, TrendingUp, Sparkles, Zap, Shield, Truck, Clock,
@@ -25,6 +28,13 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import Button from '../components/ui/Button';
+
+// Simple loader for lazy components
+const SectionLoader = () => (
+    <div className="flex justify-center items-center py-12">
+        <Loader className="w-8 h-8 text-gold-500 animate-spin" />
+    </div>
+);
 
 const Home = () => {
     const { products, loading } = useProducts();
@@ -96,7 +106,7 @@ const Home = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-neutral-900">
-            <SEO title="Union Digitale" description="Marketplace haïtienne pour produits et services, paiements sécurisés et livraison rapide." />
+            <SEO title="Zabely" description="Marketplace haïtienne pour produits et services, paiements sécurisés et livraison rapide." />
             <StructuredData />
             
             {/* Promo Banner - First Purchase Discount */}
@@ -107,7 +117,7 @@ const Home = () => {
             
             {/* Hero Section - Clear Value Proposition */}
             <div className="md:hidden px-4 pt-6 pb-4">
-                <div className="rounded-2xl bg-white shadow-sm border border-gray-100 p-5">
+                <div className="rounded-2xl bg-white border border-gray-200 p-5">
                     <h1 className="text-2xl font-bold text-gray-900">{t('hero_title_prefix')} {t('hero_title_suffix')}</h1>
                     <p className="text-gray-600 mt-2">{t('hero_desc')}</p>
                     <div className="mt-4 flex gap-2">
@@ -139,14 +149,13 @@ const Home = () => {
                     </div>
                 </section>
 
-                {/* Categories - Bento Grid */}
+                {/* Categories - Circular E-commerce Style */}
                 <section className="mb-12">
                     <div className="flex items-center justify-between mb-6">
                         <div>
                             <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
-                                🛍️ Parcourir par Catégorie
+                                Parcourir par Catégorie
                             </h2>
-                            <p className="text-sm text-gray-500 mt-1">Trouvez exactement ce que vous cherchez</p>
                         </div>
                         <button
                             onClick={() => window.location.href = '/catalog'}
@@ -156,33 +165,26 @@ const Home = () => {
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                        {categories.map((cat, index) => (
+                    <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+                        {categories.map((cat) => (
                             <div
                                 key={cat.key}
-                                className="group relative overflow-hidden rounded-2xl cursor-pointer border border-gray-100 dark:border-neutral-700 hover:border-transparent hover:shadow-xl transition-all duration-300"
+                                className="group flex flex-col items-center gap-3 cursor-pointer"
                                 onClick={() => window.location.href = `/category/${cat.key}`}
                                 role="button"
                                 tabIndex={0}
                             >
-                                <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-90`}></div>
-                                
-                                <div className="relative p-4 h-32 flex flex-col justify-between">
-                                    <div>
-                                        {cat.badge && (
-                                            <span className="inline-block px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-[10px] font-bold text-white mb-2">
-                                                {cat.badge}
-                                            </span>
-                                        )}
-                                        <div className="text-3xl mb-1 group-hover:scale-110 transition-transform duration-300">
-                                            {cat.icon}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-bold text-white">{cat.label}</h3>
-                                        <p className="text-white/70 text-xs">{cat.count}</p>
-                                    </div>
+                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 flex flex-col items-center justify-center relative transition-all group-hover:-translate-y-1 group-hover:border-primary-300">
+                                    {cat.badge && (
+                                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full z-10">
+                                            {cat.badge.replace(/[^a-zA-Z]/g, '')}
+                                        </span>
+                                    )}
+                                    <span className="text-3xl sm:text-4xl group-hover:scale-110 transition-transform duration-300">{cat.icon}</span>
                                 </div>
+                                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 text-center leading-tight">
+                                    {cat.label}
+                                </h3>
                             </div>
                         ))}
                     </div>
@@ -225,10 +227,10 @@ const Home = () => {
 
                 {/* Best Sellers */}
                 <section className="mb-12">
-                    <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-gray-100 dark:border-neutral-700 shadow-sm overflow-hidden">
+                    <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
                         <div className="p-4 md:p-6 border-b border-gray-100 dark:border-neutral-700 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center shadow-lg">
+                                <div className="w-10 h-10 rounded-xl bg-gold-500 flex items-center justify-center">
                                     <Star className="w-5 h-5 text-white fill-white" />
                                 </div>
                                 <div>
@@ -289,15 +291,21 @@ const Home = () => {
 
                 {/* AI Recommendations */}
                 <section className="mb-12">
-                    <AIRecommendations limit={8} />
+                    <Suspense fallback={<SectionLoader />}>
+                        <AIRecommendations limit={8} />
+                    </Suspense>
                 </section>
 
                 {/* Services Preview */}
-                <ServicesPreview />
+                <Suspense fallback={<SectionLoader />}>
+                    <ServicesPreview />
+                </Suspense>
 
                 {/* Live Shopping - Secondary */}
                 <section className="mb-12">
-                    <LiveStreamsList />
+                    <Suspense fallback={<SectionLoader />}>
+                        <LiveStreamsList />
+                    </Suspense>
                 </section>
             </div>
 
@@ -325,12 +333,16 @@ const Home = () => {
                             Noter sur Trustpilot
                         </a>
                     </div>
-                    <TestimonialCarousel />
+                    <Suspense fallback={<SectionLoader />}>
+                        <TestimonialCarousel />
+                    </Suspense>
                 </div>
             </section>
 
             {/* How It Works */}
-            <HowItWorks />
+            <Suspense fallback={<SectionLoader />}>
+                <HowItWorks />
+            </Suspense>
 
             {/* Final CTA */}
             <FullWidthCTA />

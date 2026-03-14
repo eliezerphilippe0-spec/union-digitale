@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import SEO from '../components/common/SEO';

@@ -1,4 +1,4 @@
-export const products = [
+﻿export const products = [
     {
         id: 1,
         title: 'Casque à Réduction de Bruit Sans Fil, Bluetooth, 30h d\'Autonomie',

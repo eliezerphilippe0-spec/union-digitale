@@ -1,4 +1,4 @@
-/**
+﻿/**
  * InstructorCard - Inspiré Udemy/Teachable
  * Profil de l'instructeur/auteur
  */

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { geminiService } from '../../services/geminiService';
@@ -151,12 +152,12 @@ const SmartAudit = () => {
                     <p className="text-gray-600 dark:text-gray-400 mb-6">
                         Connectez-vous pour auditer vos produits
                     </p>
-                    <a
-                        href="/login"
+                    <Link
+                        to="/login"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-gold-500 text-white rounded-xl font-semibold hover:bg-gold-600 transition-colors"
                     >
                         Se connecter
-                    </a>
+                    </Link>
                 </div>
             </div>
         );
@@ -228,12 +229,12 @@ const SmartAudit = () => {
                                     <div className="p-8 text-center text-gray-500">
                                         <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
                                         <p>Aucun produit trouvé</p>
-                                        <a
-                                            href="/seller/add-product"
+                                        <Link
+                                            to="/seller/products/new"
                                             className="text-indigo-600 hover:underline text-sm mt-2 inline-block"
                                         >
                                             Ajouter un produit
-                                        </a>
+                                        </Link>
                                     </div>
                                 ) : (
                                     products.map(product => (

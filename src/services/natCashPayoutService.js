@@ -1,4 +1,4 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 import logger from '../utils/logger';
 
 /**
@@ -32,7 +32,7 @@ export async function processNatCashPayout(payoutData) {
             amount: amount,
             currency: 'HTG',
             recipient_phone: phoneNumber,
-            description: `Payout Union Digitale - ${payoutId}`,
+            description: `Payout Zabely - ${payoutId}`,
             callback_url: `${window.location.origin}/api/webhooks/natcash/payout`,
             metadata: {
                 vendor_id: vendorId,

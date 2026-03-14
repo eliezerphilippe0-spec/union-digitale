@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 const TrustJobStatusCard = ({ status, onRun, onDryRun }: any) => {
   const locked = status?.expiresAt && new Date(status.expiresAt) > new Date();

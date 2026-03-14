@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+﻿import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.jsx';
@@ -31,7 +31,7 @@ createRoot(document.getElementById('root')).render(
 // Initialize Web Vitals monitoring
 if (typeof window !== 'undefined') {
   initWebVitals();
-  logger.info('Union Digitale initialized', {
+  logger.info('Zabely initialized', {
     version: import.meta.env.VITE_APP_VERSION || '0.0.0',
     environment: import.meta.env.MODE,
   });

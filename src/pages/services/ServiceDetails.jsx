@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, MapPin, Clock, ShieldCheck, Share2 } from 'lucide-react';
 import BookingCalendar from '../../components/services/BookingCalendar';
@@ -95,7 +95,7 @@ const ServiceDetails = () => {
 
     return (
         <div className="bg-gray-50 min-h-screen py-8">
-            <SEO title={service?.title || 'Service'} description={service?.description || 'Détails du service sur Union Digitale.'} />
+            <SEO title={service?.title || 'Service'} description={service?.description || 'Détails du service sur Zabely.'} />
             <div className="container mx-auto px-4 max-w-5xl">
 
                 {/* Breadcrumbs */}

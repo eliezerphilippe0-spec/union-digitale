@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Store, TrendingUp, Users, Shield, BarChart3, CreditCard, Package, Zap, CheckCircle, ArrowRight, Star } from 'lucide-react';
 import SEO from '../components/common/SEO';
@@ -84,7 +84,7 @@ const SellerLanding = () => {
             shop: 'Mode Caraïbes',
             avatar: '👩',
             rating: 5,
-            comment: 'Mes ventes ont triplé depuis que j\'ai rejoint Union Digitale. Merci !',
+            comment: 'Mes ventes ont triplé depuis que j\'ai rejoint Zabely. Merci !',
             sales: '85K HTG'
         }
     ];
@@ -111,7 +111,7 @@ const SellerLanding = () => {
     return (
         <>
             <SEO
-                title="Devenez Vendeur - Union Digitale"
+                title="Devenez Vendeur - Zabely"
                 description="Vendez vos produits à des millions d'acheteurs. Commissions compétitives, outils gratuits, paiements sécurisés."
             />
 
@@ -198,7 +198,7 @@ const SellerLanding = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl font-bold text-neutral-900 mb-4">
-                            Pourquoi vendre sur Union Digitale ?
+                            Pourquoi vendre sur Zabely ?
                         </h2>
                         <p className="text-xl text-neutral-600">
                             Tout ce dont vous avez besoin pour réussir en ligne
@@ -340,7 +340,7 @@ const SellerLanding = () => {
                         Prêt à développer votre business ?
                     </h2>
                     <p className="text-xl text-primary-100 mb-8">
-                        Rejoignez Union Digitale aujourd'hui et commencez à vendre en quelques minutes
+                        Rejoignez Zabely aujourd'hui et commencez à vendre en quelques minutes
                     </p>
                     <Button
                         variant="primary"

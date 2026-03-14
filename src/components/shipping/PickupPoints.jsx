@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Pickup Points - Click & Collect Locations
  * Inspired by: Amazon Locker, Jumia Pickup Stations, Mercado Libre Puntos
  */

@@ -1,5 +1,5 @@
-/**
- * Production-Grade Logger for Union Digitale
+﻿/**
+ * Production-Grade Logger for Zabely
  * Inspired by: Stripe, Vercel, Sentry best practices
  * 
  * Features:

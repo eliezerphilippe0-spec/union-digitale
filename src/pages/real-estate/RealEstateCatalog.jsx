@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useRealEstate } from '../../hooks/useRealEstate';
 import { MapPin, Home, Bed, Bath, Search, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

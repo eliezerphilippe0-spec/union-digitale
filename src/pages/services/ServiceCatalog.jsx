@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Search, MapPin, Filter, Star, Briefcase, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

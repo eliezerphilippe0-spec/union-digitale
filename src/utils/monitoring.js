@@ -1,5 +1,5 @@
-/**
- * Advanced Monitoring Configuration for Union Digitale
+﻿/**
+ * Advanced Monitoring Configuration for Zabely
  * Sentry + Custom Metrics + Firebase Monitoring
  */
 
@@ -67,7 +67,7 @@ export function initializeMonitoring() {
         // Additional context
         initialScope: {
             tags: {
-                'app.name': 'Union Digitale',
+                'app.name': 'Zabely',
                 'app.region': 'Haiti'
             }
         }

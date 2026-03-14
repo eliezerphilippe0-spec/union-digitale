@@ -1,4 +1,4 @@
-import Spline from '@splinetool/react-spline';
+﻿import Spline from '@splinetool/react-spline';
 
 export default function SplineBackground({ sceneUrl, className = "" }) {
     // Fallback if no URL is provided, though usually it should be passed.

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { CheckCircle, Package, ArrowRight } from 'lucide-react';
 import Celebration from '../components/marketing/Celebration';
@@ -12,7 +12,7 @@ const OrderConfirmation = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-            <SEO title="Confirmation de commande" description="Votre commande Union Digitale est confirmée." />
+            <SEO title="Confirmation de commande" description="Votre commande Zabely est confirmée." />
             <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
                 <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6 relative">
                     <CheckCircle className="h-10 w-10 text-green-600" />

@@ -1,5 +1,5 @@
-/**
- * Header Component - Union Digitale
+﻿/**
+ * Header Component - Zabely
  * With Haiti branding and improved UX
  */
 

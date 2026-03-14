@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useWallet } from '../contexts/WalletContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Plus, Send, History, Wallet as WalletIcon, ArrowUpRight, ArrowDownLeft, CreditCard } from 'lucide-react';
@@ -57,7 +57,7 @@ const Wallet = () => {
 
     return (
         <div className="bg-gray-100 min-h-screen py-8">
-            <SEO title="Portefeuille" description="Gérez votre solde et vos transactions Union Digitale." />
+            <SEO title="Portefeuille" description="Gérez votre solde et vos transactions Zabely." />
             <div className="container mx-auto px-4 max-w-4xl">
                 <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
                     <WalletIcon className="text-secondary" /> {t('my_wallet')}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useLoyalty } from '../contexts/LoyaltyContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Check, Shirt, Loader, ThumbsUp } from 'lucide-react';
@@ -10,7 +10,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import SocialProof from '../components/marketing/SocialProof';
 import CrossSell from '../components/product/CrossSell';
 import VirtualFittingRoom from '../components/VirtualFittingRoom';
-import ReviewSection from '../components/product/ReviewSection';
+import ProductReviews from '../components/reviews/ProductReviews';
 import SEO from '../components/common/SEO';
 import { useCart } from '../contexts/CartContext';
 import { useToast } from '../components/ui/Toast';
@@ -55,11 +55,11 @@ const ProductDetails = () => {
     const [selectedVariants, setSelectedVariants] = useState({});
     const [showDigitalPreview, setShowDigitalPreview] = useState(false);
 
-    // Check if product is digital
-    const isDigitalProduct = product?.type === 'digital';
-
     // Find product by ID (handle both string and number IDs)
     const product = products.find(p => String(p.id) === String(id));
+    
+    // Check if product is digital
+    const isDigitalProduct = product?.type === 'digital';
     const [activeImage, setActiveImage] = useState(0);
     const [trust, setTrust] = useState(null);
 
@@ -143,7 +143,9 @@ const ProductDetails = () => {
                     {/* Middle Column: Product Info (4 cols) */}
                     <div className="lg:col-span-4">
                         <h1 className="text-2xl font-medium text-gray-900 mb-1">{product.title}</h1>
-                        <a href={product.storeSlug ? `/store/${product.storeSlug}` : '#'} className="text-blue-600 text-sm hover:underline mb-2 block">{t('visit_store')} {product.brand}</a>
+                        <button onClick={() => product.storeSlug ? navigate(`/vendor/${product.storeSlug}`) : null} className="text-blue-600 text-sm hover:underline mb-2 block text-left">
+                            {t('visit_store')} {product.brand} <span className="text-gray-500 text-xs ml-1">(⭐ 4.8/5)</span>
+                        </button>
                         {trust?.trustTier && (
                             <div className="mb-2">
                                 <TrustBadge tier={trust.trustTier} />
@@ -167,7 +169,7 @@ const ProductDetails = () => {
                         </div>
 
                         {/* ⭐ REVIEWS SUMMARY - P3 FIX: Visible immédiatement */}
-                        <div className="flex items-center gap-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl mb-4">
+                        <div className="flex items-center gap-4 p-3 bg-green-50 border border-green-200 rounded-xl mb-4">
                             <div className="text-center px-3 border-r border-green-200">
                                 <div className="text-2xl font-black text-green-700">{product.rating}</div>
                                 <div className="flex justify-center">
@@ -186,7 +188,7 @@ const ProductDetails = () => {
                         </div>
 
                         {/* 💰 PRIX - P1 FIX: Plus gros, plus visible */}
-                        <div className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-5 my-4">
+                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 my-4">
                             {/* Prix principal - TRÈS VISIBLE */}
                             <div className="flex items-baseline gap-3 mb-3">
                                 <span className="text-4xl md:text-5xl font-black text-gray-900">
@@ -222,7 +224,7 @@ const ProductDetails = () => {
 
                             {product.unionPlus && product.type === 'physical' && (
                                 <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
-                                    <span className="bg-gradient-to-r from-yellow-400 to-amber-500 text-primary-900 px-2 py-0.5 rounded text-xs font-bold">Union Plus</span>
+                                    <span className="bg-gold-400 text-primary-900 px-2 py-0.5 rounded text-xs font-bold">Union Plus</span>
                                     <span className="text-sm text-gray-600">{t('one_day_delivery')}</span>
                                     <span className="text-sm text-green-600 font-bold">{t('free_returns')}</span>
                                 </div>
@@ -245,7 +247,7 @@ const ProductDetails = () => {
                         {isDigitalProduct ? (
                             <DigitalBuyBox product={product} />
                         ) : (
-                        <div className="border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="border border-gray-200 rounded-lg p-4">
                             <SocialProof />
                             <div className="text-2xl font-medium text-red-700 mb-2">{product.price.toLocaleString()} G</div>
 
@@ -277,7 +279,7 @@ const ProductDetails = () => {
                                 <div className="mb-4">
                                     <button
                                         onClick={() => setShowFittingRoom(true)}
-                                        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold py-3 rounded-lg shadow-md hover:shadow-lg transition-all mb-2"
+                                        className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors mb-2"
                                     >
                                         <Shirt className="w-5 h-5" />
                                         {t('fr_btn_try_on') || 'Essayer Virtuellement'}
@@ -317,7 +319,7 @@ const ProductDetails = () => {
 
                                 <button
                                     onClick={handleAddToCart}
-                                    className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 font-bold py-3 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+                                    className="w-full bg-gold-500 hover:bg-gold-600 text-gray-900 font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
                                 >
                                     <span>🛒</span>
                                     {t('add_to_cart')}
@@ -335,7 +337,7 @@ const ProductDetails = () => {
                             <div className="mt-4 text-xs text-gray-500 space-y-1">
                                 <div className="flex gap-2">
                                     <span className="w-20 text-gray-400">{t('shipped_by')}</span>
-                                    <span>Union Digitale</span>
+                                    <span>Zabely</span>
                                 </div>
                                 <div className="flex gap-2">
                                     <span className="w-20 text-gray-400">{t('sold_by')}</span>
@@ -401,9 +403,9 @@ const ProductDetails = () => {
                         <QuestionsAnswers productId={id} />
                     </div>
 
-                    {/* Review Section */}
+                    {/* Review Section (Priority 4) */}
                     <div className="lg:col-span-12">
-                        <ReviewSection productId={id} />
+                        <ProductReviews productId={id} />
                     </div>
 
                     {/* Cross Sell Section */}

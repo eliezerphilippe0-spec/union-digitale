@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 const Card = ({ label, value }: { label: string; value: any }) => (
   <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">

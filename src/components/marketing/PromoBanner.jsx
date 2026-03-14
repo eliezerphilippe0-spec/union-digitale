@@ -1,10 +1,10 @@
-/**
+﻿/**
  * Promo Banner - First Purchase Discount
  * Sticky banner for new visitors
  */
 
 import React, { useState, useEffect } from 'react';
-import { X, Gift, Copy, Check, Zap } from 'lucide-react';
+import { X, Gift, Copy, Check } from 'lucide-react';
 
 const PromoBanner = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -37,41 +37,37 @@ const PromoBanner = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[100] bg-gradient-to-r from-gold-500 via-gold-400 to-amber-500 text-primary-900 py-2.5 px-4 shadow-lg animate-slideDown">
-      <div className="container mx-auto flex items-center justify-center gap-3 flex-wrap">
-        <Gift className="w-5 h-5 animate-bounce" />
+    <div className="bg-gray-900 text-white py-3 px-4 animate-slideDown border-b border-gray-800">
+      <div className="container mx-auto flex items-center justify-center gap-3 flex-wrap relative">
+        <Gift className="w-4 h-4" />
         
-        <span className="font-bold text-sm md:text-base">
-          🎉 Bienvenue! <span className="text-primary-800">-{discount}</span> sur votre 1ère commande
+        <span className="font-medium text-sm md:text-base">
+          Bienvenue sur Zabely ! <strong className="text-green-400">-{discount}</strong> sur votre première commande avec le code:
         </span>
         
         <button
           onClick={handleCopy}
-          className="flex items-center gap-2 bg-primary-900 text-white px-3 py-1.5 rounded-lg font-mono font-bold text-sm hover:bg-primary-800 transition-colors"
+          className="flex items-center gap-2 bg-white text-gray-900 px-3 py-1.5 rounded font-mono font-bold text-sm transition-colors hover:bg-gray-200"
         >
           {copied ? (
             <>
-              <Check className="w-4 h-4" />
-              Copié!
+              <Check className="w-4 h-4 text-green-600" />
+              <span className="text-green-600">Copié !</span>
             </>
           ) : (
             <>
               <span>{promoCode}</span>
-              <Copy className="w-4 h-4" />
+              <Copy className="w-4 h-4 opacity-70" />
             </>
           )}
         </button>
 
-        <span className="hidden md:inline text-xs opacity-75">
-          Valable 48h
-        </span>
-
         <button
           onClick={handleClose}
-          className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-black/10 rounded-full transition-colors"
+          className="absolute right-0 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-800 rounded-full transition-colors"
           aria-label="Fermer"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4 opacity-70 hover:opacity-100" />
         </button>
       </div>
     </div>

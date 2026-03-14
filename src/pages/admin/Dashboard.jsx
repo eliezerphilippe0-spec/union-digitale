@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import {
     DollarSign, Users, ShoppingBag, TrendingUp, TrendingDown, RefreshCw,
     Package, Truck, AlertTriangle, Globe, ArrowUpRight, ArrowDownRight,

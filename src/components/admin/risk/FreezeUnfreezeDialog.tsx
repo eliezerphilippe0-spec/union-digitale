@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 
 const FreezeUnfreezeDialog = ({ store, mode, onClose, onSubmit }: any) => {
   const [reason, setReason] = useState('');

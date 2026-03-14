@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ShoppingBag, Eye, EyeOff, Loader, CheckCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -100,7 +100,7 @@ const BuyerRegister = () => {
             });
 
             // Redirect to home or show success message
-            navigate('/', { state: { message: 'Bienvenue sur Union Digitale !' } });
+            navigate('/', { state: { message: 'Bienvenue sur Zabely !' } });
         } catch (error) {
             setErrors({ submit: error.message });
         } finally {
@@ -111,7 +111,7 @@ const BuyerRegister = () => {
     return (
         <>
             <SEO
-                title="Inscription Acheteur - Union Digitale"
+                title="Inscription Acheteur - Zabely"
                 description="Créez votre compte acheteur et découvrez des milliers de produits"
             />
 

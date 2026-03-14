@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import TrustTierBadge from './TrustTierBadge';
 
 const StoreTrustDrawer = ({ open, store, events, onClose, onRecompute, onCopy }: any) => {
