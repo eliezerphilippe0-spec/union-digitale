@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Star,
@@ -18,6 +18,8 @@ import './VendorShop.css';
 import SEO from '../components/common/SEO';
 import TrustBadge from '../components/common/TrustBadge';
 import { getStoreTrust } from '../services/trustService';
+import useAISEO from '../hooks/useAISEO';
+import { seoService } from '../services/seoService';
 
 const VendorShop = () => {
     const { vendorId } = useParams();
@@ -56,6 +58,12 @@ const VendorShop = () => {
             setLoading(false);
         }
     };
+
+    // AI SEO: auto-generate optimized metadata for this boutique
+    const { seoMeta } = useAISEO(vendor, 'vendor');
+
+    // Schema.org JSON-LD for Store/Local Business
+    const vendorSchema = vendor ? seoService.generateVendorSchema(vendor) : null;
 
     const getVerificationBadge = () => {
         if (!vendor?.verified) return null;
@@ -116,7 +124,13 @@ const VendorShop = () => {
 
     return (
         <div className="vendor-shop">
-            <SEO title={vendor?.name ? `${vendor.name} | Boutique` : 'Boutique'} description={vendor?.description || 'Découvrez cette boutique sur Zabely.'} />
+            <SEO 
+                title={vendor?.shopName || vendor?.name} 
+                description={vendor?.description}
+                aiMeta={seoMeta}
+                schema={vendorSchema}
+                type="business.business"
+            />
             {/* Header with banner */}
             <div className="vendor-banner">
                 {vendor.shopBanner ? (

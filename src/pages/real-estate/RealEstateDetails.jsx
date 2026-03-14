@@ -1,8 +1,11 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useRealEstate } from '../../hooks/useRealEstate';
 import { MapPin, User, Check, Shield } from 'lucide-react';
 import BookingCalendar from '../../components/services/BookingCalendar';
+import SEO from '../../components/common/SEO';
+import useAISEO from '../../hooks/useAISEO';
+import { seoService } from '../../services/seoService';
 
 const RealEstateDetails = () => {
     const { id } = useParams();
@@ -14,12 +17,25 @@ const RealEstateDetails = () => {
         getListingById(id).then(setListing);
     }, [id]);
 
+    // AI SEO: auto-generate optimized metadata for this property
+    const { seoMeta } = useAISEO(listing, 'real-estate');
+
+    // Schema.org JSON-LD for Real Estate
+    const realEstateSchema = listing ? seoService.generateRealEstateSchema(listing) : null;
+
     if (!listing) return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
 
     const isRental = listing.type === 'rental';
 
     return (
         <div className="bg-white min-h-screen py-8">
+            <SEO 
+                title={listing.title} 
+                description={listing.description}
+                aiMeta={seoMeta}
+                schema={realEstateSchema}
+                type="place"
+            />
             <div className="container mx-auto px-4 max-w-6xl">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
 

@@ -27,11 +27,11 @@ export default defineConfig({
     }),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['logo-ud.svg', 'pwa-192x192.png', 'pwa-512x512.png', 'robots.txt', 'sitemap.xml'],
       manifest: {
-        name: 'Union Digitale',
-        short_name: 'Union',
-        description: 'La première plateforme e-commerce en Haïti',
+        name: 'Zabely',
+        short_name: 'Zabely',
+        description: 'Le Futur du E-commerce en Haïti',
         theme_color: '#f97316',
         background_color: '#f8fafc',
         display: 'standalone',

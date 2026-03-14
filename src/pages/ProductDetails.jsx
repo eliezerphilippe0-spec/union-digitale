@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLoyalty } from '../contexts/LoyaltyContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Check, Shirt, Loader, ThumbsUp } from 'lucide-react';
@@ -12,6 +12,8 @@ import CrossSell from '../components/product/CrossSell';
 import VirtualFittingRoom from '../components/VirtualFittingRoom';
 import ProductReviews from '../components/reviews/ProductReviews';
 import SEO from '../components/common/SEO';
+import useAISEO from '../hooks/useAISEO';
+import { seoService } from '../services/seoService';
 import { useCart } from '../contexts/CartContext';
 import { useToast } from '../components/ui/Toast';
 import StickyAddToCart from '../components/product/StickyAddToCart';
@@ -69,6 +71,12 @@ const ProductDetails = () => {
         }
     }, [product?.storeSlug]);
 
+    // AI SEO: auto-generate optimized metadata for this product
+    const { seoMeta } = useAISEO(product, product?.type === 'digital' ? 'digital' : 'product');
+
+    // Schema.org JSON-LD for Google rich snippets
+    const productSchema = product ? seoService.generateProductSchema(product) : null;
+
     // Related products for bundles (same category, different product)
     const relatedProducts = products
         .filter(p => p.category === product?.category && p.id !== product?.id)
@@ -96,6 +104,14 @@ const ProductDetails = () => {
 
     return (
         <div className="bg-white min-h-screen py-8">
+            <SEO
+                title={product.title || product.name}
+                description={product.description}
+                image={product.images?.[0] || product.image}
+                type="product"
+                aiMeta={seoMeta}
+                schema={productSchema}
+            />
             <div className="container mx-auto px-4">
                 {/* Breadcrumbs */}
                 <div className="text-sm text-gray-500 mb-4">
@@ -299,11 +315,7 @@ const ProductDetails = () => {
 
                             <div className="text-xl text-green-700 font-medium mb-4">{t('in_stock')}</div>
 
-                            <SEO
-                                title={product.title}
-                                description={product.description}
-                                image={product.image} // Note: This assumes image is a URL, but current mock data uses emojis. In real app, this would be product.imageUrl
-                            />
+
 
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2">

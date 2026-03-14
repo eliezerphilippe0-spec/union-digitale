@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Product Reviews Component
  * Displays reviews with ratings, sorting, and submission form
  */
@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { Star, ThumbsUp, Flag, CheckCircle } from 'lucide-react';
 import { httpsCallable } from 'firebase/functions';
-import { functions } from '../../config/firebase.config';
+import { functions } from '../../lib/firebase';
 
 export default function ProductReviews({ productId, currentUserId }) {
   const [reviews, setReviews] = useState([]);

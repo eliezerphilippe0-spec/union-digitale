@@ -1,10 +1,12 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../lib/firebase';
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { Calendar, MapPin, Gauge, Tag, DollarSign, User, Phone, MessageCircle } from 'lucide-react';
 import SEO from '../components/common/SEO';
+import useAISEO from '../hooks/useAISEO';
+import { seoService } from '../services/seoService';
 
 export default function CarDetails() {
     const { id } = useParams();
@@ -40,6 +42,12 @@ export default function CarDetails() {
         };
         fetchCar();
     }, [id]);
+
+    // AI SEO: auto-generate optimized metadata for this vehicle
+    const { seoMeta } = useAISEO(car, 'car');
+
+    // Schema.org JSON-LD for Vehicles
+    const carSchema = car ? seoService.generateCarSchema(car) : null;
 
     const checkAvailability = async (start, end) => {
         // Validate dates
@@ -141,7 +149,12 @@ export default function CarDetails() {
 
     return (
         <div className="bg-gray-50 min-h-screen py-10">
-            <SEO title={`${car.brand} ${car.model} | Union Auto`} description={`Louez ou achetez cette ${car.brand} ${car.model}`} />
+            <SEO 
+                title={`${car.brand} ${car.model}`} 
+                description={car.description}
+                aiMeta={seoMeta}
+                schema={carSchema}
+            />
 
             <div className="max-w-6xl mx-auto px-4">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
