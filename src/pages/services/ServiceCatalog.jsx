@@ -73,7 +73,6 @@ const ServiceCatalog = () => {
                         </button>
                     ))}
                 </div>
-                )}
 
                 {/* Service Grid */}
                 {loading ? (

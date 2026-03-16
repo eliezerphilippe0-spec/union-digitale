@@ -26,10 +26,38 @@ export const generateDownloadLinks = onCall(
 
         console.log(`📥 Download request: user=${uid}, product=${productId}, file=${fileId}`);
 
-        // 1. Verify Ownership - Multiple methods
+        // 1. Verify Ownership + Download Limit
         let hasAccess = false;
 
-        // Method 1: Check user's library subcollection
+        // Référence entitlement (modèle Steam/Apple : droits liés au compte)
+        const entitlementRef = productId
+            ? db.collection('users').doc(uid).collection('entitlements').doc(productId)
+            : null;
+        const entitlementSnap = entitlementRef ? await entitlementRef.get() : null;
+
+        // Method 0: Entitlements — vérification la plus rapide + contrôle du quota
+        if (entitlementSnap?.exists) {
+            const ent = entitlementSnap.data()!;
+
+            if (ent.downloadCount >= ent.maxDownloads) {
+                console.warn(
+                    `🚫 Quota dépassé : user=${uid}, product=${productId} ` +
+                    `(${ent.downloadCount}/${ent.maxDownloads} téléchargements)`
+                );
+                throw new HttpsError(
+                    'resource-exhausted',
+                    `Limite de téléchargements atteinte (${ent.maxDownloads}/${ent.maxDownloads}). ` +
+                    `Contactez le support pour obtenir un accès supplémentaire.`
+                );
+            }
+
+            hasAccess = true;
+            console.log(
+                `✅ Accès via entitlement (${ent.downloadCount + 1}/${ent.maxDownloads} téléchargements)`
+            );
+        }
+
+        // Method 1: Check user's library subcollection (rétrocompatibilité)
         const libraryRef = db.collection('users').doc(uid).collection('library');
         const libraryCheck = await libraryRef.where('productId', '==', productId).limit(1).get();
 
@@ -137,20 +165,39 @@ export const generateDownloadLinks = onCall(
 
             console.log(`✅ Signed URL generated for ${filePath}`);
 
-            // Log download for analytics
+            // Incrémenter le compteur de téléchargements (modèle Apple/Steam)
+            if (entitlementRef && entitlementSnap?.exists) {
+                await entitlementRef.update({
+                    downloadCount: admin.firestore.FieldValue.increment(1),
+                    lastDownloadAt: admin.firestore.FieldValue.serverTimestamp(),
+                });
+            }
+
+            // Log download pour analytics + audit
             await db.collection('download_logs').add({
                 userId: uid,
                 productId,
                 fileId: fileId || null,
                 filePath,
                 timestamp: admin.firestore.FieldValue.serverTimestamp(),
-                expiresAt: new Date(expiresAt)
+                expiresAt: new Date(expiresAt),
+                // Quota snapshot au moment du téléchargement
+                downloadCount: entitlementSnap?.exists
+                    ? (entitlementSnap.data()!.downloadCount + 1)
+                    : null,
+                maxDownloads: entitlementSnap?.exists
+                    ? entitlementSnap.data()!.maxDownloads
+                    : null,
             });
 
             return {
                 url,
                 expiresAt,
-                fileName: filePath.split('/').pop()
+                fileName: filePath.split('/').pop(),
+                // Renvoyer le quota restant pour affichage UI
+                downloadsRemaining: entitlementSnap?.exists
+                    ? Math.max(0, entitlementSnap.data()!.maxDownloads - entitlementSnap.data()!.downloadCount - 1)
+                    : null,
             };
         } catch (error: any) {
             console.error("Signed URL Error:", error);

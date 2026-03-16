@@ -122,28 +122,83 @@ const AmbassadorDashboard = () => {
                         </div>
                     </div>
 
-                    {/* Link Generator */}
+                    {/* Analytics Preview (Standard Upromote) */}
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-                        <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                            <LinkIcon className="w-5 h-5 text-gray-500" /> {t('unique_link')}
-                        </h3>
-                        <div className="flex gap-2">
-                            <input
-                                type="text"
-                                readOnly
-                                value={`https://uniondigitale.ht?ref=${ambassadorData.code}`}
-                                className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-600 font-mono text-sm"
-                            />
-                            <button
-                                onClick={copyLink}
-                                className="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 flex items-center gap-2"
-                            >
-                                <Copy className="w-4 h-4" /> {t('copy')}
-                            </button>
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                                <Award className="w-5 h-5 text-blue-600" /> Performance des 30 derniers jours
+                            </h3>
+                            <select className="text-xs border rounded px-2 py-1 bg-gray-50">
+                                <option>Vues vs Ventes</option>
+                                <option>Gains par produit</option>
+                            </select>
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">
-                            {t('share_link_desc')}
-                        </p>
+                        <div className="h-48 w-full bg-gray-50 rounded-xl border border-dashed border-gray-200 flex items-center justify-center text-gray-400">
+                            {/* Illustration of a chart */}
+                            <div className="flex items-end gap-2 h-20">
+                                <div className="w-4 bg-blue-200 h-8 rounded-t"></div>
+                                <div className="w-4 bg-blue-300 h-12 rounded-t"></div>
+                                <div className="w-4 bg-blue-400 h-16 rounded-t"></div>
+                                <div className="w-4 bg-blue-600 h-20 rounded-t"></div>
+                                <div className="w-4 bg-blue-200 h-10 rounded-t"></div>
+                            </div>
+                            <span className="ml-4 text-xs font-medium uppercase tracking-widest text-gray-300">Graphique de conversion en direct</span>
+                        </div>
+                    </div>
+
+                    {/* Link Generator & MLM (Multi-Level Marketing) */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <LinkIcon className="w-5 h-5 text-gray-500" /> {t('unique_link')}
+                            </h3>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    readOnly
+                                    value={`https://uniondigitale.ht?ref=${ambassadorData.code}`}
+                                    className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-600 font-mono text-xs"
+                                />
+                                <button
+                                    onClick={copyLink}
+                                    className="bg-[#0A1D37] text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900 flex items-center gap-2"
+                                >
+                                    <Copy className="w-4 h-4" />
+                                </button>
+                            </div>
+                            <p className="text-[10px] text-gray-400 mt-2 uppercase font-bold tracking-wider">
+                                📅 Expire dans 30 jours après le clic (Persistent Tracking)
+                            </p>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-indigo-900 to-blue-800 p-6 rounded-xl shadow-xl text-white relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform duration-700">
+                                <Users className="w-24 h-24" />
+                            </div>
+                            <h3 className="font-bold mb-2 flex items-center gap-2 text-yellow-400">
+                                <Rocket className="w-5 h-5" /> Inviter un Ambassadeur (MLM)
+                            </h3>
+                            <p className="text-xs text-blue-100 mb-6">
+                                Gagnez <strong>5% de commissions additionnelles</strong> sur toutes les ventes de vos recrues.
+                            </p>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    readOnly
+                                    value={`https://uniondigitale.ht/ambassador/join?parent=${ambassadorData.code}`}
+                                    className="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white font-mono text-xs"
+                                />
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(`https://uniondigitale.ht/ambassador/join?parent=${ambassadorData.code}`);
+                                        alert("Lien de recrutement copié !");
+                                    }}
+                                    className="bg-yellow-400 text-blue-900 px-4 py-2 rounded-lg font-black hover:bg-yellow-300 transition-all text-xs"
+                                >
+                                    INVITER
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Recent Activity Placeholder */}

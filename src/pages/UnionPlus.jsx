@@ -6,7 +6,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useLanguage } from '../contexts/LanguageContext';
 
-const UnionPlus = () => {
+const ZabelyPlus = () => {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
     const { t } = useLanguage();
@@ -33,7 +33,7 @@ const UnionPlus = () => {
             alert(t('subscribe_success'));
             // window.location.reload(); // No longer needed with real-time AuthContext
         } catch (error) {
-            console.error("Error subscribing to Union Plus:", error);
+            console.error("Error subscribing to Zabely Plus:", error);
             alert(t('subscribe_error'));
         } finally {
             setLoading(false);
@@ -64,7 +64,7 @@ const UnionPlus = () => {
                 <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#FFC400]/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
 
                 <div className="relative z-10">
-                    <h1 className="text-4xl md:text-6xl font-bold mb-4 italic">Union <span className="text-[#FFC400]">Plus</span></h1>
+                    <h1 className="text-4xl md:text-6xl font-bold mb-4 italic">Zabely <span className="text-[#FFC400]">Plus</span></h1>
                     <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto text-white font-medium">{t('union_plus_hero_desc')}</p>
                     <button
                         onClick={handleSubscribe}
@@ -149,4 +149,4 @@ const UnionPlus = () => {
     );
 };
 
-export default UnionPlus;
+export default ZabelyPlus;

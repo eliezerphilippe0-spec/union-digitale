@@ -10,8 +10,8 @@ const StructuredData = () => {
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "Union Digitale",
-        "url": "https://uniondigitale.com",
-        "logo": "https://uniondigitale.com/logo.png",
+        "url": "https://uniondigitale.ht",
+        "logo": "https://uniondigitale.ht/logo.png",
         "description": "La première plateforme e-commerce en Haïti. Achetez et vendez en toute sécurité avec MonCash et NatCash.",
         "address": {
             "@type": "PostalAddress",
@@ -35,10 +35,15 @@ const StructuredData = () => {
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "Union Digitale",
-        "url": "https://uniondigitale.com",
+        "url": "https://uniondigitale.ht",
+        // SearchAction : active la Sitelinks Searchbox Google sur le nom de marque.
+        // Target corrigé : /catalog?q= (route existante) et domaine .ht
         "potentialAction": {
             "@type": "SearchAction",
-            "target": "https://uniondigitale.com/search?q={search_term_string}",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://uniondigitale.ht/catalog?q={search_term_string}"
+            },
             "query-input": "required name=search_term_string"
         }
     };

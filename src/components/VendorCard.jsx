@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, MapPin, CheckCircle, Package, TrendingUp } from 'lucide-react';
+import { Star, MapPin, CheckCircle, Package, TrendingUp, Award } from 'lucide-react';
+import { getTierBadge } from '../services/reputationService';
 import './VendorCard.css';
 
 const VendorCard = ({ vendor }) => {
@@ -16,11 +17,24 @@ const VendorCard = ({ vendor }) => {
         rating,
         reviewCount,
         totalSales,
-        category
+        category,
+        reputationTier
     } = vendor;
 
     const handleClick = () => {
         navigate(`/vendor/${id}`);
+    };
+
+    const getReputationBadge = () => {
+        const tier = getTierBadge(reputationTier);
+        if (tier.id === 'bronze') return null;
+
+        return (
+            <div className={`reputation-badge tier-${tier.id}`} style={{ backgroundColor: tier.color }}>
+                <Award size={14} />
+                <span>{tier.label}</span>
+            </div>
+        );
     };
 
     const getVerificationBadge = () => {
@@ -54,7 +68,10 @@ const VendorCard = ({ vendor }) => {
                 )}
                 <div className="vendor-info">
                     <h3 className="vendor-name">{shopName}</h3>
-                    {getVerificationBadge()}
+                    <div className="flex flex-col gap-1">
+                        {getVerificationBadge()}
+                        {getReputationBadge()}
+                    </div>
                 </div>
             </div>
 

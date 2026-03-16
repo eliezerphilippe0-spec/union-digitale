@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Check, Star, ShieldCheck, Loader, AlertCircle } from 'lucide-react';
+import SEO from '../../components/SEO';
 import { db } from '../../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
@@ -93,6 +94,12 @@ const ProductPage = () => {
 
     return (
         <div className="bg-white min-h-screen font-sans">
+            <SEO
+                title={product.title}
+                description={product.subtitle || product.description}
+                image={product.thumbnail}
+                type="product"
+            />
             {/* Header / Hero */}
             <div className="bg-[#0A1D37] text-white py-12">
                 <div className="container mx-auto px-4 max-w-4xl text-center">

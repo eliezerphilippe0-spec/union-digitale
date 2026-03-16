@@ -1,15 +1,26 @@
 import React from 'react';
 import MainLayout from '../layouts/MainLayout';
 
+// Simple sanitization to mitigate XSS in the absence of DOMPurify
+const sanitize = (html) => {
+    if (!html) return '';
+    return html
+        .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, "")
+        .replace(/on\w+="[^"]*"/gim, "")
+        .replace(/javascript:[^"]*/gim, "");
+};
+
 const StaticPage = ({ title, content }) => {
+    const safeContent = sanitize(content);
+
     return (
         <MainLayout>
             <div className="bg-white min-h-screen py-12">
                 <div className="container mx-auto px-4 max-w-3xl">
                     <h1 className="text-3xl font-bold mb-8 text-gray-900 border-b pb-4">{title}</h1>
                     <div className="prose prose-lg text-gray-700">
-                        {content ? (
-                            <div dangerouslySetInnerHTML={{ __html: content }} />
+                        {safeContent ? (
+                            <div dangerouslySetInnerHTML={{ __html: safeContent }} />
                         ) : (
                             <p>Contenu à venir...</p>
                         )}

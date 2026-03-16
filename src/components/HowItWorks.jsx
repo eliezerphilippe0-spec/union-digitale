@@ -1,5 +1,5 @@
-import React from 'react';
 import { UserPlus, FileText, ShoppingCart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * How It Works Section
@@ -7,6 +7,7 @@ import { UserPlus, FileText, ShoppingCart } from 'lucide-react';
  */
 
 const HowItWorks = () => {
+    const navigate = useNavigate();
     const steps = [
         {
             number: 1,
@@ -91,7 +92,7 @@ const HowItWorks = () => {
                         Prêt à commencer ?
                     </p>
                     <button
-                        onClick={() => window.location.href = '/register'}
+                        onClick={() => navigate('/register')}
                         className="bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 font-bold px-8 py-4 rounded-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300"
                     >
                         S'inscrire gratuitement

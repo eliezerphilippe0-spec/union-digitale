@@ -29,12 +29,12 @@ const Header = () => {
                     {/* Mobile Menu Button - handled by CatalogMenu */}
                     <CatalogMenu />
                     <Link to="/" className="text-2xl font-bold tracking-tight hover:text-gray-200">
-                        Union<span className="text-secondary">Digitale</span>
+                        Zabely
                     </Link>
                 </div>
 
                 {/* Search Bar (Hidden on mobile, visible on lg) */}
-                <div className="hidden lg:flex flex-1 max-w-2xl mx-4">
+                <div className="hidden lg:flex flex-1 max-w-2xl mx-4" id="search-bar">
                     <div className="flex w-full rounded-md overflow-hidden bg-white">
                         <div className="bg-gray-100 px-3 py-2 text-gray-600 text-sm border-r border-gray-300 cursor-pointer hover:bg-gray-200">
                             {t('all_catalog')}
@@ -93,9 +93,10 @@ const Header = () => {
                             {/* Dropdown Menu */}
                             <div className="absolute top-full right-0 pt-2 w-48 hidden group-hover:block z-50">
                                 <div className="bg-white rounded-md shadow-lg py-1 text-gray-800 border border-gray-200">
-                                    <Link to="/wallet" className="block px-4 py-2 hover:bg-gray-100 font-bold text-secondary">{t('my_wallet')}</Link>
+                                    <Link to="/pay" className="block px-4 py-2 hover:bg-gray-100 font-bold text-secondary" id="wallet-nav">{t('my_wallet')}</Link>
                                     <Link to="/library" className="block px-4 py-2 hover:bg-gray-100">{t('my_library')}</Link>
                                     <Link to="/orders" className="block px-4 py-2 hover:bg-gray-100">{t('my_orders')}</Link>
+                                    <Link to="/account/bookings" className="block px-4 py-2 hover:bg-gray-100 font-bold text-indigo-600">Mes Rendez-vous</Link>
                                     <button onClick={logout} className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600">{t('logout')}</button>
                                 </div>
                             </div>

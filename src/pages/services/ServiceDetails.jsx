@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, MapPin, Clock, ShieldCheck, Share2 } from 'lucide-react';
+import SEO from '../../components/SEO';
 import BookingCalendar from '../../components/services/BookingCalendar';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useServices } from '../../hooks/useServices';
@@ -95,6 +96,12 @@ const ServiceDetails = () => {
     return (
         <div className="bg-gray-50 min-h-screen py-8">
             <div className="container mx-auto px-4 max-w-5xl">
+                <SEO
+                    title={service.title}
+                    description={service.description}
+                    image={service.image}
+                    type="article"
+                />
 
                 {/* Breadcrumbs */}
                 <div className="text-sm text-gray-500 mb-6">

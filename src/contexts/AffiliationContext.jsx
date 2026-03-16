@@ -22,19 +22,30 @@ export const AffiliationProvider = ({ children }) => {
             const data = {
                 sellerId: ref,
                 campaign: campaign || 'default',
-                timestamp: new Date().toISOString()
+                timestamp: new Date().getTime(), // Store as timestamp for calculation
+                expiresAt: new Date().getTime() + (30 * 24 * 60 * 60 * 1000) // 30 days expiry
             };
 
-            // Save to session storage
-            sessionStorage.setItem('union_digitale_referral', JSON.stringify(data));
+            // Save to localStorage for long-term tracking (Standard Pro like Upromote)
+            localStorage.setItem('union_digitale_referral', JSON.stringify(data));
             setReferralData(data);
-            logger.info("Referral tracked:", data);
+            logger.info("Referral tracked (Persistent 30-day):", data);
 
         } else {
-            // Load from session storage if exists
-            const saved = sessionStorage.getItem('union_digitale_referral');
+            // Load from localStorage if exists and not expired
+            const saved = localStorage.getItem('union_digitale_referral');
             if (saved) {
-                setReferralData(JSON.parse(saved));
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (new Date().getTime() < parsed.expiresAt) {
+                        setReferralData(parsed);
+                    } else {
+                        localStorage.removeItem('union_digitale_referral');
+                        logger.info("Referral tracking expired.");
+                    }
+                } catch (e) {
+                    localStorage.removeItem('union_digitale_referral');
+                }
             }
         }
     }, [location]);

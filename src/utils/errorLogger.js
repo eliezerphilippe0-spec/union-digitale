@@ -30,7 +30,7 @@ class ErrorLogger {
         }
 
         // Console logging in development
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
             console.error('[Error Logger]', errorEntry);
         }
 
@@ -86,7 +86,7 @@ class ErrorLogger {
 
     // Log info
     info(message, context = {}) {
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
             console.info('[Info]', message, context);
         }
     }

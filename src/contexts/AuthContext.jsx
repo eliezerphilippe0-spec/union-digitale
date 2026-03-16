@@ -19,6 +19,7 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
+    console.log('✅ AUTH PROVIDER: Initializing...');
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -100,6 +101,14 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         let unsubscribeFirestore = null;
 
+        // Safety timeout to prevent infinite blank screen if Firebase hangs
+        const timer = setTimeout(() => {
+            if (loading) {
+                console.warn('⚠️ AuthProvider: Initialization timeout, proceeding as unauthenticated.');
+                setLoading(false);
+            }
+        }, 5000);
+
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
             // Unsubscribe from previous user's data if exists
             if (unsubscribeFirestore) {
@@ -108,43 +117,56 @@ export const AuthProvider = ({ children }) => {
             }
 
             if (user) {
-                // Get custom claims (role, sellerId)
-                const idTokenResult = await user.getIdTokenResult();
-                const customClaims = idTokenResult.claims;
+                try {
+                    // Get custom claims (role, sellerId)
+                    const idTokenResult = await user.getIdTokenResult();
+                    const customClaims = idTokenResult.claims;
 
-                // User is signed in, listen to Firestore modifications
-                const userRef = doc(db, 'users', user.uid);
-                unsubscribeFirestore = onSnapshot(userRef, (doc) => {
-                    if (doc.exists()) {
-                        setCurrentUser({
-                            ...user,
-                            ...doc.data(),
-                            // Add custom claims to user object
-                            customClaims: {
-                                role: customClaims.role || 'buyer',
-                                sellerId: customClaims.sellerId || null
-                            }
-                        });
-                    } else {
-                        // Fallback if firestore doc doesn't exist yet
-                        setCurrentUser({
-                            ...user,
-                            customClaims: {
-                                role: customClaims.role || 'buyer',
-                                sellerId: customClaims.sellerId || null
-                            }
-                        });
-                    }
-                    setLoading(false);
-                }, (error) => {
-                    console.error("Error fetching user data:", error);
+                    // User is signed in, listen to Firestore modifications
+                    const userRef = doc(db, 'users', user.uid);
+                    unsubscribeFirestore = onSnapshot(userRef, (doc) => {
+                        if (doc.exists()) {
+                            // SECURITE : On exclut le champ 'role' du document Firestore.
+                            // Le rôle est uniquement lu depuis les custom claims Firebase Auth
+                            // pour éviter qu'un utilisateur s'auto-promue en modifiant son doc.
+                            const { role: _firestoreRole, ...safeDocData } = doc.data();
+                            setCurrentUser({
+                                ...user,
+                                ...safeDocData,
+                                customClaims: {
+                                    role: customClaims.role || 'buyer',
+                                    sellerId: customClaims.sellerId || null
+                                }
+                            });
+                        } else {
+                            // Fallback if firestore doc doesn't exist yet
+                            setCurrentUser({
+                                ...user,
+                                customClaims: {
+                                    role: customClaims.role || 'buyer',
+                                    sellerId: customClaims.sellerId || null
+                                }
+                            });
+                        }
+                        setLoading(false);
+                        clearTimeout(timer);
+                    }, (error) => {
+                        console.error("Error fetching user data:", error);
+                        setCurrentUser(user);
+                        setLoading(false);
+                        clearTimeout(timer);
+                    });
+                } catch (err) {
+                    console.error("Auth error during token result fetch:", err);
                     setCurrentUser(user);
                     setLoading(false);
-                });
+                    clearTimeout(timer);
+                }
             } else {
                 // User is signed out
                 setCurrentUser(null);
                 setLoading(false);
+                clearTimeout(timer);
             }
         });
 
@@ -153,6 +175,7 @@ export const AuthProvider = ({ children }) => {
             if (unsubscribeFirestore) {
                 unsubscribeFirestore();
             }
+            clearTimeout(timer);
         };
     }, []);
 

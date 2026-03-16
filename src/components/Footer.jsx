@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CreditCard } from 'lucide-react';
+import { CreditCard, Truck } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import TrustpilotWidget from './ui/TrustpilotWidget';
 
@@ -24,7 +24,7 @@ const Footer = () => {
                     <ul className="space-y-2">
                         <li>
                             <Link to="/about-us" className="text-neutral-200 hover:text-gold-400 transition-colors font-medium">
-                                {t('about_us') || 'À propos d\'Union Digitale'}
+                                {t('about_us') || 'À propos de Zabely'}
                             </Link>
                         </li>
                         <li>
@@ -47,17 +47,23 @@ const Footer = () => {
                     <ul className="space-y-2">
                         <li>
                             <Link to="/sell-on-union" className="text-neutral-200 hover:text-gold-400 transition-colors font-medium">
-                                {t('sell_on_union') || 'Vendez sur Union Digitale'}
+                                {t('sell_on_union') || 'Vendez sur Zabely'}
                             </Link>
                         </li>
                         <li>
                             <Link to="/sell-business" className="text-neutral-200 hover:text-gold-400 transition-colors font-medium">
-                                {t('sell_business') || 'Vendez sur Union Digitale Business'}
+                                {t('sell_business') || 'Vendez sur Zabely Business'}
                             </Link>
                         </li>
                         <li>
                             <Link to="/ambassador" className="text-gold-300 hover:text-gold-200 transition-colors font-bold">
                                 {t('ambassador_program') || 'Programme Ambassadeur'}
+                            </Link>
+                        </li>
+                        <li>
+                            <Link to="/ud-solution/join" className="text-indigo-400 hover:text-indigo-300 transition-colors font-bold flex items-center gap-1">
+                                <Truck className="w-4 h-4" />
+                                {t('ud_solution_driver') || 'Livreur UD Solution'}
                             </Link>
                         </li>
                         <li>
@@ -87,8 +93,7 @@ const Footer = () => {
             <div className="border-t border-primary-700 py-8 text-center bg-primary-950">
                 <div className="flex justify-center items-center gap-2 mb-4">
                     <span className="text-3xl font-bold tracking-tight">
-                        <span className="text-white">Union</span>
-                        <span className="text-gold-400">Digitale</span>
+                        <span className="text-white">Zabely</span>
                     </span>
                 </div>
 
@@ -99,7 +104,7 @@ const Footer = () => {
                         <span className="text-red-600 font-bold text-sm">MonCash</span>
                     </div>
                     <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Natcom_Logo.png/220px-Natcom_Logo.png" alt="Natcash" className="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Natcom_Logo.png/220px-Natcom_Logo.png" className="h-6" />
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Natcom_Logo.png/220px-Natcom_Logo.png" alt="Natcash" className="h-6" />
                         <span className="text-blue-600 font-bold text-sm">Natcash</span>
                     </div>
                     <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-md hover:shadow-lg transition-shadow text-gray-800">
@@ -115,7 +120,7 @@ const Footer = () => {
                     </div>
 
                     <p className="text-sm text-white font-medium">
-                        {t('copyright') || '© 2024 Union Digitale. Tous droits réservés.'}
+                        {t('copyright') || '© 2024 Zabely. Tous droits réservés.'}
                     </p>
                 </div>
             </div>

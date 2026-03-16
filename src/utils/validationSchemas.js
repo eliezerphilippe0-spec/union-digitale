@@ -15,7 +15,9 @@ export const UserSchema = z.object({
     displayName: z.string().min(2, 'Name must be at least 2 characters').optional(),
     phoneNumber: z.string().regex(/^\+509[0-9]{8}$/, 'Invalid Haitian phone number').optional(),
     role: z.enum(['user', 'seller', 'admin']).default('user'),
-    emailVerified: z.boolean().default(false)
+    emailVerified: z.boolean().default(false),
+    codRefusalCount: z.number().int().nonnegative().default(0),
+    codBlocked: z.boolean().default(false)
 });
 
 // ============================================================================
@@ -65,10 +67,24 @@ export const OrderSchema = z.object({
     userId: z.string().min(1, 'User ID is required'),
     items: z.array(OrderItemSchema).min(1, 'At least one item required').max(50, 'Too many items'),
     totalAmount: z.number().positive('Total must be positive').max(10000000, 'Total exceeds maximum'),
+    depositAmount: z.number().nonnegative().default(0),
+    remainingCOD: z.number().nonnegative().default(0),
     currency: z.string().default('HTG'),
-    paymentMethod: z.enum(['moncash', 'natcash', 'stripe', 'wallet', 'cash_on_delivery']),
+    paymentMethod: z.enum(['moncash', 'natcash', 'stripe', 'wallet', 'cash_on_delivery', 'COD_HT']),
     shippingAddress: ShippingAddressSchema.optional(),
-    status: z.enum(['pending_payment', 'paid', 'processing', 'shipped', 'delivered', 'cancelled']).default('pending_payment'),
+    status: z.enum([
+        'pending_payment',
+        'paid',
+        'confirmed',
+        'processing',
+        'shipped',
+        'out_for_delivery',
+        'delivered',
+        'delivered_paid',
+        'refused',
+        'returned',
+        'cancelled'
+    ]).default('pending_payment'),
     referral: z.object({
         ambassadorId: z.string(),
         code: z.string()
@@ -198,18 +214,14 @@ export const ReviewSchema = z.object({
 /**
  * Validate data against a schema and return typed result
  */
-export function validate<T>(schema: z.ZodSchema<T>, data: unknown): T {
+export function validate(schema, data) {
     return schema.parse(data);
 }
 
 /**
  * Safe validation that returns success/error
  */
-export function safeValidate<T>(schema: z.ZodSchema<T>, data: unknown): {
-    success: boolean;
-    data?: T;
-    error?: z.ZodError;
-} {
+export function safeValidate(schema, data) {
     const result = schema.safeParse(data);
     if (result.success) {
         return { success: true, data: result.data };
@@ -220,7 +232,7 @@ export function safeValidate<T>(schema: z.ZodSchema<T>, data: unknown): {
 /**
  * Format Zod errors for user-friendly messages
  */
-export function formatValidationErrors(error: z.ZodError): string[] {
+export function formatValidationErrors(error) {
     return error.errors.map(err => {
         const path = err.path.join('.');
         return `${path}: ${err.message}`;

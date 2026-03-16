@@ -35,42 +35,73 @@ const RealEstateCatalog = () => {
 
                 {/* GRID */}
                 {loading ? (
-                    <div className="flex justify-center py-20"><Loader className="animate-spin text-secondary" /></div>
+                    <div className="flex justify-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0A1D37] mx-auto"></div>
+                    </div>
                 ) : (
                     <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                             {filteredListings.map(item => (
-                                <div key={item.id} onClick={() => navigate(`/real-estate/${item.id}`)} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer group">
-                                    <div className="h-48 bg-gray-200 relative overflow-hidden">
-                                        <div className="absolute inset-0 flex items-center justify-center text-4xl group-hover:scale-110 transition-transform duration-500">
+                                <div key={item.id} onClick={() => navigate(`/real-estate/${item.id}`)} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all cursor-pointer group border border-gray-100 flex flex-col h-full">
+                                    <div className="h-64 bg-gray-100 relative overflow-hidden">
+                                        <div className="absolute inset-0 flex items-center justify-center text-6xl group-hover:scale-110 transition-transform duration-700">
                                             {item.type === 'land' ? '🏞️' : item.type === 'house' ? '🏡' : '🏨'}
                                         </div>
-                                        <div className="absolute top-3 left-3 bg-white/90 px-2 py-1 rounded text-xs font-bold uppercase tracking-wide">
-                                            {item.type === 'rental' ? 'Location' : 'Vente'}
+
+                                        {/* Status Badges */}
+                                        <div className="absolute top-4 left-4 flex flex-col gap-2">
+                                            <div className="bg-white/95 backdrop-blur-sm px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest text-[#0A1D37] shadow-sm">
+                                                {item.type === 'rental' ? 'Location Courte Durée' : 'À Vendre'}
+                                            </div>
+                                            {item.type === 'rental' && (
+                                                <div className="bg-indigo-600 text-white px-3 py-1 rounded-xl text-[10px] font-bold shadow-lg flex items-center gap-1">
+                                                    ⚡ Instant Book
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="absolute top-4 right-4 bg-amber-400 text-white p-2 rounded-xl shadow-lg">
+                                            <Star className="w-4 h-4 fill-current" />
                                         </div>
                                     </div>
 
-                                    <div className="p-5">
+                                    <div className="p-6 flex flex-col flex-1">
                                         <div className="flex justify-between items-start mb-2">
-                                            <h3 className="font-bold text-lg line-clamp-1 group-hover:text-secondary transition-colors">{item.title}</h3>
-                                            <span className="bg-green-50 text-green-700 px-2 py-1 rounded text-xs font-bold whitespace-nowrap">
-                                                {item.price.toLocaleString()} {item.currency}
-                                                {item.type === 'rental' && <span className="text-[10px] font-normal">/nuit</span>}
-                                            </span>
+                                            <h3 className="font-black text-xl text-[#0A1D37] line-clamp-1 group-hover:text-blue-600 transition-colors">{item.title}</h3>
                                         </div>
 
-                                        <div className="flex items-center gap-1 text-sm text-gray-500 mb-4">
-                                            <MapPin className="w-4 h-4" /> {item.location}
+                                        <div className="flex items-center gap-1 text-sm text-gray-400 mb-6">
+                                            <MapPin className="w-4 h-4 text-blue-500" /> {item.location}
                                         </div>
 
-                                        <div className="flex items-center gap-4 text-xs text-gray-400 border-t pt-4">
-                                            {item.type !== 'land' && (
-                                                <>
-                                                    <span className="flex items-center gap-1"><Bed className="w-3 h-3" /> {item.rooms} Ch.</span>
-                                                    <span className="flex items-center gap-1"><Bath className="w-3 h-3" /> 2 Sdb</span>
-                                                </>
-                                            )}
-                                            <span className="flex items-center gap-1 ml-auto"><Home className="w-3 h-3" /> {item.surface} m²</span>
+                                        {/* Amenities Grid */}
+                                        <div className="grid grid-cols-3 gap-4 mb-8 py-4 border-y border-gray-50">
+                                            <div className="flex flex-col items-center gap-1">
+                                                <Bed className="w-5 h-5 text-gray-300" />
+                                                <span className="text-[10px] font-bold text-gray-500 uppercase">{item.rooms || 0} Ch.</span>
+                                            </div>
+                                            <div className="flex flex-col items-center gap-1 border-x border-gray-50">
+                                                <Bath className="w-5 h-5 text-gray-300" />
+                                                <span className="text-[10px] font-bold text-gray-500 uppercase">2 Sdb</span>
+                                            </div>
+                                            <div className="flex flex-col items-center gap-1">
+                                                <Home className="w-5 h-5 text-gray-300" />
+                                                <span className="text-[10px] font-bold text-gray-500 uppercase">{item.surface} m²</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Price & Action */}
+                                        <div className="flex items-center justify-between mt-auto">
+                                            <div>
+                                                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">À partir de</div>
+                                                <div className="text-3xl font-black text-[#0A1D37]">
+                                                    {item.price.toLocaleString()} <span className="text-sm font-bold text-gray-400">{item.currency}</span>
+                                                </div>
+                                                {item.type === 'rental' && <div className="text-[10px] font-bold text-green-600 uppercase mt-0.5">Par Nuitée</div>}
+                                            </div>
+                                            <button className="bg-[#0A1D37] hover:bg-blue-900 text-white px-6 py-3 rounded-2xl text-xs font-bold shadow-xl shadow-blue-50 transition-all hover:-translate-y-1">
+                                                Voir l'offre
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

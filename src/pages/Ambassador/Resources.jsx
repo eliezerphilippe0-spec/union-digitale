@@ -65,31 +65,41 @@ const AmbassadorResources = () => {
                         </div>
                     </div>
 
-                    {/* Visual Assets */}
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 md:col-span-2">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="bg-purple-100 p-2 rounded-lg text-purple-600">
-                                <FileText className="w-6 h-6" />
-                            </div>
-                            <h2 className="text-xl font-bold text-gray-900">Visuels & Logos</h2>
+                    {/* Visual Assets (Marketing Kit) */}
+                    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 md:col-span-2 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-5">
+                            <Rocket className="w-32 h-32" />
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="border border-gray-200 rounded-lg p-4 text-center hover:bg-gray-50 cursor-pointer">
-                                <div className="h-20 bg-gray-200 rounded mb-2 flex items-center justify-center text-gray-400">Logo SVG</div>
-                                <span className="text-sm font-medium">Logo Officiel</span>
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="bg-blue-600 p-2 rounded-xl text-white shadow-lg shadow-blue-200">
+                                <Award className="w-6 h-6" />
                             </div>
-                            <div className="border border-gray-200 rounded-lg p-4 text-center hover:bg-gray-50 cursor-pointer">
-                                <div className="h-20 bg-gray-200 rounded mb-2 flex items-center justify-center text-gray-400">Banner</div>
-                                <span className="text-sm font-medium">Bannière Facebook</span>
+                            <div>
+                                <h2 className="text-2xl font-black text-[#0A1D37]">Kit Marketing Officiel</h2>
+                                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Édition {new Date().getFullYear()}</p>
                             </div>
-                            <div className="border border-gray-200 rounded-lg p-4 text-center hover:bg-gray-50 cursor-pointer">
-                                <div className="h-20 bg-gray-200 rounded mb-2 flex items-center justify-center text-gray-400">Story</div>
-                                <span className="text-sm font-medium">Template Story</span>
-                            </div>
-                            <div className="border border-gray-200 rounded-lg p-4 text-center hover:bg-gray-50 cursor-pointer">
-                                <div className="h-20 bg-gray-200 rounded mb-2 flex items-center justify-center text-gray-400">PDF</div>
-                                <span className="text-sm font-medium">Guide PDF</span>
-                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {[
+                                { title: "Bannière Facebook", type: "IMAGE", size: "1200x630", color: "blue" },
+                                { title: "Instagram Story", type: "MOBILE", size: "1080x1920", color: "purple" },
+                                { title: "WhatsApp Promo", type: "SQUARE", size: "1080x1080", color: "green" },
+                                { title: "Dossier Complet", type: "ZIP", size: "45 MB", color: "gray" }
+                            ].map((asset, i) => (
+                                <div key={i} className="group border border-gray-100 rounded-2xl p-4 transition-all hover:shadow-xl hover:-translate-y-1 hover:border-blue-100 overflow-hidden relative">
+                                    <div className={`h-32 bg-${asset.color}-50 rounded-xl mb-4 flex items-center justify-center text-${asset.color}-600 font-black text-xs uppercase tracking-tighter opacity-80 group-hover:scale-105 transition-transform`}>
+                                        {asset.type} {asset.size}
+                                    </div>
+                                    <div className="flex flex-col gap-1 mb-4">
+                                        <span className="text-sm font-black text-[#0A1D37] truncate">{asset.title}</span>
+                                        <span className="text-[10px] text-gray-400 font-bold">{asset.size} • JPG</span>
+                                    </div>
+                                    <button className="w-full bg-gray-50 group-hover:bg-blue-600 group-hover:text-white text-gray-500 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2">
+                                        <Download className="w-4 h-4" /> Télécharger
+                                    </button>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>

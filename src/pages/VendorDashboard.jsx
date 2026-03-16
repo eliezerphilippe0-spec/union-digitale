@@ -161,6 +161,12 @@ export default function VendorDashboard() {
                 >
                     Commissions
                 </button>
+                <button
+                    className={activeTab === 'advertising' ? 'active' : ''}
+                    onClick={() => setActiveTab('advertising')}
+                >
+                    Publicité (Boost)
+                </button>
             </div>
 
             {/* Tab Content */}
@@ -179,6 +185,9 @@ export default function VendorDashboard() {
                 )}
                 {activeTab === 'commissions' && (
                     <CommissionsTab breakdown={commissionBreakdown} />
+                )}
+                {activeTab === 'advertising' && (
+                    <AdvertisingTab vendorId={currentUser.uid} />
                 )}
             </div>
 
@@ -415,6 +424,44 @@ function CommissionsTab({ breakdown }) {
                     <li>Vérifié ✅: 8-13% (-2%)</li>
                     <li>Premium ⭐: 7-12% (-3%)</li>
                 </ul>
+            </div>
+        </div>
+    );
+}
+
+// ============================================================================
+// MARKETPLACE MODEL COMPONENTS
+// ============================================================================
+
+function AdvertisingTab({ vendorId }) {
+    return (
+        <div className="advertising-tab">
+            <div className="ad-hero">
+                <h3>Boostez vos ventes avec la publicité interne 🚀</h3>
+                <p>Mettez vos produits en avant dans les résultats de recherche pour seulement 50 HTG par jour.</p>
+            </div>
+            
+            <div className="ad-features">
+                <div className="ad-card">
+                    <span className="icon">🔍</span>
+                    <h4>Première Position</h4>
+                    <p>Apparaissez en tête des résultats de recherche pertinents.</p>
+                </div>
+                <div className="ad-card">
+                    <span className="icon">📈</span>
+                    <h4>Plus de Clics</h4>
+                    <p>Augmentez votre visibilité jusqu'à 3x par rapport aux produits standards.</p>
+                </div>
+                <div className="ad-card">
+                    <span className="icon">🛒</span>
+                    <h4>Ventes Directes</h4>
+                    <p>Ciblez les acheteurs au moment où ils cherchent vos produits.</p>
+                </div>
+            </div>
+
+            <div className="boost-cta">
+                <button className="btn-primary">Sélectionner un produit à booster</button>
+                <p className="hint">Les frais sont déduits de votre solde disponible.</p>
             </div>
         </div>
     );

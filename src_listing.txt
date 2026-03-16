@@ -1,0 +1,596 @@
+ Le volume dans le lecteur C s'appelle OS
+ Le num‚ro de s‚rie du volume est DE0A-EEE6
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src
+
+20/01/2026  12:07    <DIR>          .
+04/02/2026  09:37    <DIR>          ..
+01/12/2025  00:20                13 App.css
+04/02/2026  09:15            21ÿ350 App.jsx
+01/12/2025  00:20    <DIR>          assets
+04/02/2026  08:29    <DIR>          components
+12/01/2026  11:56    <DIR>          config
+13/01/2026  14:42    <DIR>          contexts
+03/02/2026  09:31    <DIR>          data
+25/01/2026  15:15    <DIR>          hooks
+04/02/2026  08:45             2ÿ021 index.css
+16/01/2026  09:02    <DIR>          layouts
+18/01/2026  08:27    <DIR>          lib
+04/02/2026  09:07               458 main.jsx
+04/02/2026  08:29    <DIR>          pages
+04/02/2026  08:33    <DIR>          services
+25/01/2026  20:20    <DIR>          styles
+13/01/2026  14:10                65 tmpclaude-8098-cwd
+13/01/2026  14:09                65 tmpclaude-8587-cwd
+13/01/2026  14:10                65 tmpclaude-e517-cwd
+25/01/2026  16:55    <DIR>          utils
+               7 fichier(s)           24ÿ037 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\assets
+
+01/12/2025  00:20    <DIR>          .
+20/01/2026  12:07    <DIR>          ..
+01/12/2025  00:20    <DIR>          images
+28/11/2025  13:10             4ÿ126 react.svg
+               1 fichier(s)            4ÿ126 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\assets\images
+
+01/12/2025  00:20    <DIR>          .
+01/12/2025  00:20    <DIR>          ..
+               0 fichier(s)                0 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\components
+
+04/02/2026  08:29    <DIR>          .
+20/01/2026  12:07    <DIR>          ..
+01/12/2025  19:00    <DIR>          admin
+02/01/2026  22:26             7ÿ497 BodyMeasurementForm.jsx
+04/02/2026  08:29    <DIR>          bookings
+08/12/2025  14:54             1ÿ081 Celebration.jsx
+06/01/2026  10:22             2ÿ613 CountUpAnimation.jsx
+03/02/2026  08:49             5ÿ559 CrossSell.jsx
+05/12/2025  19:39    <DIR>          digital
+28/12/2025  19:04             2ÿ184 ErrorBoundary.jsx
+04/02/2026  09:17             6ÿ035 ErrorFallback.jsx
+19/12/2025  10:22    <DIR>          fitting-room
+17/01/2026  12:07             4ÿ886 FlashSaleCountdown.jsx
+27/01/2026  11:21             7ÿ248 Footer.jsx
+01/12/2025  17:44             1ÿ381 FreeShippingProgress.jsx
+03/02/2026  12:19             6ÿ596 FullWidthCTA.jsx
+02/12/2025  09:58    <DIR>          FunnelBuilder
+04/02/2026  08:30             9ÿ282 Header.jsx
+03/02/2026  12:14            24ÿ015 Hero.jsx
+03/02/2026  12:15             5ÿ101 HowItWorks.jsx
+04/02/2026  08:38             1ÿ078 MaintenanceGuard.jsx
+02/01/2026  22:27             3ÿ257 MeasurementGuide.jsx
+21/01/2026  18:00    <DIR>          nav
+25/01/2026  12:50             3ÿ615 OfferCard.css
+25/01/2026  12:49             4ÿ524 OfferCard.jsx
+03/02/2026  09:32             5ÿ583 OnboardingTour.jsx
+02/12/2025  09:56             2ÿ891 OrderBump.jsx
+06/01/2026  10:21             4ÿ366 ParticleBackground.jsx
+13/01/2026  15:00    <DIR>          payments
+25/01/2026  01:36            10ÿ513 ProductCard.jsx
+13/01/2026  14:46             4ÿ683 ProductListPaginated.tsx
+25/01/2026  01:37             2ÿ818 QuickCategories.jsx
+03/01/2026  00:05             2ÿ677 RegistrationSteps.jsx
+02/01/2026  22:43            10ÿ387 ReviewCard.jsx
+14/01/2026  12:40    <DIR>          reviews
+02/01/2026  22:44             5ÿ561 ReviewSection.jsx
+02/01/2026  22:43             3ÿ854 ReviewStats.jsx
+15/12/2025  13:03               348 RouteTracker.jsx
+03/02/2026  12:15             4ÿ419 SaleNotificationListener.jsx
+04/02/2026  08:20    <DIR>          salons
+14/01/2026  10:50    <DIR>          search
+06/12/2025  13:55             1ÿ825 SEO.jsx
+25/01/2026  10:33             5ÿ960 ServiceCard.jsx
+19/12/2025  10:39    <DIR>          services
+25/01/2026  10:16             3ÿ408 ServicesGrid.jsx
+25/01/2026  10:15             3ÿ915 ServicesPreview.jsx
+02/01/2026  22:27             6ÿ628 SizeRecommendation.jsx
+28/12/2025  19:06               617 SkipLinks.jsx
+01/12/2025  01:15               696 SocialProof.jsx
+05/01/2026  14:05               789 SplineBackground.jsx
+25/12/2025  09:52            17ÿ222 StockDashboard.jsx
+26/01/2026  14:39             1ÿ907 StructuredData.jsx
+16/01/2026  09:04             6ÿ887 TestimonialCarousel.jsx
+27/01/2026  08:19             4ÿ005 TrackingMap.jsx
+25/01/2026  12:20             5ÿ381 TransactionHistory.css
+25/01/2026  12:20             6ÿ663 TransactionHistory.jsx
+25/01/2026  19:52             5ÿ791 TrustBadges.css
+25/01/2026  19:52             5ÿ276 TrustBadges.jsx
+25/01/2026  09:31             2ÿ947 TrustedBy.jsx
+04/02/2026  01:12    <DIR>          ui
+03/02/2026  12:15             9ÿ718 UniversalAccess.jsx
+25/01/2026  12:47             2ÿ339 VendorCard.css
+26/01/2026  21:15             3ÿ288 VendorCard.jsx
+25/01/2026  17:05             5ÿ147 VendorVerification.css
+25/01/2026  17:05            11ÿ900 VendorVerification.jsx
+02/01/2026  22:26            13ÿ181 VirtualFittingRoom.jsx
+19/12/2025  09:47             1ÿ128 WhatsAppWidget.jsx
+02/01/2026  22:44            12ÿ185 WriteReviewModal.jsx
+              54 fichier(s)          292ÿ855 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\components\admin
+
+01/12/2025  19:00    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+01/12/2025  19:00             7ÿ786 AITools.jsx
+               1 fichier(s)            7ÿ786 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\components\bookings
+
+04/02/2026  08:29    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+04/02/2026  08:29             4ÿ930 ClientBookingCard.jsx
+               1 fichier(s)            4ÿ930 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\components\digital
+
+05/12/2025  19:39    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+13/12/2025  09:32             9ÿ454 CheckoutForm.tsx
+03/02/2026  08:55             2ÿ673 DigitalProductCard.tsx
+05/12/2025  19:39             1ÿ343 DownloadCard.tsx
+05/12/2025  19:39             2ÿ499 OrderBump.tsx
+               4 fichier(s)           15ÿ969 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\components\fitting-room
+
+19/12/2025  10:22    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+19/12/2025  10:30             7ÿ191 SizeInputForm.jsx
+19/12/2025  10:22             2ÿ259 SizeRecommendation.jsx
+19/12/2025  10:26             6ÿ170 useFittingRoom.js
+19/12/2025  10:27             3ÿ896 VirtualFittingRoom.jsx
+               4 fichier(s)           19ÿ516 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\components\FunnelBuilder
+
+02/12/2025  09:58    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+02/12/2025  09:58             4ÿ092 FunnelEditor.jsx
+               1 fichier(s)            4ÿ092 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\components\nav
+
+21/01/2026  18:00    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+27/01/2026  08:50            17ÿ884 CatalogMenu.jsx
+               1 fichier(s)           17ÿ884 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\components\payments
+
+13/01/2026  15:00    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+26/01/2026  14:38             1ÿ702 PayPalButton.jsx
+26/01/2026  14:38             4ÿ122 StripeForm.jsx
+               2 fichier(s)            5ÿ824 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\components\reviews
+
+14/01/2026  12:40    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+14/01/2026  12:40            10ÿ896 ProductReviews.jsx
+               1 fichier(s)           10ÿ896 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\components\salons
+
+04/02/2026  08:20    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+04/02/2026  08:20            12ÿ993 BookingWizard.jsx
+04/02/2026  08:33             4ÿ069 SalonCard.jsx
+               2 fichier(s)           17ÿ062 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\components\search
+
+14/01/2026  10:50    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+14/01/2026  10:50             8ÿ335 AlgoliaSearchBar.jsx
+               1 fichier(s)            8ÿ335 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\components\services
+
+19/12/2025  10:39    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+19/12/2025  10:39             4ÿ470 BookingCalendar.jsx
+               1 fichier(s)            4ÿ470 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\components\ui
+
+04/02/2026  01:12    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+28/12/2025  16:39             4ÿ991 AnimatedBackground.jsx
+28/12/2025  16:07             1ÿ620 Badge.jsx
+06/01/2026  10:24             3ÿ841 Button.jsx
+06/01/2026  10:24             3ÿ195 Card.jsx
+12/01/2026  11:58             8ÿ274 ImageOptimizer.jsx
+28/12/2025  16:09               313 index.js
+28/12/2025  16:07             6ÿ299 Input.jsx
+04/02/2026  01:12            11ÿ911 LocationPickerModal.jsx
+28/12/2025  19:06             4ÿ311 Modal.jsx
+25/01/2026  20:19             6ÿ043 OptimizedImage.jsx
+28/12/2025  16:21             5ÿ793 SkeletonLoader.jsx
+16/01/2026  00:46             2ÿ706 ThemeToggle.jsx
+31/12/2025  12:27             4ÿ860 Toast.jsx
+27/01/2026  11:21             2ÿ248 TrustpilotWidget.jsx
+              14 fichier(s)           66ÿ405 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\config
+
+12/01/2026  11:56    <DIR>          .
+20/01/2026  12:07    <DIR>          ..
+08/12/2025  14:14             1ÿ999 alerting.js
+12/01/2026  11:56             7ÿ382 sentry.config.js
+07/01/2026  22:56             2ÿ729 twilioConfig.js
+               3 fichier(s)           12ÿ110 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\contexts
+
+13/01/2026  14:42    <DIR>          .
+20/01/2026  12:07    <DIR>          ..
+03/02/2026  09:08             2ÿ255 AffiliationContext.jsx
+05/12/2025  12:22             2ÿ957 AmbassadorContext.jsx
+13/01/2026  14:42             5ÿ863 AuthContext.jsx
+02/12/2025  00:54             2ÿ561 CartContext.jsx
+01/12/2025  18:47             2ÿ842 FavoritesContext.jsx
+02/01/2026  22:25             4ÿ921 FittingRoomContext.jsx
+01/12/2025  17:12             1ÿ111 LanguageContext.jsx
+04/02/2026  09:16             5ÿ084 PerformanceContext.jsx
+28/12/2025  17:04             1ÿ508 ThemeContext.jsx
+13/01/2026  14:09                74 tmpclaude-0f25-cwd
+05/12/2025  20:58             5ÿ206 WalletContext.jsx
+              11 fichier(s)           34ÿ382 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\data
+
+03/02/2026  09:31    <DIR>          .
+20/01/2026  12:07    <DIR>          ..
+03/02/2026  09:31             3ÿ285 faqData.js
+08/12/2025  14:33    <DIR>          legal
+08/12/2025  14:08             2ÿ811 legal_blacklist.js
+27/01/2026  08:45            12ÿ145 products.js
+25/01/2026  09:53             8ÿ545 services-data.js
+04/02/2026  01:12           224ÿ941 translations.js
+               5 fichier(s)          251ÿ727 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\data\legal
+
+08/12/2025  14:33    <DIR>          .
+03/02/2026  09:31    <DIR>          ..
+08/12/2025  14:33             4ÿ800 official_policies.js
+               1 fichier(s)            4ÿ800 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\hooks
+
+25/01/2026  15:15    <DIR>          .
+20/01/2026  12:07    <DIR>          ..
+25/01/2026  15:15             2ÿ809 useBookings.js
+28/12/2025  19:02             1ÿ702 useErrorHandler.js
+06/12/2025  14:04             1ÿ556 useGeolocation.js
+25/01/2026  15:15             4ÿ127 useOffers.js
+16/01/2026  13:36             5ÿ843 useProducts.js
+13/01/2026  14:46             6ÿ340 useProductsPaginated.ts
+19/12/2025  14:34             3ÿ070 useRealEstate.js
+25/01/2026  01:36             1ÿ757 useScrollAnimation.jsx
+25/01/2026  11:02             4ÿ653 useServices.js
+25/01/2026  15:15             2ÿ917 useVendor.js
+13/01/2026  14:41             4ÿ319 useVendorOrders.ts
+              11 fichier(s)           39ÿ093 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\layouts
+
+16/01/2026  09:02    <DIR>          .
+20/01/2026  12:07    <DIR>          ..
+16/01/2026  09:02             5ÿ497 AdminLayout.jsx
+01/12/2025  00:20               476 MainLayout.jsx
+               2 fichier(s)            5ÿ973 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\lib
+
+18/01/2026  08:27    <DIR>          .
+20/01/2026  12:07    <DIR>          ..
+14/01/2026  10:50             2ÿ079 algolia.js
+31/12/2025  12:24             4ÿ616 errorTracking.js
+25/12/2025  09:51    <DIR>          firebase
+25/01/2026  16:23             3ÿ032 firebase.js
+18/01/2026  09:03    <DIR>          nav
+25/12/2025  09:55             9ÿ846 queries.js
+13/01/2026  14:09                69 tmpclaude-e6bf-cwd
+               5 fichier(s)           19ÿ642 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\lib\firebase
+
+25/12/2025  09:51    <DIR>          .
+18/01/2026  08:27    <DIR>          ..
+25/12/2025  09:51            14ÿ904 auth.js
+               1 fichier(s)           14ÿ904 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\lib\nav
+
+18/01/2026  09:03    <DIR>          .
+18/01/2026  08:27    <DIR>          ..
+03/02/2026  12:23             6ÿ293 catalogMenu.js
+               1 fichier(s)            6ÿ293 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\pages
+
+04/02/2026  08:29    <DIR>          .
+20/01/2026  12:07    <DIR>          ..
+04/02/2026  08:29    <DIR>          account
+18/01/2026  01:15    <DIR>          admin
+16/01/2026  09:03    <DIR>          Ambassador
+05/12/2025  21:37             3ÿ888 Analytics.jsx
+19/12/2025  09:48             8ÿ991 BestShops.jsx
+14/01/2026  10:32            16ÿ793 BuyerRegister.jsx
+03/02/2026  09:28            16ÿ630 CarDetails.jsx
+07/01/2026  20:01    <DIR>          cars
+17/12/2025  15:00             8ÿ097 Cart.jsx
+03/02/2026  12:25            17ÿ091 Catalog.jsx
+16/01/2026  13:15             5ÿ453 CategoryLanding.jsx
+02/12/2025  09:56    <DIR>          Checkout
+04/02/2026  01:12            29ÿ600 Checkout.jsx
+01/12/2025  17:24             1ÿ042 ComingSoon.jsx
+03/02/2026  09:31            12ÿ550 CustomerService.jsx
+16/01/2026  19:34    <DIR>          digital
+17/12/2025  15:04             1ÿ670 Favorites.jsx
+02/12/2025  09:59             5ÿ705 FunnelBuilder.jsx
+17/12/2025  15:08             7ÿ695 GiftCards.jsx
+03/02/2026  12:19            20ÿ087 Home.jsx
+07/01/2026  20:34    <DIR>          learn
+08/12/2025  14:33    <DIR>          legal
+05/12/2025  20:26            14ÿ259 Login.jsx
+03/02/2026  12:22            21ÿ008 LoyaltyProgram.jsx
+04/02/2026  08:26             3ÿ378 Maintenance.jsx
+03/02/2026  08:56            19ÿ620 MyLibrary.jsx
+17/12/2025  15:04             2ÿ488 OrderConfirmation.jsx
+27/01/2026  08:23             6ÿ968 Orders.jsx
+07/01/2026  20:28    <DIR>          pay
+01/12/2025  17:32             1ÿ703 PlaceholderPage.jsx
+03/02/2026  09:26            23ÿ203 ProductDetails.jsx
+19/12/2025  14:35    <DIR>          real-estate
+17/12/2025  14:17            39ÿ788 Register.jsx
+03/01/2026  00:05             8ÿ963 RegisterChoice.jsx
+04/02/2026  08:20    <DIR>          salons
+04/02/2026  08:20    <DIR>          seller
+26/01/2026  21:15            18ÿ927 SellerLanding.jsx
+03/01/2026  00:09             9ÿ087 SellerOnboarding.jsx
+14/01/2026  10:32            32ÿ854 SellerRegister.jsx
+25/01/2026  15:50    <DIR>          services
+25/01/2026  10:16             8ÿ039 Services.jsx
+01/12/2025  17:59             9ÿ663 ShippingPolicy.jsx
+03/02/2026  09:44             1ÿ958 StaticPage.jsx
+13/01/2026  14:10                71 tmpclaude-b17e-cwd
+27/01/2026  08:19             7ÿ807 TrackingPage.jsx
+03/02/2026  09:00            21ÿ039 Travel.jsx
+16/01/2026  08:54             8ÿ129 UnionPlus.jsx
+07/01/2026  20:25    <DIR>          utilities
+25/01/2026  16:59            10ÿ245 VendorDashboard.css
+25/01/2026  16:59            21ÿ235 VendorDashboard.jsx
+25/01/2026  12:50             5ÿ815 VendorShop.css
+25/01/2026  12:50             8ÿ315 VendorShop.jsx
+25/01/2026  15:16             4ÿ258 VendorsPage.css
+25/01/2026  15:16             6ÿ900 VendorsPage.jsx
+27/01/2026  10:18            12ÿ639 Wallet.jsx
+              41 fichier(s)          483ÿ651 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\pages\account
+
+04/02/2026  08:29    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+04/02/2026  08:29             5ÿ716 MyBookings.jsx
+               1 fichier(s)            5ÿ716 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\pages\admin
+
+18/01/2026  01:15    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+19/12/2025  10:04            10ÿ188 ComplianceDashboard.jsx
+18/01/2026  01:15            34ÿ929 Dashboard.jsx
+19/12/2025  20:01             5ÿ343 Orders.jsx
+19/12/2025  10:02             7ÿ872 Payouts.jsx
+19/12/2025  09:58            16ÿ109 Products.jsx
+19/12/2025  10:02             8ÿ213 Settings.jsx
+19/12/2025  10:05            22ÿ797 StoreModeration.jsx
+19/12/2025  10:05             7ÿ369 Subscription.jsx
+04/02/2026  08:27            12ÿ393 SystemStatus.jsx
+19/12/2025  10:00            10ÿ451 Users.jsx
+              10 fichier(s)          135ÿ664 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\pages\Ambassador
+
+16/01/2026  09:03    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+03/02/2026  09:08            13ÿ663 Dashboard.jsx
+16/01/2026  09:02             8ÿ236 Landing.jsx
+19/12/2025  09:46             6ÿ867 Onboarding.jsx
+03/02/2026  09:09             7ÿ956 Resources.jsx
+               4 fichier(s)           36ÿ722 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\pages\cars
+
+07/01/2026  20:01    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+03/02/2026  09:01            11ÿ508 CarsCatalog.jsx
+               1 fichier(s)           11ÿ508 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\pages\Checkout
+
+02/12/2025  09:56    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+05/12/2025  12:17            13ÿ988 OnePageCheckout.jsx
+02/12/2025  09:56             6ÿ509 UpsellPage.jsx
+               2 fichier(s)           20ÿ497 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\pages\digital
+
+16/01/2026  19:34    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+16/01/2026  19:34            38ÿ030 AnalyticsDashboard.jsx
+16/01/2026  09:03             9ÿ477 CheckoutPage.tsx
+03/02/2026  09:29             7ÿ846 ProductPage.tsx
+16/01/2026  01:05            10ÿ482 UpsellPage.tsx
+               4 fichier(s)           65ÿ835 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\pages\learn
+
+07/01/2026  20:34    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+03/02/2026  09:28            13ÿ633 CourseDetails.jsx
+07/01/2026  20:49            11ÿ220 LearnCatalog.jsx
+07/01/2026  20:34            11ÿ933 MyCourses.jsx
+               3 fichier(s)           36ÿ786 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\pages\legal
+
+08/12/2025  14:33    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+08/12/2025  14:33            10ÿ045 PoliciesPage.jsx
+               1 fichier(s)           10ÿ045 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\pages\pay
+
+07/01/2026  20:28    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+07/01/2026  20:28             8ÿ035 Credit.jsx
+07/01/2026  20:49             6ÿ764 PayHub.jsx
+03/02/2026  09:15            11ÿ383 Transfer.jsx
+               3 fichier(s)           26ÿ182 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\pages\real-estate
+
+19/12/2025  14:35    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+03/02/2026  09:02             8ÿ863 RealEstateCatalog.jsx
+19/12/2025  14:35             6ÿ261 RealEstateDetails.jsx
+               2 fichier(s)           15ÿ124 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\pages\salons
+
+04/02/2026  08:20    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+04/02/2026  08:20             2ÿ599 SalonBooking.jsx
+04/02/2026  08:33             7ÿ316 SalonListing.jsx
+04/02/2026  08:19            10ÿ988 SalonProfile.jsx
+               3 fichier(s)           20ÿ903 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\pages\seller
+
+04/02/2026  08:20    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+19/12/2025  09:54            14ÿ344 AddCar.jsx
+03/02/2026  09:21            28ÿ212 AddProduct.jsx
+19/12/2025  14:35            10ÿ878 AddRealEstate.jsx
+19/12/2025  13:48            14ÿ532 AddService.jsx
+04/02/2026  01:13            53ÿ246 DashboardUltimate.jsx
+19/12/2025  09:55             9ÿ544 KYCVerification.jsx
+04/02/2026  08:21    <DIR>          salon
+18/01/2026  01:17            33ÿ882 SellerDashboard.jsx
+20/01/2026  12:06            39ÿ764 Settings.jsx
+20/01/2026  12:04            32ÿ186 SmartAudit.jsx
+13/01/2026  14:10                78 tmpclaude-a8ba-cwd
+              10 fichier(s)          236ÿ666 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\pages\seller\salon
+
+04/02/2026  08:21    <DIR>          .
+04/02/2026  08:20    <DIR>          ..
+04/02/2026  08:21             7ÿ805 SalonAnalytics.jsx
+04/02/2026  08:21             9ÿ946 SalonCalendar.jsx
+04/02/2026  08:32            17ÿ833 SalonSetup.jsx
+               3 fichier(s)           35ÿ584 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\pages\services
+
+25/01/2026  15:50    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+03/02/2026  09:01            11ÿ115 PaiementCAMEP.jsx
+25/01/2026  16:08            10ÿ270 PaiementEDH.jsx
+25/01/2026  12:27             9ÿ463 RechargeMonCash.jsx
+25/01/2026  12:27            10ÿ386 RechargeNatCash.jsx
+13/01/2026  12:15             8ÿ100 ServiceCatalog.jsx
+03/02/2026  09:26            15ÿ953 ServiceDetails.jsx
+25/01/2026  15:50             6ÿ766 ServicePage.css
+03/02/2026  09:12            18ÿ094 TransfertArgent.jsx
+               8 fichier(s)           90ÿ147 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\pages\utilities
+
+07/01/2026  20:25    <DIR>          .
+04/02/2026  08:29    <DIR>          ..
+03/02/2026  09:01            11ÿ101 ElectricityPayment.jsx
+07/01/2026  20:25            10ÿ218 MobileRecharge.jsx
+07/01/2026  20:49             9ÿ107 UtilitiesHub.jsx
+               3 fichier(s)           30ÿ426 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\services
+
+04/02/2026  08:33    <DIR>          .
+20/01/2026  12:07    <DIR>          ..
+06/12/2025  13:48             1ÿ066 adminService.js
+08/12/2025  14:02             3ÿ074 apiClient.js
+25/01/2026  15:34            10ÿ096 bookingService.js
+31/12/2025  12:26             3ÿ850 cacheService.js
+03/02/2026  09:14            11ÿ544 commissionService.js
+04/02/2026  08:32             2ÿ510 communicationService.js
+08/12/2025  14:08             3ÿ914 complianceService.js
+04/02/2026  08:38             1ÿ513 configService.js
+20/01/2026  12:01             7ÿ815 geminiService.js
+04/02/2026  08:33             1ÿ810 locationService.js
+02/01/2026  22:42             7ÿ847 moderationService.js
+04/02/2026  09:17             4ÿ998 monCashPayoutService.js
+08/12/2025  14:12             5ÿ532 monitoringService.js
+03/02/2026  09:44             4ÿ911 natCashPayoutService.js
+25/01/2026  15:34            10ÿ876 offerService.js
+03/02/2026  10:22             9ÿ849 paymentService.js
+25/01/2026  19:53             6ÿ155 payoutService.js
+08/12/2025  15:08             3ÿ017 policyService.js
+02/01/2026  22:42            10ÿ993 reviewService.js
+04/02/2026  08:32             7ÿ692 salonBookingService.js
+04/02/2026  08:18             4ÿ116 salonService.js
+13/01/2026  14:45             6ÿ739 searchService.js
+02/01/2026  22:25            10ÿ876 sizeRecommendationService.js
+13/01/2026  14:10                74 tmpclaude-b08e-cwd
+20/01/2026  12:03             7ÿ674 usageStatsService.js
+25/01/2026  15:34             8ÿ951 vendorService.js
+25/01/2026  16:55            14ÿ282 vendorWalletService.js
+07/01/2026  23:51             7ÿ403 whatsappService.js
+              28 fichier(s)          179ÿ177 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\styles
+
+25/01/2026  20:20    <DIR>          .
+20/01/2026  12:07    <DIR>          ..
+28/12/2025  19:05             6ÿ038 accessibility.css
+25/01/2026  01:07            16ÿ300 animations.css
+25/01/2026  01:07             6ÿ813 base.css
+28/12/2025  18:52             5ÿ854 dark-mode.css
+28/12/2025  16:21             6ÿ527 depth-effects.css
+25/01/2026  01:07             9ÿ514 design-tokens.css
+28/12/2025  16:21             6ÿ621 glassmorphism.css
+25/01/2026  01:35             6ÿ595 luxury-animations.css
+31/12/2025  12:30             2ÿ987 performance-mode.css
+25/01/2026  20:20             3ÿ543 performance.css
+              10 fichier(s)           70ÿ792 octets
+
+ R‚pertoire de C:\Users\Philippe\.gemini\antigravity\scratch\union-digitale\src\utils
+
+25/01/2026  16:55    <DIR>          .
+20/01/2026  12:07    <DIR>          ..
+28/12/2025  19:06             5ÿ848 accessibility.js
+15/12/2025  13:03             2ÿ186 analytics.js
+07/01/2026  16:35               980 debounce.js
+04/02/2026  09:17             4ÿ927 errorLogger.js
+12/01/2026  11:41             7ÿ525 logger.js
+02/01/2026  22:24             9ÿ749 measurementUtils.js
+25/01/2026  16:34            11ÿ652 monitoring.js
+25/01/2026  16:32             8ÿ449 transactionLogger.js
+25/01/2026  16:31            10ÿ331 validationSchemas.js
+25/01/2026  16:55            11ÿ068 vendorValidationSchemas.js
+04/02/2026  09:17             5ÿ704 webVitals.js
+              11 fichier(s)           78ÿ419 octets
+
+     Total des fichiers list‚sÿ:
+             283 fichier(s)        2ÿ482ÿ955 octets
+             131 R‚p(s)  80ÿ436ÿ899ÿ840 octets libres

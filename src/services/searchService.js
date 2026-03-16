@@ -59,6 +59,13 @@ class SearchService {
                 ...doc.data()
             }));
 
+            // Sort sponsored items to the top
+            results.sort((a, b) => {
+                if (a.isSponsored && !b.isSponsored) return -1;
+                if (!a.isSponsored && b.isSponsored) return 1;
+                return 0;
+            });
+
             // Client-side text search (Firestore limitation)
             if (searchTerm) {
                 const term = searchTerm.toLowerCase();

@@ -140,6 +140,38 @@ export const whatsappService = {
     },
 
     /**
+     * Sends COD Deposit Confirmation
+     */
+    async sendCODDepositConfirmation(order, user) {
+        const message = `Bonjour ${user.displayName || 'Client'}, nous avons bien reçu votre acompte de ${order.depositAmount} G pour la commande #${order.id}. La livraison est maintenant confirmée ! 🚚`;
+        return this.sendMessage(user.phoneNumber, 'cod_deposit_received', { orderId: order.id, message });
+    },
+
+    /**
+     * Sends COD Confirmation Request (Day of delivery)
+     */
+    async sendCODConfirmationRequest(order, user) {
+        const message = `Bonjour ${user.displayName || 'Client'}, votre commande #${order.id} est prévue pour livraison AUJOURD'HUI. Pouvez-vous confirmer votre présence et le paiement de ${order.remainingCOD} G ? Répondez OUI pour confirmer.`;
+        return this.sendMessage(user.phoneNumber, 'cod_confirmation_request', { orderId: order.id, message });
+    },
+
+    /**
+     * Sends COD Out for Delivery Notification
+     */
+    async sendCODOutForDelivery(order, user, courierName, courierPhone) {
+        const message = `Votre commande #${order.id} est en route ! 🛵 Livreur: ${courierName} (${courierPhone}). Prévoyez ${order.remainingCOD} G pour la livraison.`;
+        return this.sendMessage(user.phoneNumber, 'cod_out_for_delivery', { orderId: order.id, message });
+    },
+
+    /**
+     * Sends COD Delivered & Paid Notification
+     */
+    async sendCODDelivered(order, user) {
+        const message = `Félicitations ! Votre commande #${order.id} a été livrée et payée. Merci de votre confiance ! 🎉`;
+        return this.sendMessage(user.phoneNumber, 'cod_delivered_paid', { orderId: order.id, message });
+    },
+
+    /**
      * Sends Order Status Update
      * @param {string} orderId - Order ID
      * @param {string} newStatus - New order status
@@ -150,8 +182,11 @@ export const whatsappService = {
         const statusMessages = {
             'processing': 'est en cours de préparation ⏳',
             'shipped': 'a été expédiée 🚚',
+            'out_for_delivery': 'est en route pour livraison 🛵',
             'delivered': 'a été livrée ✅',
-            'cancelled': 'a été annulée ❌'
+            'delivered_paid': 'a été livrée et payée ✅',
+            'cancelled': 'a été annulée ❌',
+            'refused': 'a été refusée à la livraison ❌'
         };
 
         const statusText = statusMessages[newStatus] || newStatus;

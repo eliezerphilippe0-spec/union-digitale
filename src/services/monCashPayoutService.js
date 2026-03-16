@@ -6,9 +6,9 @@ import logger from '../utils/logger';
  * Documentation: https://moncashbutton.digicelgroup.com/Moncash-business/resources/doc/
  */
 
-const MONCASH_API_BASE = process.env.VITE_MONCASH_API_URL || 'https://sandbox.moncashbutton.digicelgroup.com/Api';
-const MONCASH_CLIENT_ID = process.env.VITE_MONCASH_CLIENT_ID;
-const MONCASH_CLIENT_SECRET = process.env.VITE_MONCASH_CLIENT_SECRET;
+const MONCASH_API_BASE = import.meta.env.VITE_MONCASH_API_URL || 'https://sandbox.moncashbutton.digicelgroup.com/Api';
+const MONCASH_CLIENT_ID = import.meta.env.VITE_MONCASH_CLIENT_ID;
+const MONCASH_CLIENT_SECRET = import.meta.env.VITE_MONCASH_CLIENT_SECRET;
 
 // Cache for access token
 let cachedToken = null;
@@ -50,78 +50,34 @@ async function getAccessToken() {
     }
 }
 
+import { getFunctions, httpsCallable } from 'firebase/functions';
+
+const functions = getFunctions();
+
 /**
- * Process MonCash payout
+ * Process MonCash payout securely via Cloud Function
  * @param {Object} payoutData - Payout information
  * @returns {Object} - Transaction result
  */
 export async function processMonCashPayout(payoutData) {
     try {
-        const { amount, destination, vendorId, payoutId } = payoutData;
+        const { payoutId } = payoutData;
 
-        // Validate phone number format (MonCash uses format: 509XXXXXXXX)
-        const phoneNumber = destination.phoneNumber.replace(/[^0-9]/g, '');
-        if (!phoneNumber.match(/^509[0-9]{8}$/)) {
-            throw new Error('Numéro MonCash invalide. Format requis: 509XXXXXXXX');
-        }
+        logger.info('Calling secure MonCash payout function', { payoutId });
 
-        // Get access token
-        const accessToken = await getAccessToken();
+        const processPayoutFn = httpsCallable(functions, 'processMonCashPayoutSecure');
+        const result = await processPayoutFn({ payoutId });
 
-        // Create payout request
-        const payoutRequest = {
-            amount: amount,
-            receiver: phoneNumber,
-            desc: `Payout Union Digitale - ${payoutId}`,
-            orderId: payoutId
-        };
-
-        logger.info('Processing MonCash payout', {
-            vendorId,
-            payoutId,
-            amount,
-            receiver: phoneNumber.substring(0, 6) + '***' // Log partial number for privacy
-        });
-
-        // Send payout request
-        const response = await axios.post(
-            `${MONCASH_API_BASE}/v1/transfert`,
-            payoutRequest,
-            {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
-
-        // Check response
-        if (response.data.status === 'success' || response.data.transaction_id) {
-            logger.info('MonCash payout successful', {
-                payoutId,
-                transactionId: response.data.transaction_id
-            });
-
-            return {
-                success: true,
-                transactionId: response.data.transaction_id,
-                reference: response.data.reference,
-                message: 'Payout envoyé avec succès'
-            };
-        } else {
-            throw new Error(response.data.message || 'Payout échoué');
-        }
+        return result.data;
 
     } catch (error) {
         logger.error('MonCash payout failed', error, {
-            vendorId: payoutData.vendorId,
             payoutId: payoutData.payoutId
         });
 
         return {
             success: false,
-            error: error.response?.data?.message || error.message || 'Erreur MonCash',
-            errorCode: error.response?.data?.code
+            error: error.message || 'Erreur MonCash'
         };
     }
 }

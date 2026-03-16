@@ -24,7 +24,7 @@ const ServicesPreview = () => {
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold-100 dark:bg-gold-900/20 rounded-full mb-4">
                         <Sparkles className="w-4 h-4 text-gold-600 dark:text-gold-400" />
                         <span className="text-gold-800 dark:text-gold-300 text-sm font-semibold">
-                            Super-App Haïtienne
+                            Zabely App
                         </span>
                     </div>
 

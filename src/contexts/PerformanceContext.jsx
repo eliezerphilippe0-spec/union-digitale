@@ -12,6 +12,33 @@ export function PerformanceProvider({ children }) {
         ttfb: null  // Time to First Byte
     });
 
+    const [isSlowConnection, setIsSlowConnection] = useState(false);
+    const [shouldReduceAnimations, setShouldReduceAnimations] = useState(false);
+
+    useEffect(() => {
+        // Detect connection speed
+        if ('connection' in navigator) {
+            const conn = navigator.connection;
+            const checkConnection = () => {
+                const isSlow = conn.saveData ||
+                    (conn.effectiveType && ['slow-2g', '2g', '3g'].includes(conn.effectiveType)) ||
+                    (conn.downlink && conn.downlink < 1.5);
+                setIsSlowConnection(isSlow);
+            };
+
+            conn.addEventListener('change', checkConnection);
+            checkConnection();
+        }
+
+        // Detect reduce animations preference
+        const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        setShouldReduceAnimations(mediaQuery.matches);
+        const handleChange = (e) => setShouldReduceAnimations(e.matches);
+        mediaQuery.addEventListener('change', handleChange);
+
+        return () => mediaQuery.removeEventListener('change', handleChange);
+    }, []);
+
     useEffect(() => {
         // Only run in browser
         if (typeof window === 'undefined') return;
@@ -77,7 +104,7 @@ export function PerformanceProvider({ children }) {
         // Example: gtag('event', 'web_vitals', { ...metrics });
 
         // Log to console in development
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
             logger.performance('Performance Metrics', 0, metrics);
         }
     }
@@ -110,7 +137,12 @@ export function PerformanceProvider({ children }) {
     }
 
     return (
-        <PerformanceContext.Provider value={{ metrics, getPerformanceScore }}>
+        <PerformanceContext.Provider value={{
+            metrics,
+            getPerformanceScore,
+            isSlowConnection,
+            shouldReduceAnimations
+        }}>
             {children}
         </PerformanceContext.Provider>
     );
@@ -133,7 +165,7 @@ export function useRenderTime(componentName) {
             const endTime = performance.now();
             const renderTime = endTime - startTime;
 
-            if (process.env.NODE_ENV === 'development' && renderTime > 16) {
+            if (import.meta.env.DEV && renderTime > 16) {
                 console.warn(`⚠️ ${componentName} render took ${renderTime.toFixed(2)}ms (> 16ms)`);
             }
         };

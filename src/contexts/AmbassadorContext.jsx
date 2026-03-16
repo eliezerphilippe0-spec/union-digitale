@@ -55,9 +55,13 @@ export const AmbassadorProvider = ({ children }) => {
         try {
             // Simplified: Direct Firestore write. In production, use a Callable Function for validation.
             const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+            // CORRECTIF : Les règles Firestore payouts exigent request.resource.data.vendorId
+            // On utilise vendorId (pas ambassadorId) pour satisfaire la règle de sécurité.
             await addDoc(collection(db, 'payouts'), {
-                ambassadorId: currentUser.uid,
-                amount: ambassadorData.totalEarnings, // Requesting full balance for now
+                vendorId: currentUser.uid,      // Requis par firestore.rules
+                ambassadorId: currentUser.uid,  // Traçabilité ambassador
+                type: 'ambassador',
+                amount: ambassadorData.totalEarnings,
                 status: 'pending',
                 method: 'moncash',
                 requestedAt: serverTimestamp()

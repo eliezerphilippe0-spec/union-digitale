@@ -6,12 +6,18 @@ export * from './sendWhatsAppMessage';
 
 // Orders
 export * from './orders/createOrderSecure';
+export * from './orders/codFraudDetection';
+
+// Loyalty
+export * from './loyalty/loyaltyPoints';
 
 // Webhooks
 export * from './webhooks/moncashWebhook';
 
 // Triggers
 export * from './triggers/createVendorOrderViews';
+export * from './triggers/orderConfirmation';
+export * from './triggers/digitalEntitlements';
 
 // Aggregates
 export * from './aggregates/updateSearchFacets';

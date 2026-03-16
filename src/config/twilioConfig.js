@@ -1,50 +1,16 @@
 /**
  * Twilio WhatsApp API Configuration
- * 
- * NOTE: The Twilio SDK cannot run in the browser (client-side).
- * For production, WhatsApp integration must be done via Firebase Functions (backend).
- * 
- * This module provides configuration and validation for future backend integration.
+ *
+ * SECURITE : Les credentials Twilio ne doivent JAMAIS etre dans le bundle frontend.
+ * Toute communication WhatsApp passe par les Firebase Cloud Functions (backend).
+ * Ce fichier ne contient aucun secret.
  */
 
-// Load credentials from environment variables
-const accountSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID;
-const authToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN;
-const whatsappNumber = import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER;
-
-// Check if credentials are configured (not placeholders)
-const hasValidCredentials =
-    accountSid &&
-    authToken &&
-    whatsappNumber &&
-    accountSid !== 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' &&
-    authToken !== 'votre_auth_token_ici';
-
-// Log configuration status
-if (hasValidCredentials) {
-    console.log(
-        '%c[Twilio Config] ✅ Credentials detected',
-        'background: #25D366; color: white; padding: 4px; border-radius: 4px;',
-        '\n⚠️ Note: Real WhatsApp sending requires Firebase Functions (backend).',
-        '\nCurrent mode: Simulation with credential logging'
-    );
-} else {
-    console.warn(
-        '[Twilio Config] ⚠️ Missing or placeholder credentials.\n' +
-        'WhatsApp messages will be simulated only.\n' +
-        'To configure, add real credentials to .env file:\n' +
-        '- VITE_TWILIO_ACCOUNT_SID\n' +
-        '- VITE_TWILIO_AUTH_TOKEN\n' +
-        '- VITE_TWILIO_WHATSAPP_NUMBER'
-    );
-}
-
+// SECURITE : On n'expose aucun accountSid ni authToken ici.
+// Les Cloud Functions gèrent l'authentification Twilio côté serveur.
 export const twilioConfig = {
-    accountSid: accountSid,
-    authToken: authToken, // Note: Never expose in production! Use backend only.
-    whatsappNumber: whatsappNumber,
-    isConfigured: hasValidCredentials,
-    mode: 'simulation', // Always simulation in browser
+    isConfigured: true, // Le backend (Cloud Functions) gère la connexion
+    mode: 'backend-only',
 };
 
 /**

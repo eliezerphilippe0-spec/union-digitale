@@ -9,6 +9,7 @@ import { Loader, AlertCircle, Wallet } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAffiliation } from '../contexts/AffiliationContext';
 import logger from '../utils/logger';
+import LocationPickerModal from '../components/ui/LocationPickerModal';
 
 // Payment Integrations
 import { Elements } from '@stripe/react-stripe-js';
@@ -35,6 +36,10 @@ const Checkout = () => {
     // Feature: Upsell (Order Bump)
     const [warrantyAdded, setWarrantyAdded] = useState(false);
     const WARRANTY_PRICE = 500;
+
+    const [isMapOpen, setIsMapOpen] = useState(false);
+    const [selectedLocation, setSelectedLocation] = useState(null);
+    const [instructions, setInstructions] = useState('');
 
     const totalWithBump = finalTotal + (warrantyAdded ? WARRANTY_PRICE : 0);
     const monthlyPayment = Math.ceil(totalWithBump / 3);
@@ -77,9 +82,11 @@ const Checkout = () => {
                 paymentMethod: method,
                 shippingAddress: isPhysical ? {
                     name: currentUser.displayName || 'Client',
-                    address: '15 Rue Pan-Américaine',
+                    address: selectedLocation?.addressFormatted || '15 Rue Pan-Américaine',
                     city: 'Pétion-Ville',
-                    country: 'Haïti'
+                    country: 'Haïti',
+                    location: selectedLocation ? { lat: selectedLocation.lat, lng: selectedLocation.lng } : null,
+                    instructions
                 } : null,
                 transactionDetails
             };
@@ -137,9 +144,11 @@ const Checkout = () => {
                 finalTotal: totalWithBump,
                 shippingAddress: isPhysical ? {
                     name: currentUser.displayName || 'Client',
-                    address: '15 Rue Pan-Américaine',
+                    address: selectedLocation?.addressFormatted || '15 Rue Pan-Américaine',
                     city: 'Pétion-Ville',
-                    country: 'Haïti'
+                    country: 'Haïti',
+                    location: selectedLocation ? { lat: selectedLocation.lat, lng: selectedLocation.lng } : null,
+                    instructions
                 } : null
             };
 
@@ -236,23 +245,43 @@ const Checkout = () => {
                                     <div className="flex gap-4">
                                         <button
                                             type="button"
-                                            onClick={getLocation}
-                                            disabled={geoLoading}
-                                            className="text-sm font-normal text-green-600 hover:underline flex items-center gap-1"
+                                            onClick={() => setIsMapOpen(true)}
+                                            className="text-sm font-bold text-secondary hover:underline flex items-center gap-1"
                                         >
-                                            <div className="w-4 h-4">{geoLoading ? '...' : '📍'}</div> {t('locate_btn')}
+                                            <div className="w-4 h-4">📍</div> {t('locate_btn')}
                                         </button>
                                         <span className="text-blue-600 text-sm font-normal cursor-pointer hover:underline">{t('edit')}</span>
                                     </div>
                                 </h2>
                                 <div className="text-sm text-gray-700">
-                                    <p>{currentUser?.displayName || t('shipping_guest')}</p>
-                                    <p>15 Rue Pan-Américaine</p>
-                                    <p>Pétion-Ville, Ouest</p>
-                                    <p>Haïti</p>
+                                    <p className="font-bold">{currentUser?.displayName || t('shipping_guest')}</p>
+                                    <p>{selectedLocation?.addressFormatted || '15 Rue Pan-Américaine'}</p>
+                                    {!selectedLocation && <p>Pétion-Ville, Ouest, Haïti</p>}
+
+                                    <div className="mt-4">
+                                        <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('instructions_placeholder')}</label>
+                                        <textarea
+                                            value={instructions}
+                                            onChange={(e) => setInstructions(e.target.value)}
+                                            placeholder="ex: Portail bleu, près de l'église..."
+                                            className="w-full text-sm border-gray-200 rounded-lg bg-gray-50 focus:ring-secondary focus:border-secondary transition-all"
+                                            rows="2"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         )}
+
+                        {/* Location Picker Modal */}
+                        <LocationPickerModal
+                            isOpen={isMapOpen}
+                            onClose={() => setIsMapOpen(false)}
+                            onConfirm={(loc) => {
+                                setSelectedLocation(loc);
+                                logger.info("Custom location confirmed:", loc);
+                            }}
+                            initialLocation={selectedLocation ? [selectedLocation.lat, selectedLocation.lng] : null}
+                        />
 
                         {/* Payment Method */}
                         <div className="bg-white p-6 rounded shadow-sm">

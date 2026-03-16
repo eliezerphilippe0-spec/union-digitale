@@ -1,5 +1,5 @@
-import React from 'react';
 import { Smartphone, Monitor, Tablet, Store, ArrowRight, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 
 /**
@@ -10,6 +10,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 const UniversalAccess = () => {
     const { t } = useLanguage();
+    const navigate = useNavigate();
 
     const devices = [
         {
@@ -152,7 +153,7 @@ const UniversalAccess = () => {
 
                         {/* CTA */}
                         <button
-                            onClick={() => window.location.href = '/register/seller'}
+                            onClick={() => navigate('/register?role=seller')}
                             className="inline-flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-primary-900 font-bold px-8 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
                         >
                             Créer ma Boutique Maintenant

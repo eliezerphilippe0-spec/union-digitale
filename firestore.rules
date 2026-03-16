@@ -126,8 +126,34 @@ service cloud.firestore {
       allow write: if false; // Only backend
     }
     
+    // Digital Products - Public read, seller/admin write
+    match /digital_products/{productId} {
+      allow read: if true;
+      allow create: if isSeller();
+      allow update: if isSeller() && 
+                       resource.data.vendorId == request.auth.uid &&
+                       request.resource.data.vendorId == resource.data.vendorId;
+      allow delete: if isAdmin();
+    }
+    
+    // Cars - Public read, seller/admin write
+    match /cars/{carId} {
+      allow read: if true;
+      allow create: if isSeller();
+      allow update: if (isSeller() && resource.data.ownerId == request.auth.uid) || isAdmin();
+      allow delete: if (isSeller() && resource.data.ownerId == request.auth.uid) || isAdmin();
+    }
+    
+    // Enrollments (Courses) - Owner read/create
+    match /enrollments/{enrollmentId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || isAdmin());
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
     // ========================================================================
-    // EXISTING COLLECTIONS (from previous rules)
+    // EXISTING COLLECTIONS (Hardened)
     // ========================================================================
     
     // Users
@@ -136,33 +162,91 @@ service cloud.firestore {
       allow create: if isAuthenticated() && request.auth.uid == userId;
       allow update: if isOwner(userId);
       allow delete: if isAdmin();
+
+      // Droits d'accès digitaux — modèle Apple App Store / Steam
+      // Liés au compte, pas à l'appareil. Backend uniquement en écriture.
+      match /entitlements/{productId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow write: if false; // Trigger onOrderPaidGrantEntitlements uniquement
+      }
+
+      // Bibliothèque digitale (rétrocompatibilité)
+      match /library/{itemId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow write: if false; // Backend uniquement
+      }
     }
     
     // Products
     match /products/{productId} {
       allow read: if true;
       allow create: if isSeller();
-      allow update: if isSeller() && resource.data.vendorId == request.auth.uid;
+      allow update: if isSeller() && 
+                       resource.data.vendorId == request.auth.uid &&
+                       request.resource.data.vendorId == resource.data.vendorId;
       allow delete: if isSeller() && resource.data.vendorId == request.auth.uid;
     }
     
     // Orders
     match /orders/{orderId} {
-      allow create: if isAuthenticated() && 
+      allow create: if isAuthenticated() &&
                        request.resource.data.userId == request.auth.uid &&
-                       request.resource.data.totalAmount > 0 &&
-                       request.resource.data.totalAmount <= 10000000;
-      
-      allow read: if isOwner(resource.data.userId) || 
-                     isOwner(resource.data.vendorId) || 
-                     isAdmin();
-      
-      allow update: if isAdmin() || 
-                       (isOwner(resource.data.vendorId) && 
+                       request.resource.data.totalAmount > 0;
+
+      // Seul l'acheteur et l'admin lisent la commande complète.
+      // Les vendeurs accèdent UNIQUEMENT à leur sous-collection vendor_orders
+      // (qui ne contient que leurs articles, sans données des autres vendeurs).
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+
+      // Un vendeur peut mettre à jour le statut/tracking UNIQUEMENT si son ID
+      // figure dans le tableau sellerIds de la commande.
+      allow update: if isAdmin() ||
+                       (isSeller() &&
+                        request.auth.uid in resource.data.sellerIds &&
                         request.resource.data.diff(resource.data).affectedKeys()
                           .hasOnly(['status', 'trackingNumber', 'shippedAt']));
-      
+
       allow delete: if isAdmin();
+
+      // Vue vendeur isolée — chaque vendeur ne voit que ses propres articles
+      match /vendor_orders/{vendorId} {
+        allow read: if isOwner(vendorId) || isAdmin();
+        allow write: if false; // Backend uniquement (trigger createVendorOrderViews)
+      }
+    }
+
+    // Platform balance — Admin uniquement
+    match /platform_balance/{docId} {
+      allow read: if isAdmin();
+      allow write: if false; // Backend uniquement
+    }
+
+    // Platform transactions — Admin uniquement
+    match /platform_transactions/{txId} {
+      allow read: if isAdmin();
+      allow write: if false; // Backend uniquement
+    }
+
+    // License keys — acheteur lit sa clé, vendeur gère son stock, admin tout
+    match /license_keys/{keyId} {
+      // Le vendeur peut uploader des clés
+      allow create: if isSeller() &&
+                       request.resource.data.productId is string &&
+                       request.resource.data.status == 'available';
+
+      // L'acheteur peut lire sa clé, le vendeur peut voir son stock
+      allow read: if isOwner(resource.data.soldTo) ||
+                     (isSeller() && resource.data.vendorId == request.auth.uid) ||
+                     isAdmin();
+
+      allow update: if false; // Transactions backend uniquement
+      allow delete: if isAdmin();
+    }
+
+    // Digital access records — propriétaire uniquement
+    match /digital_access/{accessId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow write: if false; // Backend uniquement
     }
     
     // Transactions
@@ -171,25 +255,29 @@ service cloud.firestore {
                        request.resource.data.userId == request.auth.uid;
       
       allow read: if isOwner(resource.data.userId) || isAdmin();
-      
       allow update: if false; // Immutable
+      allow delete: if isAdmin();
+    }
+    
+    // Messages - SECURE
+    match /messages/{messageId} {
+      allow create: if isAuthenticated() && 
+                       request.resource.data.senderId == request.auth.uid;
+      
+      allow read: if isAuthenticated() && 
+                     (request.auth.uid == resource.data.senderId || 
+                      request.auth.uid == resource.data.recipientId ||
+                      isAdmin());
       
       allow delete: if isAdmin();
     }
     
-    // Messages
-    match /messages/{messageId} {
-      allow create: if isAuthenticated();
-      allow read: if isAuthenticated();
-      allow update: if isOwner(resource.data.senderId);
-      allow delete: if isOwner(resource.data.senderId) || isAdmin();
-    }
-    
-    // Notifications
+    // Notifications - SECURE
     match /notifications/{notificationId} {
-      allow create: if isAuthenticated();
+      allow create: if false; // Only manageable via Cloud Functions / Admin SDK
       allow read: if isOwner(resource.data.userId);
-      allow update: if isOwner(resource.data.userId);
+      allow update: if isOwner(resource.data.userId) && 
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt']);
       allow delete: if isOwner(resource.data.userId);
     }
   }

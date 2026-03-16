@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { db, functions } from '../lib/firebase';
-import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
-import { Download, BookOpen, Music, Video, Loader, CheckCircle, AlertCircle, BarChart3 } from 'lucide-react';
+import { Download, BookOpen, Loader, CheckCircle, AlertCircle, BarChart3, Copy, Key } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import logger from '../utils/logger';
@@ -15,6 +15,7 @@ const MyLibrary = () => {
     const [loading, setLoading] = useState(true);
     const [downloadingId, setDownloadingId] = useState(null);
     const [downloadError, setDownloadError] = useState(null);
+    const [downloadSuccess, setDownloadSuccess] = useState({}); // { [itemKey]: downloadsRemaining }
 
     useEffect(() => {
         const fetchLibrary = async () => {
@@ -72,52 +73,51 @@ const MyLibrary = () => {
         </div>
     );
 
+    // Clé stable en string pour éviter les bugs de comparaison number vs string
+    const itemKey = (item) => String(item.productId || item.id);
+
     const handleDownload = async (item) => {
-        // Reset error state
+        const key = itemKey(item);
         setDownloadError(null);
-        setDownloadingId(item.productId || item.id);
+        setDownloadingId(key);
 
         try {
-            // Check if file info is available
-            if (!item.fileId && !item.filePath && !item.productId) {
-                // Try to use productId to get download link
-                if (!item.productId && !item.id) {
-                    setDownloadError({ id: item.productId, message: t('download_soon') || 'Fichier non disponible' });
-                    setDownloadingId(null);
-                    return;
-                }
-            }
-
-            // Call Cloud Function to generate signed download URL
-            const generateDownloadLinks = httpsCallable(functions, 'generateDownloadLinks');
-            const result = await generateDownloadLinks({
+            const generateDownloadLinksFn = httpsCallable(functions, 'generateDownloadLinks');
+            const result = await generateDownloadLinksFn({
                 fileId: item.fileId || item.productId || item.id,
-                productId: item.productId || item.id,
+                productId: String(item.productId || item.id),
                 orderId: item.orderId
             });
 
             if (result.data?.url) {
-                // Open download URL in new tab
                 window.open(result.data.url, '_blank');
                 logger.success(`Download started for ${item.title}`);
+                // Afficher le quota restant si la fonction le retourne
+                if (result.data.downloadsRemaining != null) {
+                    setDownloadSuccess(prev => ({ ...prev, [key]: result.data.downloadsRemaining }));
+                }
             } else {
-                throw new Error('No download URL returned');
+                throw new Error('Lien de téléchargement non généré');
             }
         } catch (error) {
             console.error("Download error:", error);
 
-            // Handle specific error codes
-            let errorMessage = t('download_error_alert') || 'Erreur de téléchargement';
+            // Firebase callable errors exposent .code ET .message (message du serveur)
+            let errorMessage = error.message || 'Erreur de téléchargement';
 
             if (error.code === 'functions/permission-denied') {
-                errorMessage = 'Vous n\'avez pas accès à ce fichier';
+                errorMessage = 'Accès refusé — vous n\'avez pas acheté ce produit';
             } else if (error.code === 'functions/not-found') {
-                errorMessage = 'Fichier non trouvé. Contactez le support.';
+                errorMessage = 'Fichier non disponible — contactez le support';
             } else if (error.code === 'functions/unauthenticated') {
-                errorMessage = 'Veuillez vous reconnecter';
+                errorMessage = 'Session expirée — veuillez vous reconnecter';
+            } else if (error.code === 'functions/resource-exhausted') {
+                errorMessage = 'Limite de téléchargements atteinte (5/5)';
+            } else if (error.code === 'functions/internal') {
+                errorMessage = 'Erreur serveur — réessayez dans quelques instants';
             }
 
-            setDownloadError({ id: item.productId || item.id, message: errorMessage });
+            setDownloadError({ id: key, message: errorMessage });
         } finally {
             setDownloadingId(null);
         }
@@ -171,11 +171,12 @@ const MyLibrary = () => {
                         {items.map((item, index) => (
                             <div key={`${item.id}-${index}`} className="group bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col">
                                 <div className="h-56 bg-gray-100 relative overflow-hidden">
-                                    {item.image ? (
-                                        <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    {item.image && (item.image.startsWith('http') || item.image.startsWith('/') || item.image.startsWith('data:')) ? (
+                                        <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 gap-2">
                                             <BookOpen className="w-16 h-16" />
+                                            {item.image && <span className="text-4xl">{item.image}</span>}
                                         </div>
                                     )}
                                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-gray-700 shadow-sm">
@@ -190,23 +191,38 @@ const MyLibrary = () => {
 
                                     <div className="mt-auto space-y-2">
                                         {/* Error message */}
-                                        {downloadError?.id === (item.productId || item.id) && (
-                                            <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-2 rounded-lg">
-                                                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                                                <span>{downloadError.message}</span>
+                                        {downloadError?.id === itemKey(item) && (
+                                            <div className="flex items-start gap-2 text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-100">
+                                                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                                                <div>
+                                                    <span>{downloadError.message}</span>
+                                                    {downloadError.message.includes('support') && (
+                                                        <a href="/customer-service" className="block text-xs text-red-500 underline mt-1">
+                                                            Contacter le support →
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Quota restant après téléchargement réussi */}
+                                        {downloadSuccess[itemKey(item)] != null && (
+                                            <div className="flex items-center gap-2 text-green-700 text-xs bg-green-50 px-3 py-2 rounded-lg border border-green-100">
+                                                <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                                                <span>{downloadSuccess[itemKey(item)]} téléchargement(s) restant(s)</span>
                                             </div>
                                         )}
 
                                         {/* Download button */}
                                         <button
                                             onClick={() => handleDownload(item)}
-                                            disabled={downloadingId === (item.productId || item.id)}
-                                            className={`w-full flex items-center justify-center gap-2 font-bold py-3 rounded-xl transition-colors border ${downloadingId === (item.productId || item.id)
+                                            disabled={downloadingId === itemKey(item)}
+                                            className={`w-full flex items-center justify-center gap-2 font-bold py-3 rounded-xl transition-colors border ${downloadingId === itemKey(item)
                                                 ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-wait'
                                                 : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
                                                 }`}
                                         >
-                                            {downloadingId === (item.productId || item.id) ? (
+                                            {downloadingId === itemKey(item) ? (
                                                 <>
                                                     <Loader className="w-5 h-5 animate-spin" />
                                                     {t('generating_link') || 'Génération du lien...'}
@@ -218,6 +234,29 @@ const MyLibrary = () => {
                                                 </>
                                             )}
                                         </button>
+
+                                        {/* License Key Display */}
+                                        {item.licensedKey && (
+                                            <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-300 relative group/key">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Key className="w-4 h-4 text-secondary" />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Votre Code / Licence</span>
+                                                </div>
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <code className="text-sm font-bold font-mono text-gray-900 break-all">{item.licensedKey}</code>
+                                                    <button
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(item.licensedKey);
+                                                            logger.success('Code copié !');
+                                                        }}
+                                                        className="p-2 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 text-gray-400 hover:text-secondary transition-colors"
+                                                        title="Copier le code"
+                                                    >
+                                                        <Copy className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

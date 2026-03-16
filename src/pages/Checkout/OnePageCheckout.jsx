@@ -5,8 +5,9 @@ import { useWallet } from '../../contexts/WalletContext';
 import { useAffiliation } from '../../contexts/AffiliationContext';
 import { paymentService } from '../../services/paymentService';
 import { useNavigate } from 'react-router-dom';
-import { Loader, Lock, ShieldCheck, CreditCard, Smartphone } from 'lucide-react';
+import { Loader, Lock, ShieldCheck, CreditCard, Smartphone, Truck } from 'lucide-react';
 import OrderBump from '../../components/OrderBump';
+import { COD_DEPOSIT_PERCENTAGE, ALLOWED_COD_ZONES } from '../../constants/codConstants';
 
 const OnePageCheckout = () => {
     const { currentUser } = useAuth();
@@ -21,6 +22,10 @@ const OnePageCheckout = () => {
     const [paymentMethod, setPaymentMethod] = useState('moncash');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
+    const hasDigitalItems = cartItems.some(item => item.type === 'digital' || item.isDigital);
+    const isCODAllowed = !hasDigitalItems && !currentUser?.codBlocked;
+    const depositAmount = finalTotal * COD_DEPOSIT_PERCENTAGE;
 
     // Example Bump Product (Should come from backend/config)
     const bumpProduct = {
@@ -67,6 +72,33 @@ const OnePageCheckout = () => {
                 await pay(finalTotal, orderId);
                 clearCart();
                 navigate(`/upsell?orderId=${orderId}`); // Redirect to Upsell instead of Confirmation
+            } else if (paymentMethod === 'COD_HT') {
+                if (!isCODAllowed) throw new Error("Le paiement à la livraison n'est pas disponible pour cette commande.");
+
+                // Créer la commande COD en statut 'pending_deposit'
+                const orderId = await paymentService.createOrder({
+                    ...orderData,
+                    depositAmount,
+                    remainingCOD: finalTotal - depositAmount,
+                    status: 'pending_deposit',
+                    paymentType: 'cod_deposit',
+                }, currentUser, activeReferral);
+
+                // Rediriger vers MonCash pour payer uniquement l'acompte (10%)
+                // Le webhook MonCash confirmera la commande automatiquement
+                const depositOrderData = {
+                    ...orderData,
+                    total: depositAmount,    // MonCash reçoit seulement l'acompte
+                    paymentType: 'cod_deposit',
+                    orderId,                 // Référence commande existante
+                };
+                const redirectUrl = await paymentService.processMonCashPayment(
+                    depositOrderData, currentUser, activeReferral
+                );
+                if (redirectUrl) {
+                    clearCart();
+                    window.location.href = redirectUrl;
+                }
             }
         } catch (err) {
             console.error(err);
@@ -172,6 +204,34 @@ const OnePageCheckout = () => {
                                         <CreditCard className="h-6 w-6 text-blue-600" />
                                     </div>
                                 </label>
+
+                                {/* Cash on Delivery (COD) */}
+                                <label className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition-all ${!isCODAllowed ? 'opacity-50 cursor-not-allowed bg-gray-50' : (paymentMethod === 'COD_HT' ? 'border-green-500 ring-1 ring-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300')}`}>
+                                    <input
+                                        type="radio"
+                                        name="payment"
+                                        value="COD_HT"
+                                        disabled={!isCODAllowed}
+                                        checked={paymentMethod === 'COD_HT'}
+                                        onChange={() => setPaymentMethod('COD_HT')}
+                                        className="h-4 w-4 text-green-600 border-gray-300 focus:ring-green-500"
+                                    />
+                                    <div className="ml-3 flex items-center justify-between w-full">
+                                        <div>
+                                            <span className="block text-sm font-medium text-gray-900">Paiement à la Livraison (COD)</span>
+                                            <span className="block text-xs text-gray-500">
+                                                Acompte {depositAmount > 0 ? `${depositAmount.toLocaleString()} G` : '10%'} via MonCash · Reste à la livraison
+                                            </span>
+                                        </div>
+                                        <Truck className="h-6 w-6 text-green-600" />
+                                    </div>
+                                </label>
+                                {!isCODAllowed && hasDigitalItems && (
+                                    <p className="text-[10px] text-red-500 mt-1 italic">* Non disponible pour les produits digitaux</p>
+                                )}
+                                {!isCODAllowed && currentUser?.codBlocked && (
+                                    <p className="text-[10px] text-red-500 mt-1 italic">* Votre accès au COD est suspendu suite à des refus</p>
+                                )}
                             </div>
                         </div>
 
@@ -204,14 +264,22 @@ const OnePageCheckout = () => {
                                     <span>Sous-total</span>
                                     <span>{cartTotal.toLocaleString()} G</span>
                                 </div>
-                                <div className="flex justify-between text-sm text-gray-600">
-                                    <span>Taxes</span>
-                                    <span>{tax.toLocaleString()} G</span>
-                                </div>
                                 <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-100 mt-2">
-                                    <span>Total</span>
+                                    <span>Total TTC</span>
                                     <span>{finalTotal.toLocaleString()} G</span>
                                 </div>
+                                {paymentMethod === 'COD_HT' && (
+                                    <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-100 animate-pulse">
+                                        <div className="flex justify-between text-sm font-bold text-green-800">
+                                            <span>Acompte à payer (10%)</span>
+                                            <span>{depositAmount.toLocaleString()} G</span>
+                                        </div>
+                                        <div className="flex justify-between text-xs text-green-600 mt-1">
+                                            <span>Reste à payer à la livraison</span>
+                                            <span>{(finalTotal - depositAmount).toLocaleString()} G</span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Order Bump */}
@@ -226,9 +294,14 @@ const OnePageCheckout = () => {
                                 {loading ? "Traitement..." : `Payer ${finalTotal.toLocaleString()} G`}
                             </button>
 
-                            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500">
-                                <ShieldCheck className="w-4 h-4 text-green-600" />
-                                <span>Paiement 100% Sécurisé & Chiffré</span>
+                            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                <div className="flex items-start gap-2 text-green-800">
+                                    <ShieldCheck className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                    <div className="text-xs leading-relaxed">
+                                        <p className="font-bold mb-1">Paiement 100% Sécurisé</p>
+                                        <p>Remboursement garanti si problème · Support WhatsApp disponible</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

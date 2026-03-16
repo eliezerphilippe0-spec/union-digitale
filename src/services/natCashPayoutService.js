@@ -1,94 +1,32 @@
-import axios from 'axios';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import logger from '../utils/logger';
 
-/**
- * NatCash Payout Integration Service
- * Documentation: Contact Natcom for API documentation
- */
-
-const NATCASH_API_BASE = process.env.VITE_NATCASH_API_URL || 'https://api.natcom.ht/natcash';
-const NATCASH_API_KEY = process.env.VITE_NATCASH_API_KEY;
-const NATCASH_MERCHANT_ID = process.env.VITE_NATCASH_MERCHANT_ID;
+const functions = getFunctions();
 
 /**
- * Process NatCash payout
+ * Process NatCash payout securely via Cloud Function
  * @param {Object} payoutData - Payout information
  * @returns {Object} - Transaction result
  */
 export async function processNatCashPayout(payoutData) {
     try {
-        const { amount, destination, vendorId, payoutId } = payoutData;
+        const { payoutId } = payoutData;
 
-        // Validate phone number format (NatCash uses format: 509XXXXXXXX)
-        const phoneNumber = destination.phoneNumber.replace(/[^0-9]/g, '');
-        if (!phoneNumber.match(/^509[0-9]{8}$/)) {
-            throw new Error('Numéro NatCash invalide. Format requis: 509XXXXXXXX');
-        }
+        logger.info('Calling secure NatCash payout function', { payoutId });
 
-        // Create payout request
-        const payoutRequest = {
-            merchant_id: NATCASH_MERCHANT_ID,
-            transaction_id: payoutId,
-            amount: amount,
-            currency: 'HTG',
-            recipient_phone: phoneNumber,
-            description: `Payout Union Digitale - ${payoutId}`,
-            callback_url: `${window.location.origin}/api/webhooks/natcash/payout`,
-            metadata: {
-                vendor_id: vendorId,
-                payout_id: payoutId
-            }
-        };
+        const processPayoutFn = httpsCallable(functions, 'processNatCashPayoutSecure');
+        const result = await processPayoutFn({ payoutId });
 
-        logger.info('Processing NatCash payout', {
-            vendorId,
-            payoutId,
-            amount,
-            recipient: phoneNumber.substring(0, 6) + '***'
-        });
-
-        // Send payout request
-        const response = await axios.post(
-            `${NATCASH_API_BASE}/v1/payouts`,
-            payoutRequest,
-            {
-                headers: {
-                    'Authorization': `Bearer ${NATCASH_API_KEY}`,
-                    'Content-Type': 'application/json',
-                    'X-Merchant-ID': NATCASH_MERCHANT_ID
-                }
-            }
-        );
-
-        // Check response
-        if (response.data.status === 'success' || response.data.status === 'pending') {
-            logger.info('NatCash payout initiated', {
-                payoutId,
-                transactionId: response.data.transaction_id,
-                status: response.data.status
-            });
-
-            return {
-                success: true,
-                transactionId: response.data.transaction_id,
-                reference: response.data.reference_number,
-                status: response.data.status,
-                message: 'Payout en cours de traitement'
-            };
-        } else {
-            throw new Error(response.data.message || 'Payout échoué');
-        }
+        return result.data;
 
     } catch (error) {
         logger.error('NatCash payout failed', error, {
-            vendorId: payoutData.vendorId,
             payoutId: payoutData.payoutId
         });
 
         return {
             success: false,
-            error: error.response?.data?.message || error.message || 'Erreur NatCash',
-            errorCode: error.response?.data?.error_code
+            error: error.message || 'Erreur NatCash'
         };
     }
 }

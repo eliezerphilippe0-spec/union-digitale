@@ -9,7 +9,7 @@ const PaiementCAMEP = () => {
     const navigate = useNavigate();
     const { currentUser } = useAuth();
     const [formData, setFormData] = useState({
-        numeroClient: '',
+        numeroClient: localStorage.getItem('last_camep_client') || '',
         mois: '',
         montant: ''
     });
@@ -37,6 +37,9 @@ const PaiementCAMEP = () => {
                     }
                 });
             }
+
+            // Save client number
+            localStorage.setItem('last_camep_client', formData.numeroClient);
 
             // Simulate processing
             setTimeout(() => {
@@ -90,6 +93,14 @@ const PaiementCAMEP = () => {
                             <p><strong>Mois:</strong> {formData.mois}</p>
                             <p><strong>Montant:</strong> {formData.montant} HTG</p>
                             <p><strong>Référence:</strong> {transactionRef}</p>
+                        </div>
+                        <div className="mt-6 flex gap-4">
+                            <button className="flex-1 bg-white text-blue-600 font-bold py-3 rounded-xl border border-blue-200 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2">
+                                <Shield size={18} /> Reçu PDF
+                            </button>
+                            <button onClick={() => navigate('/services')} className="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">
+                                Terminer
+                            </button>
                         </div>
                     </div>
                 </div>

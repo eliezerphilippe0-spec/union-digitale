@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Check, Shirt } from 'lucide-react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Check, Shirt, Ruler, AlertCircle, Plus, X } from 'lucide-react';
 import { useProducts } from '../hooks/useProducts';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -10,16 +10,21 @@ import VirtualFittingRoom from '../components/VirtualFittingRoom';
 import ReviewSection from '../components/ReviewSection';
 import { Loader } from 'lucide-react';
 import SEO from '../components/SEO';
+import ProductSchema from '../components/ProductSchema';
 import { useCart } from '../contexts/CartContext';
 
 const ProductDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [quantity, setQuantity] = useState(1);
+    const [selectedSize, setSelectedSize] = useState('');
+    const [recommendedSize, setRecommendedSize] = useState(null);
     const { products, loading } = useProducts();
     const { t } = useLanguage();
     const { addToCart } = useCart();
     const [showFittingRoom, setShowFittingRoom] = useState(false);
+    const [showTrailer, setShowTrailer] = useState(false);
+    const [openLesson, setOpenLesson] = useState(null);
 
     // Find product by ID (handle both string and number IDs)
     const product = products.find(p => String(p.id) === String(id));
@@ -34,10 +39,22 @@ const ProductDetails = () => {
     return (
         <div className="bg-white min-h-screen py-8">
             <div className="container mx-auto px-4">
+                <SEO
+                    title={product.title}
+                    description={product.description}
+                    image={(product.images && product.images[0]) || product.image}
+                    type="product"
+                />
+                <ProductSchema product={product} productId={id} />
+
                 {/* Breadcrumbs */}
-                <div className="text-sm text-gray-500 mb-4">
-                    {t(product.category) || product.category} &gt; {product.type === 'digital' ? 'Produits Digitaux' : 'Produits Physiques'} &gt; {product.brand}
-                </div>
+                <nav aria-label="Fil d'Ariane" className="text-sm text-gray-500 mb-4 flex items-center gap-1">
+                    <Link to="/" className="hover:underline hover:text-gray-700">Accueil</Link>
+                    <span>&gt;</span>
+                    <Link to={`/category/${product.category}`} className="hover:underline hover:text-gray-700">{t(product.category) || product.category}</Link>
+                    <span>&gt;</span>
+                    <span className="text-gray-900 font-medium truncate max-w-xs">{product.title}</span>
+                </nav>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     {/* Left Column: Image Gallery (5 cols) */}
@@ -52,7 +69,7 @@ const ProductDetails = () => {
                                 >
                                     {/* Handle both Emoji mocks and URL images */}
                                     {img && (img.startsWith('http') || img.startsWith('/')) ? (
-                                        <img src={img} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
+                                        <img src={img} alt={`Thumb ${idx}`} className="w-full h-full object-cover" loading="lazy" />
                                     ) : (
                                         <span className="text-xs text-gray-400">{img || 'Img'}</span>
                                     )}
@@ -65,11 +82,25 @@ const ProductDetails = () => {
                             {(() => {
                                 const currentImg = (product.images && product.images[activeImage]) || product.image;
                                 if (currentImg && (currentImg.startsWith('http') || currentImg.startsWith('/'))) {
-                                    return <img src={currentImg} alt={product.title} className="w-full h-full object-contain" />;
+                                    return <img src={currentImg} alt={product.title} className="w-full h-full object-contain" loading="eager" />;
                                 } else {
                                     return <span className="text-6xl text-gray-200 font-bold">{currentImg}</span>;
                                 }
                             })()}
+
+                            {product.type === 'digital' && (
+                                <button
+                                    onClick={() => setShowTrailer(true)}
+                                    className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/40 transition-colors group"
+                                >
+                                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                                        <div className="w-0 h-0 border-t-[10px] border-t-transparent border-l-[18px] border-l-indigo-600 border-b-[10px] border-b-transparent ml-1"></div>
+                                    </div>
+                                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 px-3 py-1 rounded-full text-xs font-bold text-indigo-700 shadow-sm flex items-center gap-1">
+                                        Voir l'aperçu gratuit
+                                    </div>
+                                </button>
+                            )}
 
                             {product.type === 'digital' && (
                                 <div className="absolute top-4 right-4 bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
@@ -91,6 +122,9 @@ const ProductDetails = () => {
                                 ))}
                             </div>
                             <span className="text-blue-600 text-sm hover:underline cursor-pointer">{product.reviews} {t('ratings_count')}</span>
+                            {product.type === 'digital' && (
+                                <span className="text-gray-500 text-sm">• 1,245 {t('students_joined') || 'étudiants'}</span>
+                            )}
                         </div>
 
                         <div className="border-t border-b border-gray-200 py-4 my-4">
@@ -101,23 +135,57 @@ const ProductDetails = () => {
                                     {product.originalPrice && (
                                         <span className="text-sm text-gray-500 line-through">{t('suggested_price')} {product.originalPrice.toLocaleString()} G</span>
                                     )}
+                                    {product.type === 'digital' && (
+                                        <div className="mt-1 flex gap-2">
+                                            <span className="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded">Accès à vie</span>
+                                            <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded">Certificat inclus</span>
+                                        </div>
+                                    )}
                                     <div className="text-sm text-green-600 font-bold mt-1">
                                         {t('cashback_earn')} {Math.floor(product.price * 0.02).toLocaleString()} G {t('cashback_suffix')} (2%)
                                     </div>
-                                    <div className="text-sm text-orange-600 font-bold mt-0.5 flex items-center gap-1">
-                                        <span className="bg-orange-100 px-1 rounded text-xs">{t('new_label')}</span>
-                                        {t('points_earn')} {Math.floor(product.price / 100).toLocaleString()} {t('points_suffix')}
-                                    </div>
                                 </div>
                             </div>
-                            {product.unionPlus && product.type === 'physical' && (
-                                <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
-                                    <span className="bg-[#FFC400] text-primary px-1 rounded-sm text-xs italic font-bold">Union Plus</span>
-                                    <span>{t('one_day_delivery')}</span>
-                                    <span className="text-green-600 font-bold">{t('free_returns')}</span>
-                                </div>
-                            )}
                         </div>
+
+                        {product.type === 'digital' && (
+                            <div className="mb-6">
+                                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                                    <Check className="w-5 h-5 text-green-600" />
+                                    Programme de la formation
+                                </h3>
+                                <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-200">
+                                    {[
+                                        { title: "Introduction et fondamentaux", lessons: 4, duration: "45 min" },
+                                        { title: "Maîtrise des outils avancés", lessons: 8, duration: "2h 30" },
+                                        { title: "Projet pratique de fin d'études", lessons: 2, duration: "1h 15" }
+                                    ].map((section, idx) => (
+                                        <div key={idx} className="bg-white">
+                                            <button
+                                                onClick={() => setOpenLesson(openLesson === idx ? null : idx)}
+                                                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                                            >
+                                                <div className="text-left">
+                                                    <div className="font-bold text-sm text-gray-900">{section.title}</div>
+                                                    <div className="text-xs text-gray-500">{section.lessons} leçons • {section.duration}</div>
+                                                </div>
+                                                <Plus className={`w-4 h-4 text-gray-400 transition-transform ${openLesson === idx ? 'rotate-45' : ''}`} />
+                                            </button>
+                                            {openLesson === idx && (
+                                                <div className="p-4 pt-0 space-y-2">
+                                                    {[1, 2, 3].map(l => (
+                                                        <div key={l} className="flex items-center gap-2 text-xs text-gray-600">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
+                                                            Leçon {l} : Initiation aux concepts clés
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         <div className="mb-4">
                             <h3 className="font-bold mb-2">{t('about_item')}</h3>
@@ -127,6 +195,62 @@ const ProductDetails = () => {
                                 ))}
                             </ul>
                         </div>
+
+                        {/* Size Selection & Fitting Room (Pro Optimization) */}
+                        {product.type === 'physical' && (product.category === 'Vêtements' || product.category === 'Clothing' || product.category === 'Shoes' || product.category === 'Chaussures') && (
+                            <div className="mb-6">
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="font-bold text-gray-900">Sélectionnez votre taille</h3>
+                                    <button
+                                        onClick={() => setShowFittingRoom(true)}
+                                        className="text-primary-600 hover:text-primary-700 font-bold text-sm flex items-center gap-1 transition-colors"
+                                    >
+                                        <Ruler className="w-4 h-4" />
+                                        Guide & Essayage Virtuel
+                                    </button>
+                                </div>
+
+                                {/* Social Proof (Pro Optimization) */}
+                                <div className="flex items-center gap-2 text-[11px] text-green-700 bg-green-50 px-3 py-2 rounded-lg border border-green-100 mb-4 font-medium">
+                                    <Shirt className="w-4 h-4" />
+                                    <span>85% des clients ont trouvé leur taille parfaite ici.</span>
+                                </div>
+
+                                <div className="flex flex-wrap gap-2">
+                                    {(product.sizes || ['S', 'M', 'L', 'XL']).map(size => (
+                                        <button
+                                            key={size}
+                                            onClick={() => setSelectedSize(size)}
+                                            className={`min-w-[48px] h-10 border rounded-lg font-bold text-sm transition-all ${selectedSize === size ? 'border-primary-600 bg-primary-50 text-primary-600 ring-2 ring-primary-100' : 'border-gray-200 text-gray-700 hover:border-gray-300'}`}
+                                        >
+                                            {size}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {recommendedSize && selectedSize && selectedSize !== recommendedSize && (
+                                    <div className="mt-4 p-4 bg-amber-50 rounded-xl border border-amber-200 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500">
+                                        <div className="flex items-start gap-3">
+                                            <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                                <AlertCircle className="w-5 h-5 text-amber-600" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-amber-900 text-sm mb-1">Attention à la taille !</h4>
+                                                <p className="text-xs text-amber-700 leading-relaxed mb-3">
+                                                    Notre algorithme d'essayage virtuel a calculé que la taille <b>{recommendedSize}</b> vous irait mieux que la taille <b>{selectedSize}</b> sélectionnée.
+                                                </p>
+                                                <button
+                                                    onClick={() => setSelectedSize(recommendedSize)}
+                                                    className="bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold py-1.5 px-3 rounded-lg flex items-center gap-1 transition-all shadow-sm"
+                                                >
+                                                    <Check className="w-3.5 h-3.5" /> Choisir ma taille recommandée ({recommendedSize})
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Right Column: Buy Box (3 cols) */}
@@ -147,7 +271,7 @@ const ProductDetails = () => {
                                         </div>
                                         <div className="flex items-center gap-1 text-blue-600 mt-2 cursor-pointer hover:underline">
                                             <MapPin className="w-4 h-4" />
-                                            {t('deliver_to')} Philippe - Paris 75001
+                                            {t('deliver_to')} Philippe - Pétion-Ville
                                         </div>
                                     </div>
                                 )
@@ -158,29 +282,41 @@ const ProductDetails = () => {
                                 </div>
                             )}
 
-                            {/* Virtual Fitting Room Button */}
-                            {(product.category === 'clothing' || product.category === 'shoes') && product.sizeChart && (
-                                <div className="mb-4">
-                                    <button
-                                        onClick={() => setShowFittingRoom(true)}
-                                        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold py-3 rounded-lg shadow-md hover:shadow-lg transition-all mb-2"
-                                    >
-                                        <Shirt className="w-5 h-5" />
-                                        {t('fr_btn_try_on') || 'Essayer Virtuellement'}
-                                    </button>
-                                    <div className="text-xs text-center text-gray-500">
-                                        <span className="font-semibold text-indigo-600">Nouveau !</span> Trouvez votre taille parfaite avec l'IA
+                            {/* Scarcity Alert */}
+                            {product.type === 'physical' && (
+                                <div className="mb-4 p-3 bg-red-50 rounded-lg border border-red-100 animate-pulse">
+                                    <div className="flex items-center gap-2 text-red-700 font-bold text-sm">
+                                        <AlertCircle className="w-4 h-4" />
+                                        Plus que 3 articles disponibles !
                                     </div>
+                                    <p className="text-[10px] text-red-600 mt-1">Commandez maintenant pour garantir la livraison demain.</p>
                                 </div>
                             )}
 
-                            <div className="text-xl text-green-700 font-medium mb-4">{t('in_stock')}</div>
+                            {/* Vendor Trust Block */}
+                            <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">CONFIANCE VENDEUR</h4>
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-600">Fiabilité</span>
+                                        <div className="flex gap-0.5">
+                                            {[1, 2, 3, 4, 5].map(i => (
+                                                <div key={i} className={`w-3 h-1 rounded-full ${i <= 5 ? 'bg-green-500' : 'bg-gray-200'}`}></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-600">Taux de réponse</span>
+                                        <span className="text-sm font-bold text-gray-900">98%</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-600">Délai d'expédition</span>
+                                        <span className="text-sm font-bold text-gray-900">&lt; 12h</span>
+                                    </div>
+                                </div>
+                            </div>
 
-                            <SEO
-                                title={product.title}
-                                description={product.description}
-                                image={product.image} // Note: This assumes image is a URL, but current mock data uses emojis. In real app, this would be product.imageUrl
-                            />
+                            <div className="text-xl text-green-700 font-medium mb-4">{t('in_stock')}</div>
 
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2">
@@ -195,7 +331,14 @@ const ProductDetails = () => {
                                 </div>
 
                                 <button
-                                    onClick={() => alert(`Ajouté ${quantity} article(s) au panier !`)}
+                                    onClick={() => {
+                                        if (product.type === 'physical' && !selectedSize && (product.sizes || []).length > 0) {
+                                            alert("Veuillez sélectionner une taille.");
+                                            return;
+                                        }
+                                        addToCart({ ...product, selectedSize, quantity: Number(quantity) }, Number(quantity));
+                                        alert(`${product.title} ajouté au panier !`);
+                                    }}
                                     className="w-full bg-secondary hover:bg-secondary-hover text-white font-medium py-2 rounded-full shadow-sm transition-colors"
                                 >
                                     {t('add_to_cart')}
@@ -250,10 +393,33 @@ const ProductDetails = () => {
                     product={product}
                     onClose={() => setShowFittingRoom(false)}
                     onAddToCart={(prod, size) => {
-                        addToCart({ ...prod, selectedSize: size });
+                        setSelectedSize(size);
+                        setRecommendedSize(size);
+                        addToCart({ ...prod, selectedSize: size, quantity: Number(quantity) });
                         alert(`Ajouté au panier - Taille ${size}`);
                     }}
                 />
+            )}
+
+            {/* Video Trailer Modal */}
+            {showTrailer && (
+                <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+                    <div className="w-full max-w-4xl relative aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
+                        <button
+                            onClick={() => setShowTrailer(false)}
+                            className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
+                        >
+                            <X className="w-8 h-8" />
+                        </button>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <div className="w-20 h-20 bg-indigo-600 rounded-full flex items-center justify-center mb-4">
+                                <div className="w-0 h-0 border-t-[15px] border-t-transparent border-l-[25px] border-l-white border-b-[15px] border-b-transparent ml-2"></div>
+                            </div>
+                            <p className="text-white font-bold text-xl">Aperçu vidéo en cours de chargement...</p>
+                            <p className="text-gray-400 text-sm mt-2 italic">Simulation d'un trailer professionnel</p>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

@@ -11,8 +11,10 @@ import {
     where,
     orderBy,
     limit,
-    serverTimestamp
+    serverTimestamp,
+    increment
 } from 'firebase/firestore';
+import { refreshVendorTier } from './reputationService';
 
 /**
  * Vendor Service - Manages vendor shops and profiles
@@ -65,6 +67,7 @@ export const createVendorShop = async (vendorData) => {
             totalSales: 0,
             totalRevenue: 0,
             commission: 10, // Default 10% commission
+            subscriptionPlan: 'basic',
             status: 'active',
             joinedDate: serverTimestamp(),
             createdAt: serverTimestamp(),
@@ -239,11 +242,14 @@ export const incrementVendorSales = async (vendorId, amount) => {
         const vendor = await getVendor(vendorId);
 
         await updateVendorShop(vendorId, {
-            totalSales: (vendor.totalSales || 0) + 1,
-            totalRevenue: (vendor.totalRevenue || 0) + amount
+            totalSales: increment(1),
+            totalRevenue: increment(amount)
         });
 
-        console.log('Vendor sales incremented:', vendorId);
+        // Refresh reputation tier after sale (Mercado Libre style)
+        await refreshVendorTier(vendorId);
+
+        console.log('Vendor sales incremented & tier refreshed:', vendorId);
     } catch (error) {
         console.error('Error incrementing vendor sales:', error);
         throw error;

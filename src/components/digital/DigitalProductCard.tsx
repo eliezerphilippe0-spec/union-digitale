@@ -16,12 +16,20 @@ const DigitalProductCard: React.FC<{ product: Product }> = ({ product }) => {
         <div className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col h-full border border-gray-100">
             <div className="relative h-48 overflow-hidden">
                 <img src={product.thumbnail} alt={product.title} className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500" />
-                <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded text-xs font-bold text-[#0A1D37]">
-                    Digital
+                <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
+                    <div className="bg-white/90 px-2 py-1 rounded text-[10px] font-bold text-[#0A1D37] shadow-sm">
+                        Digital
+                    </div>
+                    <div className="bg-amber-400 px-2 py-1 rounded text-[10px] font-bold text-white shadow-sm">
+                        Bestseller
+                    </div>
                 </div>
             </div>
 
             <div className="p-5 flex-1 flex flex-col">
+                <div className="mb-1">
+                    <span className="text-[10px] font-bold text-green-600 uppercase tracking-wider">Mise à jour • Fév 2026</span>
+                </div>
                 <h3 className="font-bold text-lg text-[#0A1D37] mb-2 leading-tight">{product.title}</h3>
 
                 <div className="flex items-center gap-1 mb-3">

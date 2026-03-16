@@ -4,30 +4,19 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { visualizer } from 'rollup-plugin-visualizer'
 import compression from 'vite-plugin-compression'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
-    // Gzip compression
-    compression({
-      algorithm: 'gzip',
-      ext: '.gz',
-    }),
-    // Brotli compression (better than gzip)
-    compression({
-      algorithm: 'brotliCompress',
-      ext: '.br',
-    }),
     // Bundle analyzer
     visualizer({
       open: false,
       gzipSize: true,
       brotliSize: true,
-      filename: 'dist/stats.html'
+      filename: 'stats.html'
     }),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['vite.svg', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
         name: 'Union Digitale',
         short_name: 'Union',
@@ -84,6 +73,14 @@ export default defineConfig({
           }
         ]
       }
+    }),
+    compression({
+      algorithm: 'brotliCompress',
+      ext: '.br',
+    }),
+    compression({
+      algorithm: 'gzip',
+      ext: '.gz',
     })
   ],
   resolve: {
@@ -96,56 +93,35 @@ export default defineConfig({
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true, // Remove console.logs in production
+        drop_console: true,
         drop_debugger: true
       }
     },
-    chunkSizeWarningLimit: 500, // Warn if chunk > 500KB
+    chunkSizeWarningLimit: 500,
     rollupOptions: {
       output: {
         manualChunks: {
-          // Core React
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-
-          // Firebase
-          'vendor-firebase': [
-            'firebase/app',
-            'firebase/auth',
-            'firebase/firestore',
-            'firebase/storage'
-          ],
-
-          // UI Libraries
+          'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
           'vendor-ui': ['framer-motion', 'lucide-react'],
-
-          // Charts & Analytics
           'vendor-charts': ['recharts'],
-
-          // Forms & Validation
-          'vendor-forms': ['react-hook-form', 'zod'],
-
-          // Utilities
-          'vendor-utils': ['lodash', 'date-fns', 'axios']
+          'vendor-utils': ['axios', 'react-use', 'lodash']
         },
-        // Optimize chunk naming
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: 'assets/[ext]/[name]-[hash].[ext]'
       }
     },
-    // Source maps for production debugging (optional)
     sourcemap: false,
-    // CSS code splitting
     cssCodeSplit: true
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom'],
     exclude: ['@splinetool/react-spline', '@splinetool/runtime']
   },
-  // Performance optimizations
   server: {
     hmr: {
-      overlay: false // Disable error overlay for better dev performance
+      overlay: false
     }
   }
 })

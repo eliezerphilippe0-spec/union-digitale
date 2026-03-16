@@ -141,7 +141,12 @@ export default function CarDetails() {
 
     return (
         <div className="bg-gray-50 min-h-screen py-10">
-            <SEO title={`${car.brand} ${car.model} | Union Auto`} description={`Louez ou achetez cette ${car.brand} ${car.model}`} />
+            <SEO
+                title={`${car.brand} ${car.model} | Union Auto`}
+                description={car.description || `Louez ou achetez cette ${car.brand} ${car.model} sur Union Digitale.`}
+                image={car.photos?.[0]}
+                type="article"
+            />
 
             <div className="max-w-6xl mx-auto px-4">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

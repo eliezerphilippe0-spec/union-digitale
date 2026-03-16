@@ -10,8 +10,9 @@ import {
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { getFirestore, doc, onSnapshot } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db, functions as firebaseFunctions } from '../../lib/firebase';
 import { useNavigate, Link } from 'react-router-dom';
 import { usageStatsService } from '../../services/usageStatsService';
 
@@ -328,8 +329,7 @@ const FinanceModule = ({ t, invoices }) => {
 const MarketingModule = ({ t }) => {
     const [msg, setMsg] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
-    const functions = getFunctions();
-    const generateAIContent = httpsCallable(functions, 'generateAIContent');
+    const generateAIContent = httpsCallable(firebaseFunctions, 'generateAIContent');
 
     const generateAI = async () => {
         setIsGenerating(true);
@@ -390,8 +390,7 @@ const WhatsAppModule = ({ t }) => {
     const [productLink, setProductLink] = useState('');
     const [generatedLink, setGeneratedLink] = useState('');
     const [loading, setLoading] = useState(false);
-    const functions = getFunctions();
-    const generateAIContent = httpsCallable(functions, 'generateAIContent');
+    const generateAIContent = httpsCallable(firebaseFunctions, 'generateAIContent');
 
     // eslint-disable-next-line no-unused-vars
     const generateLink = async () => {
@@ -473,6 +472,7 @@ const ChatModule = ({ t, setInvoices }) => {
         { id: 2, sender: 'ai', type: 'text', content: "Bonswa! 👋 Wi ou ka peye an Dola ($55 USD) oswa Goud (7,500 HTG). Kijan ou prefere?" },
     ]);
     const [input, setInput] = useState('');
+    const [isMapOpen, setIsMapOpen] = useState(false);
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -480,8 +480,18 @@ const ChatModule = ({ t, setInvoices }) => {
 
     const handleSend = () => {
         if (!input.trim()) return;
-        setMessages(prev => [...prev, { id: Date.now(), sender: 'ai', type: 'text', content: input }]);
+        setMessages(prev => [...prev, { id: Date.now(), sender: 'user', type: 'text', content: input }]);
         setInput('');
+    };
+
+    const handleSendLocation = (loc) => {
+        setMessages(prev => [...prev, {
+            id: Date.now(),
+            sender: 'user',
+            type: 'location',
+            content: loc.addressFormatted,
+            coords: { lat: loc.lat, lng: loc.lng }
+        }]);
     };
 
     const handleAction = (type) => {
@@ -569,6 +579,31 @@ const ChatModule = ({ t, setInvoices }) => {
                                         </button>
                                     </div>
                                 )}
+
+                                {/* LOCATION PREVIEW */}
+                                {msg.type === 'location' && (
+                                    <div className="mt-2 overflow-hidden rounded-xl border border-slate-200 shadow-sm bg-white group cursor-pointer" onClick={() => window.open(`https://www.google.com/maps?q=${msg.coords.lat},${msg.coords.lng}`, '_blank')}>
+                                        <div className="h-32 bg-slate-100 relative">
+                                            {/* Mini Static Map Placeholder (using Photon/OSM tiles if needed, here just a styled placeholder) */}
+                                            <div className="absolute inset-0 bg-[#e5e7eb] flex items-center justify-center">
+                                                <div className="relative">
+                                                    <MapPin className="w-8 h-8 text-secondary animate-bounce" />
+                                                    <div className="w-4 h-1.5 bg-black/10 rounded-full blur-[2px] mx-auto mt-[-4px]"></div>
+                                                </div>
+                                            </div>
+                                            <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm p-1 rounded-md shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Share2 className="w-3 h-3 text-slate-600" />
+                                            </div>
+                                        </div>
+                                        <div className="p-3">
+                                            <p className="text-xs font-bold text-slate-900 truncate mb-1">{msg.content}</p>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] text-indigo-600 font-bold uppercase tracking-wider">Ouvrir la carte</span>
+                                                <Share2 className="w-3 h-3 text-slate-300" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                                 <span className="text-[10px] block text-right mt-1 opacity-50">10:42</span>
                             </div>
                         </div>
@@ -580,8 +615,15 @@ const ChatModule = ({ t, setInvoices }) => {
                     <div className="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar">
                         <button onClick={() => handleAction('moncash')} className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 rounded-full text-xs font-bold border border-red-100 hover:bg-red-100 transition-colors whitespace-nowrap"><Wallet className="w-3 h-3" /> MonCash (HTG)</button>
                         <button onClick={() => handleAction('stripe')} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-100 hover:bg-blue-100 transition-colors whitespace-nowrap"><CreditCard className="w-3 h-3" /> Stripe (USD)</button>
+                        <button onClick={() => setIsMapOpen(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-100 hover:bg-green-100 transition-colors whitespace-nowrap"><MapPin className="w-3 h-3" /> {t('location_picker_title')}</button>
                         <button className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-600 rounded-full text-xs font-bold border border-slate-200 hover:bg-slate-200 transition-colors whitespace-nowrap"><Globe className="w-3 h-3" /> {t('translate') || 'Traduire'}</button>
                     </div>
+
+                    <LocationPickerModal
+                        isOpen={isMapOpen}
+                        onClose={() => setIsMapOpen(false)}
+                        onConfirm={handleSendLocation}
+                    />
                     <div className="flex items-center gap-2">
                         <button onClick={handleVoiceInvoice} className="p-2.5 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-full transition-colors" title="Simuler Commande Vocale"><Mic className="w-5 h-5" /></button>
                         <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()} placeholder={t('chat_placeholder') || "Ekri mesaj ou..."} className="flex-1 bg-slate-100 border-none rounded-full px-5 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all outline-none" />
@@ -604,8 +646,6 @@ export default function DashboardUltimate() {
 
     const { t, language } = useLanguage();
     const { currentUser } = useAuth();
-    const functions = getFunctions();
-    const db = getFirestore();
     const navigate = useNavigate();
 
     useEffect(() => {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, Users, Clock, BookOpen, Play, CheckCircle } from 'lucide-react';
+import SEO from '../../components/SEO';
 import { useAuth } from '../../contexts/AuthContext';
 import { db } from '../../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -96,6 +97,12 @@ const CourseDetails = () => {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 py-8">
             <div className="container mx-auto px-4 max-w-6xl">
+                <SEO
+                    title={course.title}
+                    description={course.description}
+                    type="article"
+                />
+
                 <button
                     onClick={() => navigate('/learn')}
                     className="flex items-center gap-2 text-gray-600 dark:text-neutral-300 hover:text-gray-900 dark:hover:text-white mb-6"

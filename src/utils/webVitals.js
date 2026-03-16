@@ -117,7 +117,7 @@ class PerformanceMonitor {
 
     // Log metric
     logMetric(name, metric) {
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
             const emoji = metric.rating === 'good' ? '✅' : metric.rating === 'needs-improvement' ? '⚠️' : '❌';
             console.log(`${emoji} [Web Vitals] ${name}:`, {
                 value: Math.round(metric.value),
@@ -172,7 +172,7 @@ export const getWebVitals = () => {
 
 // Custom performance tracking
 export const trackCustomMetric = (name, value, unit = 'ms') => {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
         console.log(`[Custom Metric] ${name}: ${value}${unit}`);
     }
 

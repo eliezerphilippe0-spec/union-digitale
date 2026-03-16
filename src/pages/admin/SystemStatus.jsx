@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { monitoringService } from '../../services/monitoringService';
 import { db } from '../../lib/firebase';
+import { updateAppSettings, subscribeToAppSettings } from '../../services/configService';
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { Activity, Server, Wifi, AlertTriangle, CheckCircle, RefreshCw, XCircle } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -15,6 +16,8 @@ const SystemStatus = () => {
         uptime: 0
     });
     const [recentLogs, setRecentLogs] = useState([]);
+    const [maintenanceMode, setMaintenanceMode] = useState(false);
+    const [updatingMaintenance, setUpdatingMaintenance] = useState(false);
     const [services, setServices] = useState([
         { name: 'Firebase Database', status: 'online', lat: '45ms' },
         { name: 'GoApi (MonCash)', status: 'online', lat: '120ms' },
@@ -30,8 +33,8 @@ const SystemStatus = () => {
 
         // Listen to recent critical logs from Firestore
         const logsQuery = query(collection(db, 'system_logs'), orderBy('timestamp', 'desc'), limit(10));
-        const unsubscribe = onSnapshot(logsQuery, (snapshot) => {
-            // Flatten logs because each doc might be a batch
+        const unsubscribeLogs = onSnapshot(logsQuery, (snapshot) => {
+            // ... logs logic ...
             const fetchedLogs = [];
             snapshot.docs.forEach(doc => {
                 const data = doc.data();
@@ -39,14 +42,31 @@ const SystemStatus = () => {
                     data.errors.forEach(err => fetchedLogs.push({ ...err, id: doc.id + Math.random() }));
                 }
             });
-            setRecentLogs(fetchedLogs.slice(0, 10)); // Keep top 10 recent
+            setRecentLogs(fetchedLogs.slice(0, 10));
+        });
+
+        const unsubscribeConfig = subscribeToAppSettings((config) => {
+            setMaintenanceMode(config.maintenanceMode);
         });
 
         return () => {
             clearInterval(interval);
-            unsubscribe();
+            unsubscribeLogs();
+            unsubscribeConfig();
         };
     }, []);
+
+    const toggleMaintenance = async () => {
+        if (!window.confirm(`Voulez-vous vraiment ${maintenanceMode ? 'désactiver' : 'activer'} le mode maintenance ?`)) return;
+        try {
+            setUpdatingMaintenance(true);
+            await updateAppSettings({ maintenanceMode: !maintenanceMode });
+        } catch (error) {
+            alert('Échec de la mise à jour du mode maintenance');
+        } finally {
+            setUpdatingMaintenance(false);
+        }
+    };
 
     const simulateCrash = () => {
         monitoringService.logError(new Error("Test Critical Crash triggered by Admin"), "dashboard", "critical");
@@ -114,6 +134,32 @@ const SystemStatus = () => {
                     <div className="text-gray-500 text-sm font-bold uppercase mb-1">{t('storage_usage')}</div>
                     <div className="text-2xl font-bold">45%</div>
                     <div className="text-xs text-gray-400 mt-2">{t('storage_details').replace('{used}', '450GB').replace('{total}', '1TB')}</div>
+                </div>
+            </div>
+
+            {/* Maintenance Control Card */}
+            <div className={`mb-8 p-6 rounded-2xl border-2 transition-all ${maintenanceMode ? 'bg-red-50 border-red-200' : 'bg-white border-transparent shadow-sm'}`}>
+                <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="flex items-center gap-4">
+                        <div className={`p-4 rounded-2xl ${maintenanceMode ? 'bg-red-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                            <Settings size={32} className={maintenanceMode ? 'animate-spin-slow' : ''} />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-black uppercase tracking-tight">Mode Maintenance Global</h2>
+                            <p className="text-sm text-slate-500 font-medium">
+                                {maintenanceMode
+                                    ? "L'application est actuellement hors-ligne pour tous les utilisateurs non-admins."
+                                    : "L'application est en ligne. L'activation redirigera tous les utilisateurs vers la page de maintenance."}
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={toggleMaintenance}
+                        disabled={updatingMaintenance}
+                        className={`px-8 py-4 rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg ${maintenanceMode ? 'bg-green-600 hover:bg-green-700 text-white shadow-green-100' : 'bg-red-600 hover:bg-red-700 text-white shadow-red-100'}`}
+                    >
+                        {updatingMaintenance ? 'Mise à jour...' : maintenanceMode ? 'Désactiver Maintenance' : 'Activer Maintenance'}
+                    </button>
                 </div>
             </div>
 

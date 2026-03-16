@@ -1,0 +1,208 @@
+import { db } from '../lib/firebase';
+import {
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    addDoc,
+    updateDoc,
+    query,
+    where,
+    orderBy,
+    limit,
+    serverTimestamp,
+    Timestamp,
+    runTransaction
+} from 'firebase/firestore';
+import { BOOKING_STATUS } from './bookingService';
+import { getVendor } from './vendorService';
+import { sendWhatsAppNotification, NOTIFICATION_TEMPLATES } from './communicationService';
+
+/**
+ * Salon Booking Service - Specialized for salon appointments
+ * Includes anti-double-booking logic via transactional slot checking
+ */
+
+/**
+ * Create a salon booking with double-booking protection
+ * @param {Object} bookingData - Booking details
+ * @returns {Promise<string>} - Booking ID
+ */
+export const createSalonBooking = async (bookingData) => {
+    const {
+        salonId,
+        clientId,
+        serviceId,
+        serviceName,
+        startAt,
+        durationMin,
+        totalPrice,
+        depositAmount = 0,
+        paymentStatus = 'UNPAID',
+        paymentProvider = 'MONCASH',
+        notes = ''
+    } = bookingData;
+
+    try {
+        const startTime = startAt instanceof Date ? Timestamp.fromDate(startAt) : startAt;
+        const endTimeDate = new Date(startAt.getTime() + durationMin * 60000);
+        const endTime = Timestamp.fromDate(endTimeDate);
+
+        return await runTransaction(db, async (transaction) => {
+            // Check for overlapping bookings
+            const bookingsRef = collection(db, 'bookings');
+            const overlapQuery = query(
+                bookingsRef,
+                where('salonId', '==', salonId),
+                where('status', 'in', [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED])
+            );
+
+            const snapshot = await getDocs(overlapQuery);
+            const overlaps = snapshot.docs.some(doc => {
+                const b = doc.data();
+                const bStart = b.startAt.toMillis();
+                const bEnd = b.endAt.toMillis();
+                const newStart = startTime.toMillis();
+                const newEnd = endTime.toMillis();
+
+                return (newStart < bEnd && newEnd > bStart);
+            });
+
+            if (overlaps) {
+                throw new Error('This time slot is no longer available');
+            }
+
+            // Create booking
+            const booking = {
+                salonId,
+                clientId,
+                serviceId,
+                serviceName,
+                startAt: startTime,
+                endAt: endTime,
+                durationMin,
+                status: BOOKING_STATUS.PENDING,
+                totalPrice: parseFloat(totalPrice),
+                depositAmount: parseFloat(depositAmount),
+                paymentStatus,
+                paymentProvider,
+                notes,
+                commissionAmount: (parseFloat(totalPrice) * 0.1), // Example 10%
+                sellerNetAmount: (parseFloat(totalPrice) * 0.9),
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            };
+
+            const newDocRef = doc(collection(db, 'bookings'));
+            transaction.set(newDocRef, booking);
+
+            // After transaction success, send notifications (asynchronously)
+            const triggerNotifications = async () => {
+                try {
+                    const salon = await getVendor(salonId);
+                    // Fetch client data from users collection
+                    const clientSnap = await getDoc(doc(db, 'users', clientId));
+                    const client = clientSnap.exists() ? clientSnap.data() : { displayName: 'Client', phone: '' };
+
+                    const dateStr = startAt instanceof Date ? startAt.toLocaleDateString('fr-FR') : new Date(startAt.seconds * 1000).toLocaleDateString('fr-FR');
+                    const timeStr = startAt instanceof Date ? startAt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : new Date(startAt.seconds * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+                    // Notify Client
+                    if (client.phone || client.whatsapp) {
+                        await sendWhatsAppNotification(client.phone || client.whatsapp, NOTIFICATION_TEMPLATES.BOOKING_CONFIRMED_CLIENT, {
+                            salonName: salon.shopName,
+                            serviceName,
+                            date: dateStr,
+                            time: timeStr,
+                            address: salon.address?.details || salon.address?.city || 'Haiti',
+                            bookingId: newDocRef.id
+                        });
+                    }
+
+                    // Notify Seller
+                    if (salon.phone || salon.whatsapp) {
+                        await sendWhatsAppNotification(salon.phone || salon.whatsapp, NOTIFICATION_TEMPLATES.BOOKING_CONFIRMED_SELLER, {
+                            clientName: client.displayName,
+                            serviceName,
+                            date: dateStr,
+                            time: timeStr,
+                            bookingId: newDocRef.id
+                        });
+                    }
+                } catch (err) {
+                    console.error('Failed to send booking notifications:', err);
+                }
+            };
+
+            // Fire and forget side effect
+            triggerNotifications();
+
+            return newDocRef.id;
+        });
+    } catch (error) {
+        console.error('Error creating salon booking:', error);
+        throw error;
+    }
+};
+
+/**
+ * Get salon bookings for a specific date range
+ * @param {string} salonId - Salon ID
+ * @param {Date} date - Specific date
+ * @returns {Promise<Array>} - Array of bookings
+ */
+export const getSalonBookingsForDate = async (salonId, date) => {
+    try {
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const q = query(
+            collection(db, 'bookings'),
+            where('salonId', '==', salonId),
+            where('startAt', '>=', Timestamp.fromDate(startOfDay)),
+            where('startAt', '<=', Timestamp.fromDate(endOfDay)),
+            orderBy('startAt', 'asc')
+        );
+
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    } catch (error) {
+        console.error('Error getting salon bookings for date:', error);
+        throw error;
+    }
+};
+
+/**
+ * Retrieves all bookings for a specific client.
+ * @param {string} clientId
+ * @returns {Promise<Array>}
+ */
+export const getClientBookings = async (clientId) => {
+            try {
+                const bookingsRef = collection(db, 'bookings');
+                const q = query(
+                    bookingsRef,
+                    where('clientId', '==', clientId),
+                    orderBy('startAt', 'desc')
+                );
+                const querySnapshot = await getDocs(q);
+                return querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+            } catch (error) {
+                console.error('Error fetching client bookings:', error);
+                throw error;
+            }
+        };
+
+        export default {
+            createSalonBooking,
+            getSalonBookingsForDate,
+            getClientBookings
+        };

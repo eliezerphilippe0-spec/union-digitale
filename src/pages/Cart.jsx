@@ -66,6 +66,11 @@ const Cart = () => {
                                             <h3 className="font-medium text-lg text-blue-600 hover:underline cursor-pointer line-clamp-2">
                                                 {item.title}
                                             </h3>
+                                            {item.selectedSize && (
+                                                <div className="text-sm text-gray-600 mt-1">
+                                                    Taille : <span className="font-bold">{item.selectedSize}</span>
+                                                </div>
+                                            )}
                                             <div className="text-sm text-green-700 mt-1">{t('in_stock')}</div>
                                             {item.unionPlus && item.type === 'physical' && (
                                                 <div className="flex items-center gap-1 mt-1">
@@ -81,7 +86,7 @@ const Cart = () => {
                                                     {t('qty')} <span className="font-bold">{item.quantity}</span>
                                                 </div>
                                                 <button
-                                                    onClick={() => removeFromCart(item.id)}
+                                                    onClick={() => removeFromCart(item.id, item.selectedSize)}
                                                     className="text-blue-600 hover:underline border-l pl-4 border-gray-300 flex items-center gap-1"
                                                 >
                                                     <Trash2 className="w-4 h-4" /> {t('remove')}

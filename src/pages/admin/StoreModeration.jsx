@@ -351,9 +351,6 @@ const StoreModeration = () => {
                                                 'bg-secondary hover:bg-secondary-hover'
                                         }`}
                                 >
-                                    'bg-secondary hover:bg-secondary-hover'
-                                        }`}
-                                >
                                     {actionLoading ? t('processing_btn') : t('confirm_action_btn').replace('{action}', modalAction)}
                                 </button>
                             </div>

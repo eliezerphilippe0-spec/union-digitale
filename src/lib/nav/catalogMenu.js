@@ -31,7 +31,8 @@ import {
   Package,
   FileText,
   BadgeCheck,
-  Rocket
+  Rocket,
+  Zap
 } from 'lucide-react';
 
 // ============================================
@@ -91,13 +92,13 @@ export const digitalSection = {
       id: 'books',
       labelKey: 'union_books',
       icon: BookOpen,
-      href: '/books'
+      href: '/category/books'
     },
     {
       id: 'gaming',
       labelKey: 'union_gaming',
       icon: Gamepad2,
-      href: '/gaming'
+      href: '/category/gaming'
     },
     {
       id: 'apps',
@@ -179,7 +180,7 @@ export const programsSection = {
       id: 'referral',
       labelKey: 'menu_referral',
       icon: Percent,
-      href: '/ambassador'
+      href: '/ambassador/'
     }
   ]
 };
@@ -208,13 +209,13 @@ export const helpSection = {
       id: 'settings',
       labelKey: 'menu_settings_language',
       icon: Settings,
-      href: '/settings'
+      href: '/seller/settings'
     },
     {
       id: 'terms',
       labelKey: 'menu_returns_terms',
       icon: FileText,
-      href: '/terms'
+      href: '/policies'
     }
   ]
 };
@@ -234,7 +235,7 @@ export const sellCTA = {
   secondaryButton: {
     labelKey: 'menu_become_verified_seller',
     icon: BadgeCheck,
-    href: '/seller/verification'
+    href: '/seller/verify'
   },
   reassurance: {
     labelKey: 'menu_join_verified_sellers',
@@ -245,8 +246,34 @@ export const sellCTA = {
 // ============================================
 // COMPLETE MENU STRUCTURE
 // ============================================
+// ============================================
+// SECTION 6: SERVICES UD (NEW)
+// ============================================
+export const servicesSection = {
+  id: 'services',
+  labelKey: 'menu_ud_services',
+  icon: Rocket,
+  children: [
+    {
+      id: 'digital-store',
+      labelKey: 'digital_store',
+      icon: Rocket,
+      href: '/digital-store',
+      badge: 'premium'
+    },
+    {
+      id: 'pay-bills',
+      labelKey: 'pay_bills',
+      icon: Zap,
+      href: '/pay-bills',
+      badge: 'new'
+    }
+  ]
+};
+
 export const catalogMenuData = {
   discover: discoverSection,
+  services: servicesSection,
   digital: digitalSection,
   shop: shopSection,
   programs: programsSection,
@@ -255,6 +282,7 @@ export const catalogMenuData = {
 
 export const mobileMenuOrder = [
   'discover',
+  'services',
   'digital',
   'shop',
   'programs',

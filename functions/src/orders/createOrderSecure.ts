@@ -26,6 +26,18 @@ interface CreateOrderRequest {
 }
 
 /**
+ * Génère un numéro de commande lisible — Format : UD-YYMMDD-XXXXXX
+ */
+function generateOrderNumber(): string {
+  const now = new Date();
+  const yy = now.getFullYear().toString().slice(2);
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  const random = Math.floor(100000 + Math.random() * 900000);
+  return `UD-${yy}${mm}${dd}-${random}`;
+}
+
+/**
  * Secure Order Creation with Server-Side Price Validation
  * Prevents price manipulation attacks by fetching prices from database
  */
@@ -110,9 +122,13 @@ export const createOrderSecure = onCall(async (request) => {
       throw new HttpsError('invalid-argument', 'Order total exceeds maximum allowed amount');
     }
 
+    // Générer un numéro de commande lisible
+    const orderNumber = generateOrderNumber();
+
     // Create order document
     const orderData = {
       userId,
+      orderNumber,
       items: validatedItems,
       totalPrice: totalAmount,
       status: 'pending',
@@ -127,10 +143,11 @@ export const createOrderSecure = onCall(async (request) => {
     // Create order
     const orderRef = await db.collection('orders').add(orderData);
 
-    console.log(`✅ Order created: ${orderRef.id}, total: ${totalAmount} HTG`);
+    console.log(`✅ Order created: ${orderRef.id} (${orderNumber}), total: ${totalAmount} HTG`);
 
     return {
       orderId: orderRef.id,
+      orderNumber,
       totalPrice: totalAmount,
       items: validatedItems.map(i => ({
         productId: i.productId,

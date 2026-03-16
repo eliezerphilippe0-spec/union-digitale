@@ -51,101 +51,116 @@ const CarsCatalog = () => {
                 </div>
 
                 {/* Filters */}
-                <div className="flex justify-center gap-4 mb-8">
-                    <button
-                        onClick={() => setFilter('all')}
-                        className={`px-6 py-2 rounded-full font-medium transition-all ${filter === 'all'
-                            ? 'bg-primary-600 text-white shadow-lg'
-                            : 'bg-white text-gray-700 hover:bg-gray-100'
-                            }`}
-                    >
-                        Tous
-                    </button>
-                    <button
-                        onClick={() => setFilter('sale')}
-                        className={`px-6 py-2 rounded-full font-medium transition-all ${filter === 'sale'
-                            ? 'bg-secondary text-white shadow-lg'
-                            : 'bg-white text-gray-700 hover:bg-gray-100'
-                            }`}
-                    >
-                        À Vendre
-                    </button>
-                    <button
-                        onClick={() => setFilter('rent')}
-                        className={`px-6 py-2 rounded-full font-medium transition-all ${filter === 'rent'
-                            ? 'bg-accent text-white shadow-lg'
-                            : 'bg-white text-gray-700 hover:bg-gray-100'
-                            }`}
-                    >
-                        À Louer
-                    </button>
+                <div className="flex flex-wrap justify-center gap-3 mb-10">
+                    {['all', 'sale', 'rent'].map(t => (
+                        <button
+                            key={t}
+                            onClick={() => setFilter(t)}
+                            className={`px-8 py-2.5 rounded-xl font-bold transition-all shadow-sm ${filter === t
+                                ? 'bg-[#0A1D37] text-white shadow-blue-200'
+                                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-100'
+                                }`}
+                        >
+                            {t === 'all' ? 'Tous' : t === 'sale' ? 'À Vendre' : 'Location'}
+                        </button>
+                    ))}
+                    <div className="flex items-center gap-2 ml-4">
+                        <select className="px-4 py-2.5 rounded-xl border border-gray-100 bg-white text-sm font-medium focus:ring-2 focus:ring-blue-500">
+                            <option>Prix: Croissant</option>
+                            <option>Prix: Décroissant</option>
+                            <option>Plus récents</option>
+                        </select>
+                    </div>
                 </div>
 
                 {/* Cars Grid */}
                 {loading ? (
-                    <div className="text-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-                        <p className="mt-4 text-gray-600">Chargement des véhicules...</p>
+                    <div className="text-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0A1D37] mx-auto"></div>
+                        <p className="mt-4 text-gray-500 font-medium tracking-wide">Recherche de véhicules...</p>
                     </div>
                 ) : cars.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {cars.map((car) => (
                             <div
                                 key={car.id}
                                 onClick={() => navigate(`/car/${car.id}`)}
-                                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer group"
+                                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all cursor-pointer group border border-gray-100"
                             >
                                 {/* Car Image */}
-                                <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                                <div className="relative h-56 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                                     {car.photos && car.photos[0] ? (
                                         <img
                                             src={car.photos[0]}
                                             alt={`${car.brand} ${car.model}`}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                         />
                                     ) : (
                                         <div className="flex items-center justify-center h-full">
-                                            <Car className="w-20 h-20 text-gray-400" />
+                                            <Car className="w-16 h-16 text-gray-300" />
                                         </div>
                                     )}
-                                    {/* Type Badge */}
-                                    <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold text-white ${car.type === 'sale' ? 'bg-green-500' : 'bg-blue-500'
-                                        }`}>
-                                        {car.type === 'sale' ? 'À Vendre' : 'À Louer'}
+
+                                    {/* Badges */}
+                                    <div className="absolute top-4 left-4 flex flex-col gap-2">
+                                        <div className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter text-white shadow-lg ${car.type === 'sale' ? 'bg-green-500' : 'bg-blue-600'}`}>
+                                            {car.type === 'sale' ? 'À Vendre' : 'Location'}
+                                        </div>
+                                        {car.featured && (
+                                            <div className="bg-amber-400 text-white px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1">
+                                                ★ Verified
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold text-gray-900 border border-white/50">
+                                        {car.year}
                                     </div>
                                 </div>
 
                                 {/* Car Info */}
-                                <div className="p-4">
-                                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                                        {car.brand} {car.model}
-                                    </h3>
-                                    <p className="text-sm text-gray-500 mb-3">{car.year}</p>
-
-                                    {/* Features */}
-                                    <div className="grid grid-cols-2 gap-2 mb-4 text-sm text-gray-600">
-                                        <div className="flex items-center gap-1">
-                                            <MapPin className="w-4 h-4" />
-                                            <span>{car.location || 'Haïti'}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <Calendar className="w-4 h-4" />
-                                            <span>{car.mileage ? `${car.mileage} km` : 'N/A'}</span>
+                                <div className="p-6">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <h3 className="text-xl font-black text-[#0A1D37] group-hover:text-blue-600 transition-colors">
+                                                {car.brand} {car.model}
+                                            </h3>
+                                            <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
+                                                <MapPin className="w-3 h-3" />
+                                                <span>{car.location || 'Port-au-Prince, Haïti'}</span>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* Price */}
-                                    <div className="flex items-center justify-between pt-3 border-t">
+                                    {/* Key Features Icons */}
+                                    <div className="grid grid-cols-3 gap-2 mb-6 py-4 border-y border-gray-50">
+                                        <div className="flex flex-col items-center gap-1">
+                                            <Users className="w-4 h-4 text-gray-400" />
+                                            <span className="text-[10px] text-gray-500 font-bold uppercase">5 Places</span>
+                                        </div>
+                                        <div className="flex flex-col items-center gap-1 border-x border-gray-50">
+                                            <Fuel className="w-4 h-4 text-gray-400" />
+                                            <span className="text-[10px] text-gray-500 font-bold uppercase">Hybride</span>
+                                        </div>
+                                        <div className="flex flex-col items-center gap-1">
+                                            <Car className="w-4 h-4 text-gray-400" />
+                                            <span className="text-[10px] text-gray-500 font-bold uppercase">Auto</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Price & CTA */}
+                                    <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-2xl font-bold text-primary-600">
-                                                {car.price?.toLocaleString()} {car.currency || 'HTG'}
-                                            </p>
+                                            <div className="text-sm text-gray-400 font-medium">Prix</div>
+                                            <div className="text-2xl font-black text-[#0A1D37]">
+                                                {car.price?.toLocaleString()} <span className="text-sm text-gray-400">{car.currency || 'HTG'}</span>
+                                            </div>
                                             {car.type === 'rent' && (
-                                                <p className="text-xs text-gray-500">par jour</p>
+                                                <div className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-0.5">/ Journée</div>
                                             )}
                                         </div>
-                                        <button className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-                                            Voir détails
+                                        <button className="bg-[#0A1D37] hover:bg-blue-900 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-blue-100 transition-all hover:-translate-y-0.5 active:translate-y-0">
+                                            Réserver
                                         </button>
                                     </div>
                                 </div>

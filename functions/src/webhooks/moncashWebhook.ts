@@ -26,6 +26,50 @@ function verifyWebhookSignature(rawBody: Buffer, signature: string): boolean {
 }
 
 /**
+ * Process COD deposit atomically
+ * Appelé quand un client paie l'acompte de 10% via MonCash pour une commande COD
+ */
+async function processCODDepositAtomic(
+  orderId: string,
+  transactionId: string,
+  amount: number
+): Promise<void> {
+  await db.runTransaction(async (transaction) => {
+    const orderRef = db.collection('orders').doc(orderId);
+    const orderDoc = await transaction.get(orderRef);
+
+    if (!orderDoc.exists) {
+      throw new Error('Order not found');
+    }
+
+    const orderData = orderDoc.data();
+
+    // Éviter le double-traitement
+    if (orderData?.depositPaid === true) {
+      console.log(`COD deposit for order ${orderId} already processed, skipping`);
+      return;
+    }
+
+    // Vérifier que le montant correspond à l'acompte attendu (tolérance 1 HTG)
+    const expectedDeposit = orderData?.depositAmount ?? 0;
+    if (Math.abs(expectedDeposit - amount) > 1) {
+      throw new Error(
+        `COD deposit amount mismatch: expected ${expectedDeposit} HTG, got ${amount} HTG`
+      );
+    }
+
+    // Confirmer la commande COD avec l'acompte payé
+    transaction.update(orderRef, {
+      status: 'confirmed',
+      depositPaid: true,
+      depositPaidAt: admin.firestore.FieldValue.serverTimestamp(),
+      depositTransactionId: transactionId,
+      depositPaymentMethod: 'moncash',
+    });
+  });
+}
+
+/**
  * Process payment atomically to prevent race conditions
  */
 async function processPaymentAtomic(
@@ -100,11 +144,15 @@ async function processPaymentAtomic(
         vendorGroups.get(item.vendorId)!.push(item);
       }
 
-      // Credit each vendor's balance
+      // Credit each vendor's balance + accumulate platform fees
+      let totalPlatformFees = 0;
+
       for (const [vendorId, items] of vendorGroups) {
         const subtotal = items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
         const platformFee = subtotal * PLATFORM_COMMISSION;
         const vendorAmount = subtotal - platformFee;
+
+        totalPlatformFees += platformFee;
 
         const balanceRef = db.collection('balances').doc(vendorId);
         const balanceDoc = await transaction.get(balanceRef);
@@ -128,7 +176,7 @@ async function processPaymentAtomic(
           });
         }
 
-        // Record transaction
+        // Enregistrement de la transaction vendeur
         const txRef = db.collection('transactions').doc();
         transaction.set(txRef, {
           orderId,
@@ -136,11 +184,56 @@ async function processPaymentAtomic(
           type: 'order_payment',
           amount: vendorAmount,
           platformFee,
+          commissionRate: PLATFORM_COMMISSION,
           moncashTransactionId: transactionId,
           status: 'completed',
           createdAt: admin.firestore.FieldValue.serverTimestamp()
         });
       }
+
+      // ─── Créditer la caisse plateforme (15%) ────────────────────────────────
+      // Ce montant correspond au chiffre d'affaires réel de Union Digitale.
+      const platformBalanceRef = db.collection('platform_balance').doc('main');
+      const platformBalanceDoc = await transaction.get(platformBalanceRef);
+
+      if (platformBalanceDoc.exists) {
+        const pb = platformBalanceDoc.data();
+        transaction.update(platformBalanceRef, {
+          totalCollected: (pb.totalCollected || 0) + totalPlatformFees,
+          availableBalance: (pb.availableBalance || 0) + totalPlatformFees,
+          transactionCount: (pb.transactionCount || 0) + 1,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+      } else {
+        transaction.set(platformBalanceRef, {
+          totalCollected: totalPlatformFees,
+          availableBalance: totalPlatformFees,
+          totalPaidOut: 0,
+          transactionCount: 1,
+          commissionRate: PLATFORM_COMMISSION,
+          currency: 'HTG',
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+      }
+
+      // Enregistrement de la transaction plateforme (audit)
+      const platformTxRef = db.collection('platform_transactions').doc();
+      transaction.set(platformTxRef, {
+        orderId,
+        moncashTransactionId: transactionId,
+        totalOrderAmount: amount,
+        platformFee: totalPlatformFees,
+        commissionRate: PLATFORM_COMMISSION,
+        vendorCount: vendorGroups.size,
+        status: 'collected',
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      console.log(
+        `💰 Plateforme créditée : ${totalPlatformFees.toFixed(2)} HTG ` +
+        `(${(PLATFORM_COMMISSION * 100)}% de ${amount} HTG) — commande ${orderId}`
+      );
     }
   });
 }
@@ -221,7 +314,15 @@ export const moncashWebhook = onRequest({
 
     // Process payment atomically
     if (status === 'successful' || status === 'completed') {
-      await processPaymentAtomic(orderId, transactionId, amount);
+
+      // Aiguillage : dépôt COD vs paiement complet
+      if (body.payment_type === 'cod_deposit') {
+        await processCODDepositAtomic(orderId, transactionId, amount);
+        console.log(`✅ COD deposit processed for order ${orderId}`);
+      } else {
+        await processPaymentAtomic(orderId, transactionId, amount);
+        console.log(`✅ Full payment processed for order ${orderId}`);
+      }
 
       // Update idempotency record
       await lockRef.update({
@@ -229,7 +330,6 @@ export const moncashWebhook = onRequest({
         completedAt: admin.firestore.FieldValue.serverTimestamp()
       });
 
-      console.log(`✅ Payment processed successfully: ${orderId}`);
       res.status(200).json({ received: true, processed: true });
     } else {
       // Payment failed or pending

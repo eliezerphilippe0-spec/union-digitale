@@ -10,9 +10,10 @@ const ElectricityPayment = () => {
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
-        meterNumber: '',
+        meterNumber: localStorage.getItem('last_edh_meter') || '',
         amount: ''
     });
+    const [showHistory, setShowHistory] = useState(false);
 
     const predefinedAmounts = [500, 1000, 1500, 2000, 3000, 5000];
 
@@ -38,8 +39,11 @@ const ElectricityPayment = () => {
                 createdAt: serverTimestamp()
             });
 
+            // Save meter number
+            localStorage.setItem('last_edh_meter', formData.meterNumber);
+
             alert(`✅ Paiement de ${formData.amount} HTG effectué avec succès!\nNuméro de compteur: ${formData.meterNumber}`);
-            navigate('/utilities');
+            setShowHistory(true);
         } catch (error) {
             console.error('Payment error:', error);
             alert('❌ Erreur lors du paiement');
@@ -102,8 +106,8 @@ const ElectricityPayment = () => {
                                         type="button"
                                         onClick={() => setFormData({ ...formData, amount: amount.toString() })}
                                         className={`py-3 px-4 rounded-lg border-2 font-semibold transition-all ${formData.amount === amount.toString()
-                                                ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400'
-                                                : 'border-gray-300 dark:border-neutral-600 hover:border-yellow-300 dark:text-white'
+                                            ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400'
+                                            : 'border-gray-300 dark:border-neutral-600 hover:border-yellow-300 dark:text-white'
                                             }`}
                                     >
                                         {amount} HTG
@@ -175,9 +179,27 @@ const ElectricityPayment = () => {
                     {/* Info */}
                     <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                         <p className="text-sm text-blue-800 dark:text-blue-300">
-                            💡 <strong>Astuce:</strong> Votre paiement sera traité instantanément et vous recevrez un reçu par email.
+                            💡 <strong>Astuce:</strong> Votre numéro de compteur est sauvegardé pour votre prochain paiement.
                         </p>
                     </div>
+
+                    {showHistory && (
+                        <div className="mt-8 border-t dark:border-neutral-700 pt-6">
+                            <h3 className="font-bold mb-4 flex items-center gap-2">
+                                <ArrowLeft className="w-4 h-4 rotate-180" />
+                                Historique Récent
+                            </h3>
+                            <div className="bg-gray-50 dark:bg-neutral-900 rounded-xl p-4 flex items-center justify-between">
+                                <div>
+                                    <div className="font-bold text-sm">Paiement EDH - {formData.meterNumber}</div>
+                                    <div className="text-xs text-gray-500">Aujourd'hui • {formData.amount} HTG</div>
+                                </div>
+                                <button className="text-blue-600 hover:text-blue-700 text-xs font-bold flex items-center gap-1">
+                                    <CreditCard className="w-4 h-4" /> Reçu PDF
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

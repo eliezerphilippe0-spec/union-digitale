@@ -1,11 +1,12 @@
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
 import { httpsCallable, getFunctions } from 'firebase/functions';
-import { whatsappService } from './whatsappService';
 import logger from '../utils/logger';
 
 // Initialize Cloud Functions
 const functions = getFunctions();
+
+export const ZABELY_PAY_FEE = 0.015; // 1.5% Zabely Pay Fintech Fee
 
 export const paymentService = {
     /**
@@ -35,19 +36,27 @@ export const paymentService = {
         const validatedData = validation.data;
 
         try {
+            // Extract unique seller IDs and shop names for indexing and notifications
+            const sellerIds = [...new Set(validatedData.items.map(item => item.sellerId))].filter(Boolean);
+            const shopNames = [...new Set(validatedData.items.map(item => item.shopName))].filter(Boolean);
+
             const orderRef = await addDoc(collection(db, 'orders'), {
                 userId: user.uid,
                 type: validatedData.type || 'product',
                 items: validatedData.items || [],
                 totalAmount: validatedData.totalAmount,
+                depositAmount: validatedData.depositAmount || 0,
+                remainingCOD: validatedData.remainingCOD || 0,
                 currency: validatedData.currency || 'HTG',
-                status: validatedData.paymentMethod === 'wallet' ? 'paid' : 'pending_payment',
+                status: orderData.status || (validatedData.paymentMethod === 'wallet' ? 'paid' : 'pending_payment'),
                 paymentMethod: validatedData.paymentMethod,
                 shippingAddress: validatedData.shippingAddress || null,
                 referral: referralData,
+                sellerIds, // Indexed array for querying
+                shopNames,
                 createdAt: serverTimestamp(),
-                // Add idempotency key to prevent duplicate orders
-                idempotencyKey: `${user.uid}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+                // Clé d'idempotence cryptographiquement sûre pour éviter les doublons
+                idempotencyKey: `${user.uid}-${Date.now()}-${crypto.randomUUID()}`
             });
 
             logger.info('Order created', {
@@ -57,13 +66,8 @@ export const paymentService = {
                 paymentMethod: orderData.paymentMethod
             });
 
-            // Send WhatsApp Confirmation (Async, don't await to not block UI)
-            whatsappService.sendOrderConfirmation({
-                id: orderRef.id,
-                totalAmount: orderData.total
-            }, user).catch(err => {
-                logger.warn('WhatsApp notification failed', { orderId: orderRef.id, error: err.message });
-            });
+            // La confirmation WhatsApp + Email est envoyée par le trigger Cloud Function
+            // 'onOrderConfirmed' quand le paiement est réellement validé — pas ici.
 
             return orderRef.id;
         } catch (error) {

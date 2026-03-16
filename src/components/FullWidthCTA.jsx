@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShoppingBag, Truck, CreditCard, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Button from './ui/Button';
 
 /**
@@ -8,6 +9,7 @@ import Button from './ui/Button';
  */
 
 const FullWidthCTA = () => {
+    const navigate = useNavigate();
     return (
         <section className="relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary-800 to-indigo-900 py-20">
             {/* Background Effects - Matching Hero */}
@@ -51,7 +53,7 @@ const FullWidthCTA = () => {
                         variant="primary"
                         size="lg"
                         icon={ShoppingBag}
-                        onClick={() => window.location.href = '/register'}
+                        onClick={() => navigate('/register')}
                         className="group relative overflow-hidden bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-primary-900 font-bold shadow-[0_0_40px_rgba(212,175,55,0.3)] hover:shadow-[0_0_60px_rgba(212,175,55,0.4)] transition-all duration-300 text-lg px-8 py-4"
                     >
                         <span className="relative z-10 flex items-center gap-2">
@@ -62,7 +64,7 @@ const FullWidthCTA = () => {
                     <Button
                         variant="secondary"
                         size="lg"
-                        onClick={() => window.location.href = '/catalog'}
+                        onClick={() => navigate('/catalog')}
                         className="bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-white/10 hover:border-white/20 text-white transition-all duration-300 text-lg px-8 py-4 font-semibold"
                     >
                         Voir le catalogue
@@ -72,8 +74,8 @@ const FullWidthCTA = () => {
                 {/* Trust Indicators */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto animate-fadeIn" style={{ animationDelay: '0.3s' }}>
                     <div className="flex items-center justify-center gap-3 text-white">
-                        <div className="w-12 h-12 bg-blue-500/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-blue-500/20">
-                            <Truck className="w-6 h-6 text-blue-400" />
+                        <div className="w-12 h-12 bg-primary-500/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-primary-500/20">
+                            <Truck className="w-6 h-6 text-primary-400" />
                         </div>
                         <div className="text-left">
                             <p className="font-bold text-lg">Livraison rapide</p>
@@ -82,8 +84,8 @@ const FullWidthCTA = () => {
                     </div>
 
                     <div className="flex items-center justify-center gap-3 text-white">
-                        <div className="w-12 h-12 bg-green-500/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-green-500/20">
-                            <CreditCard className="w-6 h-6 text-green-400" />
+                        <div className="w-12 h-12 bg-primary-500/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-primary-500/20">
+                            <CreditCard className="w-6 h-6 text-primary-400" />
                         </div>
                         <div className="text-left">
                             <p className="font-bold text-lg">Paiement sécurisé</p>
@@ -92,8 +94,8 @@ const FullWidthCTA = () => {
                     </div>
 
                     <div className="flex items-center justify-center gap-3 text-white">
-                        <div className="w-12 h-12 bg-gold-500/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-gold-500/20">
-                            <ShoppingBag className="w-6 h-6 text-gold-400" />
+                        <div className="w-12 h-12 bg-primary-500/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-primary-500/20">
+                            <ShoppingBag className="w-6 h-6 text-primary-400" />
                         </div>
                         <div className="text-left">
                             <p className="font-bold text-lg">+10,000 produits</p>

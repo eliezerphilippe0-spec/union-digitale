@@ -5,14 +5,10 @@
 
 @import './design-tokens.css';
 
+/* Fonts loaded with display=swap to prevent FOUT/FOIT and reduce CLS */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
 @layer base {
-    /* ========================================
-     FONT IMPORTS
-     ======================================== */
-
-    /* Fonts loaded with display=swap to prevent FOUT/FOIT and reduce CLS */
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
-
     /* ========================================
      GLOBAL RESETS
      ======================================== */

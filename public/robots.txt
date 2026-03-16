@@ -1,4 +1,4 @@
-# robots.txt for Union Digitale
+# robots.txt for Zabely
 # Updated: 2026-01-12
 
 # Allow all crawlers by default
@@ -48,7 +48,7 @@ Allow: /seller/welcome
 Allow: /ambassador
 
 # Sitemap location
-Sitemap: https://uniondigitale.ht/sitemap.xml
+Sitemap: https://zabely.ht/sitemap.xml
 
 # Crawl delay for specific bots (optional)
 # User-agent: Googlebot

@@ -1,13 +1,31 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
+import ErrorBoundary from './components/ErrorBoundary';
+import MaintenanceGuard from './components/MaintenanceGuard';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
-
-// Critical path - loaded immediately
+import { AffiliationProvider } from './contexts/AffiliationContext';
+import { FavoritesProvider } from './contexts/FavoritesContext';
+import { AmbassadorProvider } from './contexts/AmbassadorContext';
+import { PerformanceProvider } from './contexts/PerformanceContext';
+import { FittingRoomProvider } from './contexts/FittingRoomContext';
+import { WalletProvider } from './contexts/WalletContext';
+import { ToastProvider } from './components/ui/Toast';
+import OnboardingTour from './components/OnboardingTour';
+import RouteTracker from './components/RouteTracker';
+import SaleNotificationListener from './components/SaleNotificationListener';
+import SkipLinks from './components/SkipLinks';
 import MainLayout from './layouts/MainLayout';
+import WhatsAppWidget from './components/WhatsAppWidget';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Primary pages
 import Home from './pages/Home';
 
-// Everything else - lazy loaded
+// Lazy loaded components
 const Services = React.lazy(() => import('./pages/Services'));
 const ProductDetails = React.lazy(() => import('./pages/ProductDetails'));
 const Cart = React.lazy(() => import('./pages/Cart'));
@@ -15,7 +33,11 @@ const Checkout = React.lazy(() => import('./pages/Checkout/OnePageCheckout'));
 const UpsellPage = React.lazy(() => import('./pages/Checkout/UpsellPage'));
 const OrderConfirmation = React.lazy(() => import('./pages/OrderConfirmation'));
 const Catalog = React.lazy(() => import('./pages/Catalog'));
-const Orders = React.lazy(() => import('./pages/Orders'));
+const DigitalStore = React.lazy(() => import('./pages/DigitalStore'));
+const PayBills = React.lazy(() => import('./pages/PayBills'));
+const DriverOnboarding = lazy(() => import('./pages/DriverOnboarding'));
+const DriverDashboard = lazy(() => import('./pages/DriverDashboard'));
+const Orders = lazy(() => import('./pages/Orders'));
 const Login = React.lazy(() => import('./pages/Login'));
 const Register = React.lazy(() => import('./pages/Register'));
 const RegisterChoice = React.lazy(() => import('./pages/RegisterChoice'));
@@ -28,7 +50,6 @@ const ComingSoon = React.lazy(() => import('./pages/ComingSoon'));
 const PlaceholderPage = React.lazy(() => import('./pages/PlaceholderPage'));
 const BestShops = React.lazy(() => import('./pages/BestShops'));
 const PoliciesPage = React.lazy(() => import('./pages/legal/PoliciesPage'));
-const ErrorBoundary = React.lazy(() => import('./components/ErrorBoundary'));
 const AddCar = React.lazy(() => import('./pages/seller/AddCar'));
 const KYCVerification = React.lazy(() => import('./pages/seller/KYCVerification'));
 const CarDetails = React.lazy(() => import('./pages/CarDetails'));
@@ -48,7 +69,13 @@ const VendorShop = React.lazy(() => import('./pages/VendorShop'));
 const VendorsPage = React.lazy(() => import('./pages/VendorsPage'));
 const TrackingPage = React.lazy(() => import('./pages/TrackingPage'));
 
-// Admin - lazy loaded
+// Salons
+const SalonListing = React.lazy(() => import('./pages/salons/SalonListing'));
+const SalonProfile = React.lazy(() => import('./pages/salons/SalonProfile'));
+const SalonBooking = React.lazy(() => import('./pages/salons/SalonBooking'));
+const MyBookings = React.lazy(() => import('./pages/account/MyBookings'));
+
+// Admin
 const FunnelBuilder = React.lazy(() => import('./pages/FunnelBuilder'));
 const AdminLayout = React.lazy(() => import('./layouts/AdminLayout'));
 const AdminDashboard = React.lazy(() => import('./pages/admin/Dashboard'));
@@ -62,7 +89,7 @@ const AdminSettings = React.lazy(() => import('./pages/admin/Settings'));
 const AdminPayouts = React.lazy(() => import('./pages/admin/Payouts'));
 const AdminSubscription = React.lazy(() => import('./pages/admin/Subscription'));
 
-// Seller - lazy loaded
+// Seller
 const DashboardUltimate = React.lazy(() => import('./pages/seller/DashboardUltimate'));
 const SellerDashboard = React.lazy(() => import('./pages/seller/SellerDashboard'));
 const AddProduct = React.lazy(() => import('./pages/seller/AddProduct'));
@@ -70,13 +97,47 @@ const AddService = React.lazy(() => import('./pages/seller/AddService'));
 const AddRealEstate = React.lazy(() => import('./pages/seller/AddRealEstate'));
 const SmartAudit = React.lazy(() => import('./pages/seller/SmartAudit'));
 const SellerSettings = React.lazy(() => import('./pages/seller/Settings'));
+const SalonSetup = React.lazy(() => import('./pages/seller/salon/SalonSetup'));
+const SalonCalendar = React.lazy(() => import('./pages/seller/salon/SalonCalendar'));
+const SalonAnalytics = React.lazy(() => import('./pages/seller/salon/SalonAnalytics'));
 
-// Ambassador - lazy loaded
+// Ambassador
 const AmbassadorLanding = React.lazy(() => import('./pages/Ambassador/Landing'));
 const AmbassadorOnboarding = React.lazy(() => import('./pages/Ambassador/Onboarding'));
 const AmbassadorDashboard = React.lazy(() => import('./pages/Ambassador/Dashboard'));
 const AmbassadorResources = React.lazy(() => import('./pages/Ambassador/Resources'));
 
+// Wallet
+const Wallet = React.lazy(() => import('./pages/Wallet'));
+
+// Other pages
+const MyLibrary = React.lazy(() => import('./pages/MyLibrary'));
+const Travel = React.lazy(() => import('./pages/Travel'));
+const Favorites = React.lazy(() => import('./pages/Favorites'));
+const ZabelyPlus = React.lazy(() => import('./pages/UnionPlus'));
+const LoyaltyProgram = React.lazy(() => import('./pages/LoyaltyProgram'));
+
+// Services
+const ServiceCatalog = React.lazy(() => import('./pages/services/ServiceCatalog'));
+const ServiceDetails = React.lazy(() => import('./pages/services/ServiceDetails'));
+const RechargeMonCash = React.lazy(() => import('./pages/services/RechargeMonCash'));
+const RechargeNatCash = React.lazy(() => import('./pages/services/RechargeNatCash'));
+const TransfertArgent = React.lazy(() => import('./pages/services/TransfertArgent'));
+const PaiementEDH = React.lazy(() => import('./pages/services/PaiementEDH'));
+const PaiementCAMEP = React.lazy(() => import('./pages/services/PaiementCAMEP'));
+
+// Digital Products
+const DigitalProductPage = React.lazy(() => import('./pages/digital/ProductPage'));
+const DigitalCheckoutPage = React.lazy(() => import('./pages/digital/CheckoutPage'));
+const DigitalUpsellPage = React.lazy(() => import('./pages/digital/UpsellPage'));
+const DigitalAnalyticsDashboard = React.lazy(() => import('./pages/digital/AnalyticsDashboard'));
+
+// Static pages
+const CategoryLanding = React.lazy(() => import('./pages/CategoryLanding'));
+const GiftCards = React.lazy(() => import('./pages/GiftCards'));
+const CustomerService = React.lazy(() => import('./pages/CustomerService'));
+const Analytics = React.lazy(() => import('./pages/Analytics'));
+const StaticPage = React.lazy(() => import('./pages/StaticPage'));
 
 const PageLoader = () => (
   <div className="h-screen w-full flex flex-col items-center justify-center bg-slate-50 text-slate-800">
@@ -85,56 +146,9 @@ const PageLoader = () => (
   </div>
 );
 
-import { HelmetProvider } from 'react-helmet-async';
-import SEO from './components/SEO';
-import RouteTracker from './components/RouteTracker';
-
-import { WalletProvider } from './contexts/WalletContext';
-
-// Lazy load these too
-const Wallet = React.lazy(() => import('./pages/Wallet'));
-
-const MyLibrary = React.lazy(() => import('./pages/MyLibrary'));
-const Travel = React.lazy(() => import('./pages/Travel'));
-const Favorites = React.lazy(() => import('./pages/Favorites'));
-const UnionPlus = React.lazy(() => import('./pages/UnionPlus'));
-const WhatsAppWidget = React.lazy(() => import('./components/WhatsAppWidget'));
-
-import { LanguageProvider } from './contexts/LanguageContext';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { AffiliationProvider } from './contexts/AffiliationContext';
-import { FavoritesProvider } from './contexts/FavoritesContext';
-import { AmbassadorProvider } from './contexts/AmbassadorContext';
-import { PerformanceProvider } from './contexts/PerformanceContext';
-import { FittingRoomProvider } from './contexts/FittingRoomContext';
-import { ToastProvider } from './components/ui/Toast';
-import SkipLinks from './components/SkipLinks';
-
-// Services - lazy loaded
-const ServiceCatalog = React.lazy(() => import('./pages/services/ServiceCatalog'));
-const ServiceDetails = React.lazy(() => import('./pages/services/ServiceDetails'));
-
-// Financial Services - lazy loaded
-const RechargeMonCash = React.lazy(() => import('./pages/services/RechargeMonCash'));
-const RechargeNatCash = React.lazy(() => import('./pages/services/RechargeNatCash'));
-const TransfertArgent = React.lazy(() => import('./pages/services/TransfertArgent'));
-const PaiementEDH = React.lazy(() => import('./pages/services/PaiementEDH'));
-const PaiementCAMEP = React.lazy(() => import('./pages/services/PaiementCAMEP'));
-
-// Digital Products - lazy loaded
-const DigitalProductPage = React.lazy(() => import('./pages/digital/ProductPage'));
-const DigitalCheckoutPage = React.lazy(() => import('./pages/digital/CheckoutPage'));
-const DigitalUpsellPage = React.lazy(() => import('./pages/digital/UpsellPage'));
-const DigitalAnalyticsDashboard = React.lazy(() => import('./pages/digital/AnalyticsDashboard'));
-
-// Static pages - lazy loaded
-const CategoryLanding = React.lazy(() => import('./pages/CategoryLanding'));
-const GiftCards = React.lazy(() => import('./pages/GiftCards'));
-const CustomerService = React.lazy(() => import('./pages/CustomerService'));
-const Analytics = React.lazy(() => import('./pages/Analytics'));
-const StaticPage = React.lazy(() => import('./pages/StaticPage'));
-
 function App() {
+  console.log('🚀 Zabely: Initializing application core...');
+
   return (
     <HelmetProvider>
       <ErrorBoundary>
@@ -150,149 +164,132 @@ function App() {
                           <CartProvider>
                             <WalletProvider>
                               <ToastProvider>
+                                <SaleNotificationListener />
                                 <SkipLinks />
+                                <OnboardingTour />
                                 <Suspense fallback={<PageLoader />}>
                                   <RouteTracker />
                                   <Routes>
-                                    {/* Public Routes wrapped in MainLayout */}
-                                    <Route element={<MainLayout />}>
-                                      <Route path="/" element={<Home />} />
-                                      <Route path="product/:id" element={<ProductDetails />} />
-                                      <Route path="cart" element={<Cart />} />
-                                      <Route path="checkout" element={<Checkout />} />
-                                      <Route path="order-confirmation" element={<OrderConfirmation />} />
-
-                                      {/* Catalog Routes */}
-                                      <Route path="catalog" element={<Catalog />} />
-                                      <Route path="category/:category" element={<Catalog />} />
-                                      <Route path="union-dh" element={<Catalog predefinedFilter="Union DH" />} />
-                                      <Route path="flash-sales" element={<Catalog predefinedFilter="Flash Sales" />} />
-                                      <Route path="deals" element={<Catalog predefinedFilter="Flash Sales" />} />
-                                      <Route path="new-arrivals" element={<Catalog predefinedFilter="New Arrivals" />} />
-                                      <Route path="best-sellers" element={<Catalog predefinedFilter="Best Sellers" />} />
-                                      <Route path="best-shops" element={<BestShops />} />
-
-                                      {/* Category Landing Pages */}
-                                      <Route path="music" element={<CategoryLanding type="music" />} />
-                                      <Route path="apps" element={<CategoryLanding type="apps" />} />
-                                      <Route path="business" element={<CategoryLanding type="business" />} />
-                                      <Route path="sell-business" element={<CategoryLanding type="business" />} />
-
-                                      {/* Functional & Static Pages */}
-                                      <Route path="gift-cards" element={<GiftCards />} />
-                                      <Route path="fierte-union" element={<UnionPlus />} />
-                                      <Route path="prestige" element={<UnionPlus />} /> {/* Legacy redirect */}
-                                      <Route path="union-plus" element={<UnionPlus />} />
-
-                                      <Route path="customer-service" element={<CustomerService />} />
-                                      <Route path="help" element={<CustomerService />} />
-                                      <Route path="returns-replacements" element={<CustomerService />} />
-                                      <Route path="analytics" element={<Analytics />} />
-                                      <Route path="account" element={<Orders />} />
-
-                                      <Route path="orders" element={<Orders />} />
-                                      <Route path="library" element={<MyLibrary />} />
-                                      <Route path="favorites" element={<Favorites />} />
-                                      <Route path="travel" element={<Travel />} />
-                                      <Route path="shipping-policy" element={<ShippingPolicy />} />
-                                      <Route path="tracking/:orderId" element={<TrackingPage />} />
-
-                                      {/* Services Routes */}
-                                      <Route path="services" element={<Services />} />
-                                      <Route path="services/:id" element={<ServiceDetails />} />
-
-                                      {/* Vendor Routes */}
-                                      <Route path="vendors" element={<VendorsPage />} />
-                                      <Route path="vendor/:vendorId" element={<VendorShop />} />
-                                      <Route path="offer/:offerId" element={<ProductDetails />} />
-
-                                      {/* Financial Services */}
-                                      <Route path="services/recharge-moncash" element={<RechargeMonCash />} />
-                                      <Route path="services/recharge-natcash" element={<RechargeNatCash />} />
-                                      <Route path="services/transfert-argent" element={<TransfertArgent />} />
-                                      <Route path="services/paiement-edh" element={<PaiementEDH />} />
-                                      <Route path="services/paiement-camep" element={<PaiementCAMEP />} />
-
-                                      {/* Cars Routes */}
-                                      <Route path="cars" element={<CarsCatalog />} />
-                                      <Route path="car/:id" element={<CarDetails />} />
-
-                                      {/* Utilities Routes */}
-                                      <Route path="utilities" element={<UtilitiesHub />} />
-                                      <Route path="utilities/electricity" element={<ElectricityPayment />} />
-                                      <Route path="utilities/mobile" element={<MobileRecharge />} />
-
-                                      {/* Pay Routes */}
-                                      <Route path="pay" element={<PayHub />} />
-                                      <Route path="pay/transfer" element={<Transfer />} />
-                                      <Route path="pay/credit" element={<Credit />} />
-
-                                      {/* Learn Routes */}
-                                      <Route path="learn" element={<LearnCatalog />} />
-                                      <Route path="learn/course/:id" element={<CourseDetails />} />
-                                      <Route path="learn/my-courses" element={<MyCourses />} />
-
-                                      {/* Real Estate Routes */}
-                                      <Route path="real-estate" element={<RealEstateCatalog />} />
-                                      <Route path="real-estate/:id" element={<RealEstateDetails />} />
-
-                                      {/* Footer Static Pages */}
-                                      <Route path="about-us" element={<StaticPage title="À propos d'Union Digitale" content="<p>Union Digitale est la plateforme e-commerce leader en Haïti...</p>" />} />
-                                      <Route path="careers" element={<StaticPage title="Carrières" content="<p>Rejoignez notre équipe et aidez-nous à bâtir le futur du commerce haïtien.</p>" />} />
-                                      <Route path="sustainability" element={<StaticPage title="Durabilité" content="<p>Nos engagements pour un environnement plus vert.</p>" />} />
-                                      <Route path="sell-on-union" element={<StaticPage title="Vendre sur Union" content="<p>Ouvrez votre boutique en ligne dès aujourd'hui.</p>" />} />
-
-                                      {/* Ambassador Program */}
-                                      <Route path="ambassador/" element={<AmbassadorLanding />} />
-                                      <Route path="ambassador/join" element={<AmbassadorOnboarding />} />
-                                      <Route path="ambassador/dashboard" element={<AmbassadorDashboard />} />
-                                      <Route path="ambassador/resources" element={<AmbassadorResources />} />
-                                      <Route path="wallet" element={<Wallet />} />
-
-                                      <Route path="digital/product/:id" element={<DigitalProductPage />} />
-                                      <Route path="digital/checkout/:id" element={<DigitalCheckoutPage />} />
-                                      <Route path="digital/upsell" element={<DigitalUpsellPage />} />
-                                      <Route path="digital/analytics" element={<DigitalAnalyticsDashboard />} />
-                                    </Route>
-
-                                    {/* Standalone Pages (No Navbar usually, or specialized) */}
-                                    <Route path="upsell" element={<UpsellPage />} />
-                                    <Route path="funnel-builder" element={<FunnelBuilder />} />
+                                    {/* --- AUTH ROUTES (ALWAYS ACCESSIBLE) --- */}
                                     <Route path="login" element={<Login />} />
                                     <Route path="register" element={<RegisterChoice />} />
                                     <Route path="register/buyer" element={<BuyerRegister />} />
                                     <Route path="register/seller" element={<SellerRegister />} />
-                                    <Route path="seller/welcome" element={<SellerLanding />} />
-                                    <Route path="seller/onboarding" element={<SellerOnboarding />} />
 
-                                    {/* Admin Routes */}
-                                    <Route path="admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
-                                    <Route path="admin/products" element={<AdminLayout><AdminProducts /></AdminLayout>} />
-                                    <Route path="admin/orders" element={<AdminLayout><AdminOrders /></AdminLayout>} />
-                                    <Route path="admin/moderation" element={<AdminLayout><StoreModeration /></AdminLayout>} />
-                                    <Route path="admin/system-status" element={<AdminLayout><SystemStatus /></AdminLayout>} />
-                                    <Route path="admin/compliance" element={<AdminLayout><ComplianceDashboard /></AdminLayout>} />
-                                    <Route path="admin/users" element={<AdminLayout><AdminUsers /></AdminLayout>} />
-                                    <Route path="admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
-                                    <Route path="admin/payouts" element={<AdminLayout><AdminPayouts /></AdminLayout>} />
-                                    <Route path="admin/subscription" element={<AdminLayout><AdminSubscription /></AdminLayout>} />
+                                    {/* --- PROTECTED BY MAINTENANCE GUARD --- */}
+                                    <Route element={<MaintenanceGuard />}>
+                                      {/* Routes with Sidebars/Navbars */}
+                                      <Route path="/debug" element={<div style={{ padding: '50px', background: 'white', color: 'black', minHeight: '100vh', zIndex: 9999 }}>DEBUG PAGE - ROUTES WORKING</div>} />
+                                      <Route element={<MainLayout />}>
+                                        <Route path="/" element={<Home />} />
+                                        <Route path="product/:id" element={<ProductDetails />} />
+                                        <Route path="cart" element={<Cart />} />
+                                        <Route path="checkout" element={<Checkout />} />
+                                        <Route path="order-confirmation" element={<OrderConfirmation />} />
+                                        <Route path="/catalog" element={<Catalog />} />
+                                        <Route path="/digital-store" element={<DigitalStore />} />
+                                        <Route path="/pay-bills" element={<PayBills />} />
+                                        <Route path="category/:category" element={<Catalog />} />
+                                        <Route path="union-dh" element={<Catalog predefinedFilter="Union DH" />} />
+                                        <Route path="flash-sales" element={<Catalog predefinedFilter="Flash Sales" />} />
+                                        <Route path="deals" element={<Catalog predefinedFilter="Flash Sales" />} />
+                                        <Route path="new-arrivals" element={<Catalog predefinedFilter="New Arrivals" />} />
+                                        <Route path="best-sellers" element={<Catalog predefinedFilter="Best Sellers" />} />
+                                        <Route path="best-shops" element={<BestShops />} />
+                                        <Route path="music" element={<CategoryLanding type="music" />} />
+                                        <Route path="apps" element={<CategoryLanding type="apps" />} />
+                                        <Route path="business" element={<CategoryLanding type="business" />} />
+                                        <Route path="sell-business" element={<CategoryLanding type="business" />} />
+                                        <Route path="gift-cards" element={<GiftCards />} />
+                                        <Route path="fierte-union" element={<ZabelyPlus />} />
+                                        <Route path="fierte-zabely" element={<ZabelyPlus />} />
+                                        <Route path="zabely-plus" element={<ZabelyPlus />} />
+                                        <Route path="union-plus" element={<ZabelyPlus />} />
+                                        <Route path="loyalty" element={<LoyaltyProgram />} />
+                                        <Route path="customer-service" element={<CustomerService />} />
+                                        <Route path="help" element={<CustomerService />} />
+                                        <Route path="returns-replacements" element={<CustomerService />} />
+                                        <Route path="analytics" element={<Analytics />} />
+                                        <Route path="account" element={<Orders />} />
+                                        <Route path="account/bookings" element={<MyBookings />} />
+                                        {/* UD Solution (Logistics) */}
+                                        <Route path="/ud-solution/join" element={<DriverOnboarding />} />
+                                        <Route path="/ud-solution/dashboard" element={<DriverDashboard />} />
 
-                                    {/* General Routes */}
-                                    <Route path="best-shops" element={<BestShops />} />
-                                    <Route path="policies" element={<PoliciesPage />} />
+                                        <Route path="/orders" element={<Orders />} />
+                                        <Route path="library" element={<MyLibrary />} />
+                                        <Route path="favorites" element={<Favorites />} />
+                                        <Route path="travel" element={<Travel />} />
+                                        <Route path="shipping-policy" element={<ShippingPolicy />} />
+                                        <Route path="tracking/:orderId" element={<TrackingPage />} />
+                                        <Route path="services" element={<Services />} />
+                                        <Route path="services/:id" element={<ServiceDetails />} />
+                                        <Route path="salons" element={<SalonListing />} />
+                                        <Route path="salons/:slug" element={<SalonProfile />} />
+                                        <Route path="salons/:slug/book" element={<SalonBooking />} />
+                                        <Route path="vendors" element={<VendorsPage />} />
+                                        <Route path="vendor/:vendorId" element={<VendorShop />} />
+                                        <Route path="offer/:offerId" element={<ProductDetails />} />
+                                        <Route path="services/recharge-moncash" element={<RechargeMonCash />} />
+                                        <Route path="services/recharge-natcash" element={<RechargeNatCash />} />
+                                        <Route path="services/transfert-argent" element={<TransfertArgent />} />
+                                        <Route path="services/paiement-edh" element={<PaiementEDH />} />
+                                        <Route path="services/paiement-camep" element={<PaiementCAMEP />} />
+                                        <Route path="cars" element={<CarsCatalog />} />
+                                        <Route path="car/:id" element={<CarDetails />} />
+                                        <Route path="utilities" element={<UtilitiesHub />} />
+                                        <Route path="utilities/electricity" element={<ElectricityPayment />} />
+                                        <Route path="utilities/mobile" element={<MobileRecharge />} />
+                                        <Route path="pay" element={<PayHub />} />
+                                        <Route path="pay/transfer" element={<Transfer />} />
+                                        <Route path="pay/credit" element={<Credit />} />
+                                        <Route path="learn" element={<LearnCatalog />} />
+                                        <Route path="learn/course/:id" element={<CourseDetails />} />
+                                        <Route path="learn/my-courses" element={<MyCourses />} />
+                                        <Route path="real-estate" element={<RealEstateCatalog />} />
+                                        <Route path="real-estate/:id" element={<RealEstateDetails />} />
+                                        <Route path="about-us" element={<StaticPage title="À propos de Zabely" content="<p>Zabely est la plateforme e-commerce leader en Haïti...</p>" />} />
+                                        <Route path="careers" element={<StaticPage title="Carrières" content="<p>Rejoignez notre équipe et aidez-nous à bâtir le futur du commerce haïtien.</p>" />} />
+                                        <Route path="sustainability" element={<StaticPage title="Durabilité" content="<p>Nos engagements pour un environnement plus vert.</p>" />} />
+                                        <Route path="sell-on-union" element={<StaticPage title="Vendre sur Zabely" content="<p>Ouvrez votre boutique en ligne dès aujourd'hui.</p>" />} />
+                                        <Route path="ambassador" element={<AmbassadorLanding />} />
+                                        <Route path="wallet" element={<Wallet />} />
+                                        <Route path="digital/product/:id" element={<DigitalProductPage />} />
+                                        <Route path="digital/checkout/:id" element={<DigitalCheckoutPage />} />
+                                      </Route>
 
-                                    {/* Seller Routes (Cars) */}
-                                    <Route path="seller/cars/new" element={<AddCar />} />
-                                    <Route path="seller/products/new" element={<AddProduct />} />
-                                    <Route path="seller/services/new" element={<AddService />} />
-                                    <Route path="seller/real-estate/new" element={<AddRealEstate />} />
-                                    <Route path="seller/settings" element={<SellerSettings />} />
-                                    <Route path="seller/smart-audit" element={<SmartAudit />} />
-                                    <Route path="seller/verify" element={<KYCVerification />} />
-                                    <Route path="seller/dashboard" element={<DashboardUltimate />} />
-                                    <Route path="seller/dashboard-pro" element={<SellerDashboard />} />
-                                    <Route path="cars/:id" element={<CarDetails />} />
+                                      {/* Standalone Pages inside MaintenanceGuard */}
+                                      <Route path="upsell" element={<UpsellPage />} />
+                                      <Route path="funnel-builder" element={<FunnelBuilder />} />
+                                      <Route path="seller/welcome" element={<SellerLanding />} />
+                                      <Route path="seller/onboarding" element={<SellerOnboarding />} />
 
+                                      {/* Admin Routes — SECURITE : ProtectedRoute requiredRole="admin" */}
+                                      <Route path="admin" element={<ProtectedRoute requiredRole="admin"><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} />
+                                      <Route path="admin/products" element={<ProtectedRoute requiredRole="admin"><AdminLayout><AdminProducts /></AdminLayout></ProtectedRoute>} />
+                                      <Route path="admin/orders" element={<ProtectedRoute requiredRole="admin"><AdminLayout><AdminOrders /></AdminLayout></ProtectedRoute>} />
+                                      <Route path="admin/moderation" element={<ProtectedRoute requiredRole="admin"><AdminLayout><StoreModeration /></AdminLayout></ProtectedRoute>} />
+                                      <Route path="admin/system-status" element={<ProtectedRoute requiredRole="admin"><AdminLayout><SystemStatus /></AdminLayout></ProtectedRoute>} />
+                                      <Route path="admin/compliance" element={<ProtectedRoute requiredRole="admin"><AdminLayout><ComplianceDashboard /></AdminLayout></ProtectedRoute>} />
+                                      <Route path="admin/users" element={<ProtectedRoute requiredRole="admin"><AdminLayout><AdminUsers /></AdminLayout></ProtectedRoute>} />
+                                      <Route path="admin/settings" element={<ProtectedRoute requiredRole="admin"><AdminLayout><AdminSettings /></AdminLayout></ProtectedRoute>} />
+                                      <Route path="admin/payouts" element={<ProtectedRoute requiredRole="admin"><AdminLayout><AdminPayouts /></AdminLayout></ProtectedRoute>} />
+                                      <Route path="admin/subscription" element={<ProtectedRoute requiredRole="admin"><AdminLayout><AdminSubscription /></AdminLayout></ProtectedRoute>} />
+
+                                      {/* Seller Routes */}
+                                      <Route path="seller/dashboard" element={<DashboardUltimate />} />
+                                      <Route path="seller/dashboard-pro" element={<SellerDashboard />} />
+                                      <Route path="seller/salon" element={<SalonSetup />} />
+                                      <Route path="seller/salon/calendar" element={<SalonCalendar />} />
+                                      <Route path="seller/salon/analytics" element={<SalonAnalytics />} />
+                                      <Route path="seller/cars/new" element={<AddCar />} />
+                                      <Route path="seller/products/new" element={<AddProduct />} />
+                                      <Route path="seller/services/new" element={<AddService />} />
+                                      <Route path="seller/real-estate/new" element={<AddRealEstate />} />
+                                      <Route path="seller/smart-audit" element={<SmartAudit />} />
+                                      <Route path="seller/verify" element={<KYCVerification />} />
+                                      <Route path="seller/settings" element={<SellerSettings />} />
+                                    </Route>
                                   </Routes>
                                 </Suspense>
                                 <WhatsAppWidget />
