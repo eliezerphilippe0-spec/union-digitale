@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+﻿import React, { useRef, useCallback } from 'react';
 import { useProductsPaginated } from '../hooks/useProductsPaginated';
 
 interface ProductListPaginatedProps {

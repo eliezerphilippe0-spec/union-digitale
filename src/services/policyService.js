@@ -1,4 +1,4 @@
-import { db } from '../lib/firebase.js'; // Ensure this path works for Node execution or adjust text
+﻿import { db } from '../lib/firebase.js'; // Ensure this path works for Node execution or adjust text
 // Note: Normally we'd use firebase-admin for seeding script, but for client-side app consistency we might use client SDK if authenticated.
 // However, since this is 'seed', let's assume it's running in Node.
 // IF running via `node scripts/seed_policies.js`, it needs "type": "module" in package.json and working firebase imports.

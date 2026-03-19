@@ -1,17 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLoyalty } from '../contexts/LoyaltyContext';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Check, Shirt, Ruler, AlertCircle, Plus, X } from 'lucide-react';
+import { Star, ShieldCheck, Truck, MapPin, Lock, Download, Check, Shirt, Ruler, AlertCircle, Plus, X, Loader, ThumbsUp } from 'lucide-react';
+import TrustBadge from '../components/common/TrustBadge';
+import { getStoreTrust } from '../services/trustService';
 import { useProducts } from '../hooks/useProducts';
 import { useLanguage } from '../contexts/LanguageContext';
 
-import SocialProof from '../components/SocialProof';
-import CrossSell from '../components/CrossSell';
+import SocialProof from '../components/marketing/SocialProof';
+import CrossSell from '../components/product/CrossSell';
 import VirtualFittingRoom from '../components/VirtualFittingRoom';
-import ReviewSection from '../components/ReviewSection';
-import { Loader } from 'lucide-react';
-import SEO from '../components/SEO';
+import ProductReviews from '../components/reviews/ProductReviews';
+import SEO from '../components/common/SEO';
 import ProductSchema from '../components/ProductSchema';
+import useAISEO from '../hooks/useAISEO';
+import { seoService } from '../services/seoService';
 import { useCart } from '../contexts/CartContext';
+import { useToast } from '../components/ui/Toast';
+import StickyAddToCart from '../components/product/StickyAddToCart';
+import UrgencyIndicators, { StockWarning, LiveViewers, RecentSales } from '../components/marketing/UrgencyIndicators';
+import ImageZoom from '../components/product/ImageZoom';
+// Nouveaux composants inspirés des géants
+import FrequentlyBoughtTogether from '../components/product/FrequentlyBoughtTogether';
+import ProductVariants from '../components/product/ProductVariants';
+import BuyNowButton from '../components/product/BuyNowButton';
+import QuestionsAnswers from '../components/product/QuestionsAnswers';
+import DeliveryEstimate from '../components/product/DeliveryEstimate';
+// Composants spécifiques produits digitaux
+import { 
+    DigitalProductFeatures, 
+    CourseContent, 
+    DigitalPreview, 
+    InstructorCard, 
+    DigitalBuyBox 
+} from '../components/digital';
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -22,13 +44,62 @@ const ProductDetails = () => {
     const { products, loading } = useProducts();
     const { t } = useLanguage();
     const { addToCart } = useCart();
+    const { getTierInfo, loyaltyData } = useLoyalty();
+    const toast = useToast();
+
+    const cashbackRateMap = {
+        bronze: 0.01,
+        silver: 0.02,
+        gold: 0.03,
+        platinum: 0.05,
+        diamond: 0.07,
+    };
+    const cashbackRate = cashbackRateMap[loyaltyData?.tier] || 0.02;
+    const tierInfo = getTierInfo(loyaltyData?.tier);
     const [showFittingRoom, setShowFittingRoom] = useState(false);
     const [showTrailer, setShowTrailer] = useState(false);
     const [openLesson, setOpenLesson] = useState(null);
+    const [selectedVariants, setSelectedVariants] = useState({});
+    const [showDigitalPreview, setShowDigitalPreview] = useState(false);
 
     // Find product by ID (handle both string and number IDs)
     const product = products.find(p => String(p.id) === String(id));
+    
+    // Check if product is digital
+    const isDigitalProduct = product?.type === 'digital';
     const [activeImage, setActiveImage] = useState(0);
+    const [trust, setTrust] = useState(null);
+
+    useEffect(() => {
+        if (product?.storeSlug) {
+            getStoreTrust(product.storeSlug).then(setTrust).catch(() => {});
+        }
+    }, [product?.storeSlug]);
+
+    // AI SEO: auto-generate optimized metadata for this product
+    const { seoMeta } = useAISEO(product, product?.type === 'digital' ? 'digital' : 'product');
+
+    // Schema.org JSON-LD for Google rich snippets
+    const productSchema = product ? seoService.generateProductSchema(product) : null;
+
+    // Related products for bundles (same category, different product)
+    const relatedProducts = products
+        .filter(p => p.category === product?.category && p.id !== product?.id)
+        .slice(0, 4);
+
+    // Handle variant change
+    const handleVariantChange = (type, value) => {
+        setSelectedVariants(prev => ({ ...prev, [type]: value }));
+    };
+
+    const handleAddToCart = () => {
+        for (let i = 0; i < quantity; i++) {
+            addToCart(product);
+        }
+        if (toast) {
+            toast.success(`${quantity}x ${product.title} ajouté au panier !`);
+        }
+    };
 
     if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader className="animate-spin w-8 h-8 text-secondary" /></div>;
 
@@ -38,6 +109,14 @@ const ProductDetails = () => {
 
     return (
         <div className="bg-white min-h-screen py-8">
+            <SEO
+                title={product.title || product.name}
+                description={product.description}
+                image={product.images?.[0] || product.image}
+                type="product"
+                aiMeta={seoMeta}
+                schema={productSchema}
+            />
             <div className="container mx-auto px-4">
                 <SEO
                     title={product.title}
@@ -60,7 +139,7 @@ const ProductDetails = () => {
                     {/* Left Column: Image Gallery (5 cols) */}
                     <div className="lg:col-span-5 flex gap-4">
                         {/* Thumbnails */}
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-2 max-h-[380px] overflow-y-auto pr-1">
                             {(product.images && product.images.length > 0 ? product.images : [product.image]).map((img, idx) => (
                                 <div
                                     key={idx}
@@ -77,33 +156,31 @@ const ProductDetails = () => {
                             ))}
                         </div>
 
-                        {/* Main Image */}
-                        <div className="flex-1 bg-gray-50 rounded-lg flex items-center justify-center min-h-[400px] border border-gray-100 relative overflow-hidden">
-                            {(() => {
-                                const currentImg = (product.images && product.images[activeImage]) || product.image;
-                                if (currentImg && (currentImg.startsWith('http') || currentImg.startsWith('/'))) {
-                                    return <img src={currentImg} alt={product.title} className="w-full h-full object-contain" loading="eager" />;
-                                } else {
-                                    return <span className="text-6xl text-gray-200 font-bold">{currentImg}</span>;
-                                }
-                            })()}
+                        {/* Main Image with Zoom */}
+                        <div className="flex-1 relative bg-gray-50 rounded-lg border border-gray-100 overflow-hidden">
+                            <ImageZoom
+                                src={(product.images && product.images[activeImage]) || product.image}
+                                alt={product.title}
+                                placeholder={product.title?.charAt(0) || '📦'}
+                                className="min-h-[280px] md:min-h-[400px]"
+                            />
 
                             {product.type === 'digital' && (
                                 <button
                                     onClick={() => setShowTrailer(true)}
-                                    className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/40 transition-colors group"
+                                    className="absolute inset-0 z-10 flex items-center justify-center bg-black/10 hover:bg-black/20 transition-colors group"
                                 >
                                     <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                                        <div className="w-0 h-0 border-t-[10px] border-t-transparent border-l-[18px] border-l-indigo-600 border-b-[10px] border-b-transparent ml-1"></div>
+                                        <div className="w-0 h-0 border-t-[10px] border-t-transparent border-l-[18px] border-l-primary-600 border-b-[10px] border-b-transparent ml-1"></div>
                                     </div>
-                                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 px-3 py-1 rounded-full text-xs font-bold text-indigo-700 shadow-sm flex items-center gap-1">
+                                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 px-3 py-1 rounded-full text-xs font-bold text-primary-700 shadow-sm flex items-center gap-1">
                                         Voir l'aperçu gratuit
                                     </div>
                                 </button>
                             )}
 
                             {product.type === 'digital' && (
-                                <div className="absolute top-4 right-4 bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
+                                <div className="absolute top-4 right-4 bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded flex items-center gap-1 z-20">
                                     <Download className="w-3 h-3" /> {t('download_label')}
                                 </div>
                             )}
@@ -113,9 +190,16 @@ const ProductDetails = () => {
                     {/* Middle Column: Product Info (4 cols) */}
                     <div className="lg:col-span-4">
                         <h1 className="text-2xl font-medium text-gray-900 mb-1">{product.title}</h1>
-                        <a href="#" className="text-blue-600 text-sm hover:underline mb-2 block">{t('visit_store')} {product.brand}</a>
+                        <button onClick={() => product.storeSlug ? navigate(`/vendor/${product.storeSlug}`) : null} className="text-blue-600 text-sm hover:underline mb-2 block text-left">
+                            {t('visit_store')} {product.brand} <span className="text-gray-500 text-xs ml-1">(⭐ 4.8/5)</span>
+                        </button>
+                        {trust?.trustTier && (
+                            <div className="mb-2">
+                                <TrustBadge tier={trust.trustTier} />
+                            </div>
+                        )}
 
-                        <div className="flex items-center gap-2 mb-4">
+                        <div className="flex items-center gap-2 mb-3">
                             <div className="flex text-secondary">
                                 {[...Array(5)].map((_, i) => (
                                     <Star key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'fill-current' : 'text-gray-300'}`} />
@@ -127,25 +211,72 @@ const ProductDetails = () => {
                             )}
                         </div>
 
-                        <div className="border-t border-b border-gray-200 py-4 my-4">
-                            <div className="flex items-start gap-2">
-                                <span className="text-sm text-gray-500 mt-1">{t('price_label')}</span>
-                                <div className="flex flex-col">
-                                    <span className="text-2xl font-medium text-red-700">{product.price.toLocaleString()} G</span>
-                                    {product.originalPrice && (
-                                        <span className="text-sm text-gray-500 line-through">{t('suggested_price')} {product.originalPrice.toLocaleString()} G</span>
-                                    )}
-                                    {product.type === 'digital' && (
-                                        <div className="mt-1 flex gap-2">
-                                            <span className="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded">Accès à vie</span>
-                                            <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded">Certificat inclus</span>
-                                        </div>
-                                    )}
-                                    <div className="text-sm text-green-600 font-bold mt-1">
-                                        {t('cashback_earn')} {Math.floor(product.price * 0.02).toLocaleString()} G {t('cashback_suffix')} (2%)
-                                    </div>
+                        {/* Proof social */}
+                        <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full mb-3">
+                            <span>🔥 12 achetés cette semaine</span>
+                            <span className="text-emerald-400">•</span>
+                            <span>👀 8 personnes regardent</span>
+                        </div>
+
+                        {/* ⭐ REVIEWS SUMMARY */}
+                        <div className="flex items-center gap-4 p-3 bg-green-50 border border-green-200 rounded-xl mb-4">
+                            <div className="text-center px-3 border-r border-green-200">
+                                <div className="text-2xl font-black text-green-700">{product.rating}</div>
+                                <div className="flex justify-center">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star key={i} className={`w-3 h-3 ${i < Math.floor(product.rating) ? 'text-gold-500 fill-gold-500' : 'text-gray-300'}`} />
+                                    ))}
                                 </div>
                             </div>
+                            <div className="flex-1 text-sm">
+                                <div className="flex items-center gap-2 text-green-700 font-semibold">
+                                    <ThumbsUp className="w-4 h-4" />
+                                    <span>{t('product_recommend_rate')}</span>
+                                </div>
+                                <p className="text-green-600 text-xs mt-0.5">{product.reviews || 0} {t('verified_reviews')}</p>
+                            </div>
+                        </div>
+
+                        {/* 💰 PRIX */}
+                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 my-4">
+                            <div className="flex items-baseline gap-3 mb-3">
+                                <span className="text-4xl md:text-5xl font-black text-gray-900">
+                                    {product.price.toLocaleString()}
+                                    <span className="text-2xl ml-1 text-gray-500 font-normal">G</span>
+                                </span>
+                                {product.originalPrice && product.originalPrice > product.price && (
+                                    <>
+                                        <span className="text-xl text-gray-400 line-through">
+                                            {product.originalPrice.toLocaleString()} G
+                                        </span>
+                                        <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                            -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                                        </span>
+                                    </>
+                                )}
+                            </div>
+                            
+                            <div className="flex flex-wrap gap-3 mb-3">
+                                <div className="flex items-center gap-1.5 text-sm bg-green-50 text-green-700 px-3 py-1.5 rounded-full">
+                                    <span className="text-base">💰</span>
+                                    <span className="font-semibold">+{Math.floor(product.price * cashbackRate).toLocaleString()} G cashback</span>
+                                    {tierInfo?.name && (
+                                        <span className="ml-1 text-xs text-green-600">({tierInfo.name})</span>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-1.5 text-sm bg-orange-50 text-orange-700 px-3 py-1.5 rounded-full">
+                                    <span className="text-base">⭐</span>
+                                    <span className="font-semibold">+{Math.floor(product.price / 100)} {t('loyalty_points_label')}</span>
+                                </div>
+                            </div>
+
+                            {product.zabelyPlus && product.type === 'physical' && (
+                                <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+                                    <span className="bg-gold-400 text-primary-900 px-2 py-0.5 rounded text-xs font-bold">Zabely Plus</span>
+                                    <span className="text-sm text-gray-600">{t('one_day_delivery')}</span>
+                                    <span className="text-sm text-green-600 font-bold">{t('free_returns')}</span>
+                                </div>
+                            )}
                         </div>
 
                         {product.type === 'digital' && (
@@ -255,23 +386,27 @@ const ProductDetails = () => {
 
                     {/* Right Column: Buy Box (3 cols) */}
                     <div className="lg:col-span-3">
-                        <div className="border border-gray-200 rounded-lg p-4 shadow-sm">
+                        {/* Digital Product: Special Buy Box */}
+                        {isDigitalProduct ? (
+                            <DigitalBuyBox product={product} />
+                        ) : (
+                        <div className="border border-gray-200 rounded-lg p-4">
                             <SocialProof />
                             <div className="text-2xl font-medium text-red-700 mb-2">{product.price.toLocaleString()} G</div>
 
                             {product.type === 'physical' ? (
-                                product.unionPlus && (
+                                product.zabelyPlus && (
                                     <div className="mb-4 text-sm">
-                                        <div className="flex items-center gap-1 text-blue-600">
-                                            <span className="bg-[#FFC400] text-primary px-1 rounded-sm text-xs italic font-bold">Union Plus</span>
-                                            <span>{t('one_day_delivery')}</span>
+                                        <div className="flex items-center gap-1 text-primary-600">
+                                            <span className="bg-gold-400 text-primary-900 px-1 rounded-sm text-xs italic font-bold uppercase">Zabely Plus</span>
+                                            <span className="font-semibold">{t('one_day_delivery')}</span>
                                         </div>
                                         <div className="text-gray-500 mt-1">
                                             {t('free_delivery')} <span className="font-bold text-gray-900">Demain, 2 Déc.</span>. {t('order_within')} <span className="text-green-600">4 h 30 min</span>
                                         </div>
-                                        <div className="flex items-center gap-1 text-blue-600 mt-2 cursor-pointer hover:underline">
+                                        <div className="flex items-center gap-1 text-primary-600 mt-2 cursor-pointer hover:underline">
                                             <MapPin className="w-4 h-4" />
-                                            {t('deliver_to')} Philippe - Pétion-Ville
+                                            {t('deliver_to')} {currentUser?.displayName || 'Client'} - Pétion-Ville
                                         </div>
                                     </div>
                                 )
@@ -282,16 +417,22 @@ const ProductDetails = () => {
                                 </div>
                             )}
 
-                            {/* Scarcity Alert */}
-                            {product.type === 'physical' && (
-                                <div className="mb-4 p-3 bg-red-50 rounded-lg border border-red-100 animate-pulse">
-                                    <div className="flex items-center gap-2 text-red-700 font-bold text-sm">
-                                        <AlertCircle className="w-4 h-4" />
-                                        Plus que 3 articles disponibles !
+                            {/* Virtual Fitting Room Button */}
+                            {product.type === 'physical' && (product.category === 'clothing' || product.category === 'shoes' || product.category === 'Vêtements' || product.category === 'Chaussures') && (
+                                <div className="mb-4">
+                                    <button
+                                        onClick={() => setShowFittingRoom(true)}
+                                        className="w-full flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-lg transition-colors mb-2"
+                                    >
+                                        <Shirt className="w-5 h-5" />
+                                        {t('fr_btn_try_on') || 'Essayer Virtuellement'}
+                                    </button>
+                                    <div className="text-xs text-center text-gray-500">
+                                        <span className="font-semibold text-primary-600">Nouveau !</span> Trouvez votre taille parfaite avec l'IA
                                     </div>
-                                    <p className="text-[10px] text-red-600 mt-1">Commandez maintenant pour garantir la livraison demain.</p>
                                 </div>
                             )}
+                            <p className="text-[10px] text-red-600 mt-1">Commandez maintenant pour garantir la livraison demain.</p>
 
                             {/* Vendor Trust Block */}
                             <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
@@ -316,6 +457,13 @@ const ProductDetails = () => {
                                 </div>
                             </div>
 
+                            {/* Urgency Indicators */}
+                            <div className="mb-4 space-y-2">
+                                <StockWarning stock={product.stock || 3} />
+                                <LiveViewers productId={product.id} />
+                                <RecentSales count={product.recentSales || 12} hours={24} />
+                            </div>
+
                             <div className="text-xl text-green-700 font-medium mb-4">{t('in_stock')}</div>
 
                             <div className="space-y-3">
@@ -324,7 +472,7 @@ const ProductDetails = () => {
                                     <select
                                         value={quantity}
                                         onChange={(e) => setQuantity(e.target.value)}
-                                        className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-secondary shadow-sm bg-gray-50"
+                                        className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-primary-600 shadow-sm bg-gray-50"
                                     >
                                         {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}
                                     </select>
@@ -336,34 +484,36 @@ const ProductDetails = () => {
                                             alert("Veuillez sélectionner une taille.");
                                             return;
                                         }
-                                        addToCart({ ...product, selectedSize, quantity: Number(quantity) }, Number(quantity));
-                                        alert(`${product.title} ajouté au panier !`);
+                                        handleAddToCart();
                                     }}
-                                    className="w-full bg-secondary hover:bg-secondary-hover text-white font-medium py-2 rounded-full shadow-sm transition-colors"
+                                    className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2"
                                 >
+                                    <span>🛒</span>
                                     {t('add_to_cart')}
                                 </button>
-                                <button
-                                    onClick={() => navigate('/checkout')}
-                                    className="w-full bg-orange-400 hover:bg-orange-500 text-gray-900 font-medium py-2 rounded-full shadow-sm transition-colors"
-                                >
-                                    {t('buy_now')}
-                                </button>
+                                
+                                {/* Buy Now - Amazon Style avec confirmation */}
+                                <BuyNowButton 
+                                    product={product} 
+                                    quantity={parseInt(quantity)}
+                                    variant="primary"
+                                    className="w-full"
+                                />
                             </div>
 
                             <div className="mt-4 text-xs text-gray-500 space-y-1">
                                 <div className="flex gap-2">
                                     <span className="w-20 text-gray-400">{t('shipped_by')}</span>
-                                    <span>Union Digitale</span>
+                                    <span>Zabely</span>
                                 </div>
                                 <div className="flex gap-2">
                                     <span className="w-20 text-gray-400">{t('sold_by')}</span>
-                                    <span className="text-blue-600 hover:underline cursor-pointer">{product.brand}</span>
+                                    <span className="text-primary-600 hover:underline cursor-pointer">{product.brand}</span>
                                 </div>
                                 {product.type === 'physical' && (
                                     <div className="flex gap-2">
                                         <span className="w-20 text-gray-400">{t('returns_policy')}</span>
-                                        <span className="text-blue-600 hover:underline cursor-pointer">{t('returnable_until')} 31 Jan. 2026</span>
+                                        <span className="text-primary-600 hover:underline cursor-pointer">{t('returnable_until')} 31 Jan. 2026</span>
                                     </div>
                                 )}
                             </div>
@@ -373,11 +523,56 @@ const ProductDetails = () => {
                                 {t('secure_transaction')}
                             </div>
                         </div>
+                        )}
                     </div>
 
-                    {/* Review Section */}
+                    {/* Digital Product Specific Sections */}
+                    {isDigitalProduct && (
+                        <>
+                            {/* Course Content / Table of Contents */}
+                            <div className="lg:col-span-8">
+                                <CourseContent course={product} />
+                            </div>
+                            
+                            {/* Instructor / Author Card */}
+                            <div className="lg:col-span-4">
+                                <InstructorCard instructor={product.instructor} />
+                            </div>
+                            
+                            {/* Digital Product Features */}
+                            <div className="lg:col-span-12">
+                                <DigitalProductFeatures product={product} />
+                            </div>
+                        </>
+                    )}
+
+                    {/* Frequently Bought Together - Amazon Style */}
                     <div className="lg:col-span-12">
-                        <ReviewSection productId={id} />
+                        <FrequentlyBoughtTogether 
+                            mainProduct={product} 
+                            relatedProducts={relatedProducts}
+                        />
+                    </div>
+
+                    {/* Delivery Estimate - Only for physical */}
+                    {!isDigitalProduct && (
+                        <div className="lg:col-span-12">
+                            <DeliveryEstimate 
+                                department="Ouest"
+                                hasZabelyPlus={product.zabelyPlus}
+                                productType={product.type}
+                            />
+                        </div>
+                    )}
+
+                    {/* Questions & Answers - Amazon Style */}
+                    <div className="lg:col-span-12">
+                        <QuestionsAnswers productId={id} />
+                    </div>
+
+                    {/* Review Section (Priority 4) */}
+                    <div className="lg:col-span-12">
+                        <ProductReviews productId={id} />
                     </div>
 
                     {/* Cross Sell Section */}
@@ -396,7 +591,11 @@ const ProductDetails = () => {
                         setSelectedSize(size);
                         setRecommendedSize(size);
                         addToCart({ ...prod, selectedSize: size, quantity: Number(quantity) });
-                        alert(`Ajouté au panier - Taille ${size}`);
+                        if (toast) {
+                            toast.success(`Ajouté au panier - Taille ${size}`);
+                        } else {
+                            alert(`Ajouté au panier - Taille ${size}`);
+                        }
                     }}
                 />
             )}
@@ -412,7 +611,7 @@ const ProductDetails = () => {
                             <X className="w-8 h-8" />
                         </button>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <div className="w-20 h-20 bg-indigo-600 rounded-full flex items-center justify-center mb-4">
+                            <div className="w-20 h-20 bg-primary-600 rounded-full flex items-center justify-center mb-4">
                                 <div className="w-0 h-0 border-t-[15px] border-t-transparent border-l-[25px] border-l-white border-b-[15px] border-b-transparent ml-2"></div>
                             </div>
                             <p className="text-white font-bold text-xl">Aperçu vidéo en cours de chargement...</p>
@@ -421,6 +620,18 @@ const ProductDetails = () => {
                     </div>
                 </div>
             )}
+
+            {/* Digital Preview Modal */}
+            {showDigitalPreview && isDigitalProduct && (
+                <DigitalPreview
+                    product={product}
+                    isOpen={showDigitalPreview}
+                    onClose={() => setShowDigitalPreview(false)}
+                />
+            )}
+
+            {/* Sticky Add to Cart for Mobile */}
+            <StickyAddToCart product={product} />
         </div>
     );
 };

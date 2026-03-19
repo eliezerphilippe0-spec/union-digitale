@@ -59,8 +59,8 @@ export const CartProvider = ({ children }) => {
     const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
     const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
 
-    // Shipping Logic: Free if > 5000 or Union Plus Member
-    const shippingCost = (cartTotal >= 5000 || currentUser?.isUnionPlus) ? 0 : 250;
+    // Shipping Logic: Free if > 5000 or Zabely Plus Member
+    const shippingCost = (cartTotal >= 5000 || currentUser?.isZabelyPlus) ? 0 : 250;
     const tax = cartTotal * 0.1;
     const finalTotal = cartTotal + tax + shippingCost;
 

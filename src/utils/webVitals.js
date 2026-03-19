@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Simplified Web Vitals Monitoring (without external dependency)
  * Tracks basic performance metrics
  */

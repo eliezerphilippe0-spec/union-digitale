@@ -130,7 +130,7 @@ const AdminOrders = () => {
                     missionId: missionId,
                     status: 'processing' // Move to processing if not already
                 });
-                alert("Mission UD Solution créée ! Elle est maintenant visible par les chauffeurs.");
+                alert("Mission Zabely Solution créée ! Elle est maintenant visible par les chauffeurs.");
             }
         } catch (error) {
             console.error("Error converting to mission:", error);
@@ -233,7 +233,7 @@ const AdminOrders = () => {
                                                         onClick={() => handleConvertToMission(order.id)}
                                                         className="bg-secondary text-white px-2 py-1 rounded text-[10px] items-center flex gap-1 shadow-sm hover:scale-105 transition-transform"
                                                     >
-                                                        <Navigation className="w-3 h-3" /> UD Solution
+                                                        <Navigation className="w-3 h-3" /> Zabely Solution
                                                     </button>
                                                 ) : (
                                                     <span className="text-[10px] text-secondary font-bold border border-secondary/20 bg-secondary/10 px-2 py-1 rounded">

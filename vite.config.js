@@ -16,11 +16,11 @@ export default defineConfig({
     }),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['vite.svg', 'pwa-192x192.png', 'pwa-512x512.png'],
+      includeAssets: ['logo-zabely.svg', 'pwa-192x192.png', 'pwa-512x512.png', 'robots.txt', 'sitemap.xml'],
       manifest: {
-        name: 'Union Digitale',
-        short_name: 'Union',
-        description: 'La première plateforme e-commerce en Haïti',
+        name: 'Zabely',
+        short_name: 'Zabely',
+        description: 'Le Futur du E-commerce en Haïti',
         theme_color: '#f97316',
         background_color: '#f8fafc',
         display: 'standalone',
@@ -105,7 +105,8 @@ export default defineConfig({
           'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
           'vendor-ui': ['framer-motion', 'lucide-react'],
           'vendor-charts': ['recharts'],
-          'vendor-utils': ['axios', 'react-use', 'lodash']
+          'vendor-utils': ['axios', 'react-use', 'lodash'],
+          'vendor-forms': ['zod']
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
@@ -122,6 +123,7 @@ export default defineConfig({
   server: {
     hmr: {
       overlay: false
-    }
+    },
+    allowedHosts: ['zabely.loca.lt', 'localhost', '.loca.lt']
   }
 })

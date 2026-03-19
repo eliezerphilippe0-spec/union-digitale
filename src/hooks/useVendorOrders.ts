@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { collection, collectionGroup, query, where, orderBy, limit, getDocs, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
@@ -41,7 +41,7 @@ export const useVendorOrders = (options: UseVendorOrdersOptions = {}) => {
 
     // Use collectionGroup to query vendor_orders across all orders
     let q = query(
-      collectionGroup(db, 'vendor_orders'),
+      collectionGroup(db as any, 'vendor_orders'),
       where('vendorId', '==', currentUser.uid),
       orderBy('createdAt', 'desc'),
       limit(limitCount)
@@ -50,7 +50,7 @@ export const useVendorOrders = (options: UseVendorOrdersOptions = {}) => {
     // Add status filter if provided
     if (status) {
       q = query(
-        collectionGroup(db, 'vendor_orders'),
+        collectionGroup(db as any, 'vendor_orders'),
         where('vendorId', '==', currentUser.uid),
         where('status', '==', status),
         orderBy('createdAt', 'desc'),
@@ -65,7 +65,7 @@ export const useVendorOrders = (options: UseVendorOrdersOptions = {}) => {
         const ordersData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
-        })) as VendorOrder[];
+        })) as any as VendorOrder[];
         setOrders(ordersData);
         setError(null);
       } catch (err: any) {
@@ -84,7 +84,7 @@ export const useVendorOrders = (options: UseVendorOrdersOptions = {}) => {
           const ordersData = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
-          })) as VendorOrder[];
+          })) as any as VendorOrder[];
           setOrders(ordersData);
           setLoading(false);
           setError(null);
@@ -115,7 +115,9 @@ export const useVendorOrderStats = () => {
     totalOrders: 0,
     totalRevenue: 0,
     pendingOrders: 0,
-    completedOrders: 0
+    completedOrders: 0,
+    pendingBalance: 0,
+    availableBalance: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -128,7 +130,7 @@ export const useVendorOrderStats = () => {
     const fetchStats = async () => {
       try {
         const q = query(
-          collectionGroup(db, 'vendor_orders'),
+          collectionGroup(db as any, 'vendor_orders'),
           where('vendorId', '==', currentUser.uid)
         );
 
@@ -137,14 +139,22 @@ export const useVendorOrderStats = () => {
 
         const totalOrders = orders.length;
         const totalRevenue = orders.reduce((sum, order) => sum + (order.vendorAmount || 0), 0);
-        const pendingOrders = orders.filter(o => o.paymentStatus === 'pending').length;
-        const completedOrders = orders.filter(o => o.status === 'completed').length;
+        
+        // Priority 2: Escrow logic computations
+        // Funds are pending if order is NOT delivered. Funds are available if order IS delivered.
+        const pendingOrders = orders.filter(o => o.status !== 'delivered').length;
+        const completedOrders = orders.filter(o => o.status === 'delivered').length;
+        
+        const pendingBalance = orders.filter(o => o.status !== 'delivered').reduce((sum, order) => sum + (order.vendorAmount || 0), 0);
+        const availableBalance = orders.filter(o => o.status === 'delivered').reduce((sum, order) => sum + (order.vendorAmount || 0), 0);
 
         setStats({
           totalOrders,
           totalRevenue,
           pendingOrders,
-          completedOrders
+          completedOrders,
+          pendingBalance,
+          availableBalance
         });
       } catch (err) {
         console.error('Error fetching vendor stats:', err);

@@ -10,12 +10,12 @@ export const useLanguage = () => {
 export const LanguageProvider = ({ children }) => {
     // Try to get language from localStorage, default to 'fr'
     const [language, setLanguage] = useState(() => {
-        const saved = localStorage.getItem('union_digitale_lang');
+        const saved = localStorage.getItem('zabely_lang');
         return saved || 'fr';
     });
 
     useEffect(() => {
-        localStorage.setItem('union_digitale_lang', language);
+        localStorage.setItem('zabely_lang', language);
     }, [language]);
 
     // Translation function

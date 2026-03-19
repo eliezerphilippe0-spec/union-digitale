@@ -104,7 +104,7 @@ const ProductCard = ({ product }) => {
                             -{discountPercentage}%
                         </Badge>
                     )}
-                    {product.unionPlus && (
+                    {product.zabelyPlus && (
                         <Badge variant="premium" size="sm">
                             Zabely Plus
                         </Badge>
@@ -253,7 +253,7 @@ const ProductCard = ({ product }) => {
 
                     {/* Features row */}
                     <div className="flex items-center gap-3 pt-4 border-t border-neutral-50">
-                        {product.unionPlus && (
+                        {product.zabelyPlus && (
                             <div className="flex items-center gap-1.5 text-[9px] text-blue-600 font-black uppercase tracking-widest bg-blue-50 px-2 py-1 rounded-lg">
                                 <Zap className="w-3 h-3 fill-current" />
                                 <span>Livraison 24h</span>

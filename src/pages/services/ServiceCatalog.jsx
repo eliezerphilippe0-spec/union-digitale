@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Search, MapPin, Filter, Star, Briefcase, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useServices } from '../../hooks/useServices';
+import SEO from '../../components/common/SEO';
 
 const CATEGORIES = [
     { id: 'all', label: 'Tous', icon: Briefcase },
@@ -33,6 +34,7 @@ const ServiceCatalog = () => {
 
     return (
         <div className="bg-gray-50 min-h-screen py-8">
+            <SEO title="Union Services" description="Trouvez des professionnels en Haïti: beauté, maison, éducation, business et événements." />
             <div className="container mx-auto px-4 max-w-6xl">
 
                 {/* Header & Search */}
@@ -85,9 +87,13 @@ const ServiceCatalog = () => {
                                 onClick={() => navigate(`/services/${service.id}`)}
                                 className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group cursor-pointer"
                             >
-                                {/* Image Placeholder */}
+                                {/* Image */}
                                 <div className="h-40 bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center relative overflow-hidden">
-                                    <span className="text-6xl transform group-hover:scale-110 transition-transform duration-300">{service.image}</span>
+                                    {service.image && (service.image.startsWith('http') || service.image.startsWith('/')) ? (
+                                        <img src={service.image} alt={service.title} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="text-6xl transform group-hover:scale-110 transition-transform duration-300">{service.image || '🧰'}</span>
+                                    )}
                                     <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold flex items-center gap-1 shadow-sm">
                                         <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
                                         {service.rating}
@@ -112,10 +118,13 @@ const ServiceCatalog = () => {
                                             {service.price.toLocaleString()} {service.currency}
                                             <span className="text-xs text-gray-400 font-normal ml-1">/ session</span>
                                         </div>
-                                        <button className="bg-gray-900 text-white p-2 rounded-lg group-hover:bg-indigo-600 transition-colors">
+                                        <button className="bg-gray-900 text-white p-2 rounded-lg group-hover:bg-indigo-600 transition-colors" aria-label="Voir le service">
                                             <Briefcase className="w-4 h-4" />
                                         </button>
                                     </div>
+                                    <button className="mt-3 w-full sm:hidden bg-indigo-600 text-white text-sm font-semibold py-2 rounded-lg">
+                                        Voir
+                                    </button>
                                 </div>
                             </div>
                         ))}

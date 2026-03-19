@@ -53,3 +53,17 @@ export * from './security/auditLogging';
 
 // Auth - 2FA
 export * from './auth/twoFactorAuth'; 
+
+// Digital Files - Signed URLs
+export * from './digital/signedUrls';
+
+// Certificates
+export * from './certificates/generateCertificate';
+
+// Shipping & Logistics
+export * from './shipping/shippingService';
+
+// Affiliate System
+export * from './affiliate/affiliateCommissions';
+export * from './affiliate/bonusSystem';
+export * from './affiliate/antifraud';

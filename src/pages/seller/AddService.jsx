@@ -1,13 +1,28 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Upload, Plus, Trash2, Save, Clock, Calendar, MapPin } from 'lucide-react';
+import { Upload, Plus, Trash2, Save, Clock, Calendar, MapPin, Sparkles, Wand2, Loader } from 'lucide-react';
+import useGeolocation from '../../hooks/useGeolocation';
 import { useNavigate } from 'react-router-dom';
 import { useServices } from '../../hooks/useServices';
+import { geminiService } from '../../services/geminiService';
 
 const AddService = () => {
     const { t } = useLanguage();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [aiGenerating, setAiGenerating] = useState(false);
+    const [aiTone, setAiTone] = useState('professional');
+
+    const { address: geoAddress, loading: geoLoading, getLocation } = useGeolocation();
+
+    React.useEffect(() => {
+        if (geoAddress) {
+            setFormData(prev => ({ 
+                ...prev, 
+                address: geoAddress.full || `${geoAddress.street}, ${geoAddress.city}` 
+            }));
+        }
+    }, [geoAddress]);
 
     // Initial State
     const [formData, setFormData] = useState({
@@ -72,6 +87,28 @@ const AddService = () => {
     };
 
     const { addService } = useServices();
+
+    const handleAIGenerate = async () => {
+        if (!formData.title) {
+            alert("Veuillez d'abord saisir un nom pour le service.");
+            return;
+        }
+
+        setAiGenerating(true);
+        try {
+            const descriptiveKeywords = `service, ${formData.category}, ${formData.locationType}`;
+            const generated = await geminiService.generateProductDescription(formData.title, descriptiveKeywords, aiTone);
+            
+            if (generated) {
+                setFormData(prev => ({ ...prev, description: generated }));
+            }
+        } catch (error) {
+            console.error("AI Generation failed:", error);
+            alert("L'assistant IA est temporairement indisponible.");
+        } finally {
+            setAiGenerating(false);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -194,16 +231,69 @@ const AddService = () => {
                             </div>
                         </div>
 
+                        {formData.locationType === 'provider_location' && (
+                            <div className="col-span-2 animate-fadeIn">
+                                <div className="flex justify-between items-center mb-1">
+                                    <label className="block text-sm font-medium text-gray-700">{t('service_address') || 'Adresse du service'}</label>
+                                    <button
+                                        type="button"
+                                        onClick={getLocation}
+                                        disabled={geoLoading}
+                                        className="text-xs flex items-center gap-1 text-indigo-600 hover:underline disabled:opacity-50"
+                                    >
+                                        <MapPin className="w-3 h-3" />
+                                        {geoLoading ? t('locating') : t('locate_me')}
+                                    </button>
+                                </div>
+                                <div className="relative">
+                                    <input
+                                        name="address"
+                                        value={formData.address || ''}
+                                        onChange={handleChange}
+                                        placeholder="Numéro, Rue, Ville..."
+                                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                    />
+                                    <MapPin className="absolute right-3 top-2.5 w-4 h-4 text-gray-300" />
+                                </div>
+                            </div>
+                        )}
+
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium mb-1 text-gray-700">Description</label>
+                            <div className="flex items-center justify-between mb-1">
+                                <label className="block text-sm font-medium text-gray-700">Description</label>
+                                <div className="flex items-center gap-2">
+                                    <select 
+                                        value={aiTone}
+                                        onChange={(e) => setAiTone(e.target.value)}
+                                        className="text-xs border rounded p-1 bg-gray-50 outline-none focus:ring-1 focus:ring-indigo-500"
+                                    >
+                                        <option value="professional">Ton Pro</option>
+                                        <option value="excited">Ton Vendeur</option>
+                                        <option value="creative">Ton Créatif</option>
+                                    </select>
+                                    <button
+                                        type="button"
+                                        onClick={handleAIGenerate}
+                                        disabled={aiGenerating || !formData.title}
+                                        className="flex items-center gap-1.5 px-2 py-1 bg-indigo-50 text-indigo-700 rounded-md text-xs font-bold hover:bg-indigo-100 transition-colors disabled:opacity-50"
+                                    >
+                                        {aiGenerating ? <Loader className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+                                        Assistant IA
+                                    </button>
+                                </div>
+                            </div>
                             <textarea
                                 name="description"
                                 value={formData.description}
                                 onChange={handleChange}
-                                rows="3"
+                                rows="4"
                                 className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                placeholder="Décrivez votre service en détail..."
+                                placeholder="Décrivez votre service en détail ou utilisez l'assistant IA..."
                             ></textarea>
+                            <p className="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
+                                <Sparkles className="w-2.5 h-2.5" />
+                                L'IA rédige une description professionnelle pour votre service.
+                            </p>
                         </div>
                     </div>
                 </div>

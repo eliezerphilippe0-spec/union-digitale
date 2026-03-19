@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { db, storage } from '../../lib/firebase';
 import { doc, updateDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Shield, Upload, CheckCircle, AlertTriangle } from 'lucide-react';
-import SEO from '../../components/SEO';
+import SEO from '../../components/common/SEO';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 export default function KYCVerification() {

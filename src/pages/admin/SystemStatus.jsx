@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { monitoringService } from '../../services/monitoringService';
 import { db } from '../../lib/firebase';
 import { updateAppSettings, subscribeToAppSettings } from '../../services/configService';

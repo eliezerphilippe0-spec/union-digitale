@@ -100,6 +100,15 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         let unsubscribeFirestore = null;
+        let timeoutId = null;
+
+        // Safety timeout - never block more than 5 seconds
+        timeoutId = setTimeout(() => {
+            if (loading) {
+                console.warn('Auth loading timeout - proceeding without user data');
+                setLoading(false);
+            }
+        }, 5000);
 
         // Safety timeout to prevent infinite blank screen if Firebase hangs
         const timer = setTimeout(() => {
@@ -124,12 +133,13 @@ export const AuthProvider = ({ children }) => {
 
                     // User is signed in, listen to Firestore modifications
                     const userRef = doc(db, 'users', user.uid);
-                    unsubscribeFirestore = onSnapshot(userRef, (doc) => {
-                        if (doc.exists()) {
+                    unsubscribeFirestore = onSnapshot(userRef, (docSnap) => {
+                        clearTimeout(timeoutId);
+                        clearTimeout(timer);
+                        if (docSnap.exists()) {
                             // SECURITE : On exclut le champ 'role' du document Firestore.
                             // Le rôle est uniquement lu depuis les custom claims Firebase Auth
-                            // pour éviter qu'un utilisateur s'auto-promue en modifiant son doc.
-                            const { role: _firestoreRole, ...safeDocData } = doc.data();
+                            const { role: _firestoreRole, ...safeDocData } = docSnap.data();
                             setCurrentUser({
                                 ...user,
                                 ...safeDocData,
@@ -149,21 +159,23 @@ export const AuthProvider = ({ children }) => {
                             });
                         }
                         setLoading(false);
-                        clearTimeout(timer);
                     }, (error) => {
+                        clearTimeout(timeoutId);
+                        clearTimeout(timer);
                         console.error("Error fetching user data:", error);
                         setCurrentUser(user);
                         setLoading(false);
-                        clearTimeout(timer);
                     });
                 } catch (err) {
-                    console.error("Auth error during token result fetch:", err);
+                    clearTimeout(timeoutId);
+                    clearTimeout(timer);
+                    console.error("Auth error:", err);
                     setCurrentUser(user);
                     setLoading(false);
-                    clearTimeout(timer);
                 }
             } else {
                 // User is signed out
+                clearTimeout(timeoutId);
                 setCurrentUser(null);
                 setLoading(false);
                 clearTimeout(timer);
@@ -171,6 +183,7 @@ export const AuthProvider = ({ children }) => {
         });
 
         return () => {
+            clearTimeout(timeoutId);
             unsubscribeAuth();
             if (unsubscribeFirestore) {
                 unsubscribeFirestore();

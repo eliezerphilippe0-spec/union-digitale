@@ -127,9 +127,9 @@
     <priority>0.7</priority>
   </url>
 
-  <!-- Union Plus -->
+  <!-- Zabely Plus -->
   <url>
-    <loc>https://zabely.ht/union-plus</loc>
+    <loc>https://zabely.ht/zabely-plus</loc>
     <lastmod>2026-01-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -185,7 +185,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
-
   <!-- 
     NOTE: Dynamic product URLs should be generated server-side
     Example format:

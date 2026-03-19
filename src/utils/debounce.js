@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Simple debounce utility function
  * @param {Function} func - The function to debounce
  * @param {number} wait - The delay in milliseconds

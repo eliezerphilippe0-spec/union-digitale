@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Clean minimal UD monogram -->
+  
+  <!-- U - White -->
+  <path d="M20 20 L20 55 C20 75 35 85 50 85" 
+        stroke="#0F2847" stroke-width="10" stroke-linecap="round" fill="none"/>
+  
+  <!-- D - Gold -->
+  <path d="M50 15 L50 85 M50 15 C80 15 90 35 90 50 C90 65 80 85 50 85" 
+        stroke="#D4AF37" stroke-width="10" stroke-linecap="round" fill="none"/>
+</svg>

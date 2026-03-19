@@ -51,7 +51,7 @@ const TrustpilotWidget = ({
             data-style-width="100%"
             data-theme={theme}
         >
-            <a href="https://fr.trustpilot.com/review/uniondigitale.ht" target="_blank" rel="noopener">Trustpilot</a>
+            <a href="https://fr.trustpilot.com/review/zabely.com" target="_blank" rel="noopener">Trustpilot</a>
         </div>
     );
 };

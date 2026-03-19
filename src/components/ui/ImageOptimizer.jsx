@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ImageOptimizer Component
  * Inspired by: Next.js Image, Shopify, Amazon image optimization
  * 

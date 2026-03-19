@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Check, Star, ShieldCheck, Loader, AlertCircle } from 'lucide-react';
 import SEO from '../../components/SEO';

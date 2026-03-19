@@ -7,7 +7,7 @@
 import { doc, setDoc, getDoc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
-const STORAGE_KEY = 'union_usage_stats';
+const STORAGE_KEY = 'zabely_usage_stats';
 
 // Default stats structure
 const getDefaultStats = () => ({

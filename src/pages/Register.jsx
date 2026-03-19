@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import SEO from '../components/common/SEO';
 import { Mail, Lock, User, AlertCircle, ShoppingBag, Store, Phone, ArrowRight, Check, Upload, FileText, Calendar, MapPin } from 'lucide-react';
 import { updateProfile } from 'firebase/auth';
 import useGeolocation from '../hooks/useGeolocation';
@@ -35,18 +36,23 @@ const Register = () => {
         zip: ''
     });
 
-    const { location: geoData, loading: geoLoading, getLocation } = useGeolocation();
+    const { location: geoData, address: geoAddress, loading: geoLoading, getLocation } = useGeolocation();
 
     React.useEffect(() => {
         if (geoData) {
             setAddress(prev => ({
                 ...prev,
                 lat: geoData.lat,
-                lng: geoData.lng
-                // In a real app, we would call a Reverse Geocoding API here to fill city/state
+                lng: geoData.lng,
+                ...(geoAddress && {
+                    street: geoAddress.street || prev.street,
+                    city: geoAddress.city || prev.city,
+                    state: geoAddress.state || prev.state,
+                    zip: geoAddress.zip || prev.zip
+                })
             }));
         }
-    }, [geoData]);
+    }, [geoData, geoAddress]);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -269,6 +275,7 @@ const Register = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <SEO title="Créer un compte" description="Créez votre compte Zabely en quelques étapes." />
             <div className="max-w-2xl w-full space-y-8 bg-white p-8 rounded-xl shadow-sm border border-gray-100">
                 <div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">

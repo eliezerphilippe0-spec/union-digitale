@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, Users, Clock, BookOpen, Play, CheckCircle } from 'lucide-react';
 import SEO from '../../components/SEO';

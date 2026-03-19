@@ -48,7 +48,7 @@ const DigitalStore = () => {
 
                 <div className="container mx-auto max-w-6xl relative z-10 text-center">
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-xs font-black uppercase tracking-widest mb-6 border border-white/10">
-                        <Zap className="w-4 h-4 text-gold-400" /> UD Digital Store (Expansion)
+                        <Zap className="w-4 h-4 text-gold-400" /> Zabely Digital Store
                     </div>
                     <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight">
                         Vos produits digitaux,<br />
@@ -126,7 +126,7 @@ const DigitalStore = () => {
                 <div className="bg-[#0A1D37] dark:bg-neutral-800 rounded-[40px] p-10 md:p-20 text-white flex flex-col md:flex-row items-center gap-10 shadow-2xl shadow-neutral-900/10">
                     <div className="flex-1 space-y-6">
                         <h2 className="text-3xl md:text-5xl font-black leading-tight">
-                            Pourquoi acheter digital sur <span className="text-secondary text-gold-400">Union Digitale</span> ?
+                            Pourquoi acheter digital sur <span className="text-secondary text-gold-400">Zabely</span> ?
                         </h2>
                         <ul className="space-y-4">
                             <li className="flex items-start gap-4">

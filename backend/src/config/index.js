@@ -1,0 +1,87 @@
+/**
+ * Configuration centrale
+ */
+
+require('dotenv').config();
+
+module.exports = {
+  // Server
+  PORT: process.env.PORT || 5000,
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  
+  // Database
+  DATABASE_URL: process.env.DATABASE_URL || 'postgresql://localhost:5432/union_digitale',
+  
+  // JWT
+  JWT_SECRET: process.env.JWT_SECRET || 'union-digitale-secret-key-change-in-production',
+  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
+  JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
+  
+  // Bcrypt
+  BCRYPT_ROUNDS: 12,
+  
+  // Rate Limiting
+  RATE_LIMIT_WINDOW: 15 * 60 * 1000, // 15 minutes
+  RATE_LIMIT_MAX: 100, // requests per window
+  
+  // File Upload
+  MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
+  ALLOWED_FILE_TYPES: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+  
+  // Stripe
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+  
+  // Email
+  SMTP_HOST: process.env.SMTP_HOST,
+  SMTP_PORT: process.env.SMTP_PORT || 587,
+  SMTP_USER: process.env.SMTP_USER,
+  SMTP_PASS: process.env.SMTP_PASS,
+  EMAIL_FROM: process.env.EMAIL_FROM || 'noreply@uniondigitale.ht',
+  
+  // MonCash (Haiti payment - Digicel)
+  MONCASH_CLIENT_ID: process.env.MONCASH_CLIENT_ID,
+  MONCASH_CLIENT_SECRET: process.env.MONCASH_CLIENT_SECRET,
+  MONCASH_MODE: process.env.MONCASH_MODE || 'sandbox',
+  
+  // NatCash (Haiti payment - Natcom)
+  NATCASH_MERCHANT_ID: process.env.NATCASH_MERCHANT_ID,
+  NATCASH_SECRET_KEY: process.env.NATCASH_SECRET_KEY,
+  NATCASH_MERCHANT_NUMBER: process.env.NATCASH_MERCHANT_NUMBER,
+  NATCASH_MODE: process.env.NATCASH_MODE || 'sandbox',
+  
+  // Backend URL (for callbacks)
+  BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:5000',
+  
+  // Frontend URL
+  FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:5173',
+  
+  // Cashback
+  CASHBACK_EXPIRY_DAYS: parseInt(process.env.CASHBACK_EXPIRY_DAYS || '90', 10),
+  CASHBACK_MONTHLY_CAP: parseFloat(process.env.CASHBACK_MONTHLY_CAP || '5000'),
+
+  // Points
+  POINTS_VALUE_HTG: parseInt(process.env.POINTS_VALUE_HTG || '10', 10),
+  POINTS_MAX_PERCENT: parseInt(process.env.POINTS_MAX_PERCENT || '20', 10),
+  POINTS_MIN_ORDER_HTG: parseInt(process.env.POINTS_MIN_ORDER_HTG || '1000', 10),
+  POINTS_EXPIRY_DAYS: parseInt(process.env.POINTS_EXPIRY_DAYS || '365', 10),
+  POINTS_EXPIRY_SOON_DAYS: parseInt(process.env.POINTS_EXPIRY_SOON_DAYS || '14', 10),
+  PAYOUT_MIN_HTG: parseInt(process.env.PAYOUT_MIN_HTG || '2000', 10),
+
+  // Pagination
+  DEFAULT_PAGE_SIZE: 20,
+  MAX_PAGE_SIZE: 100,
+
+  // Admin
+  SUPER_ADMIN_EMAILS: (process.env.SUPER_ADMIN_EMAILS || '').split(',').map(s => s.trim()).filter(Boolean),
+
+  // Risk cron
+  RISK_CRON_ENABLED: process.env.RISK_CRON_ENABLED === 'true',
+  RISK_CRON_SCHEDULE: process.env.RISK_CRON_SCHEDULE || '30 3 * * *',
+  RISK_CRON_BATCH_SIZE: parseInt(process.env.RISK_CRON_BATCH_SIZE || '200', 10),
+
+  // Trust cron
+  TRUST_CRON_ENABLED: process.env.TRUST_CRON_ENABLED === 'true',
+  TRUST_CRON_SCHEDULE: process.env.TRUST_CRON_SCHEDULE || '0 4 * * *',
+  TRUST_CRON_BATCH_SIZE: parseInt(process.env.TRUST_CRON_BATCH_SIZE || '200', 10),
+};

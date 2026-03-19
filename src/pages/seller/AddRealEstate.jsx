@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { useRealEstate } from '../../hooks/useRealEstate';
-import { Home, MapPin, DollarSign, Upload, FileText, CheckCircle, Shield } from 'lucide-react';
+import { Home, MapPin, DollarSign, Upload, FileText, CheckCircle, Shield, Sparkles, Wand2, Loader } from 'lucide-react';
+import { geminiService } from '../../services/geminiService';
+import useGeolocation from '../../hooks/useGeolocation';
 
 const AddRealEstate = () => {
     const { t } = useLanguage();
@@ -11,6 +13,21 @@ const AddRealEstate = () => {
 
     // Steps: 1=Type, 2=Details, 3=Confirm
     const [step, setStep] = useState(1);
+    const [aiGenerating, setAiGenerating] = useState(false);
+    const [aiTone, setAiTone] = useState('creative');
+
+    const { address: geoAddress, loading: geoLoading, getLocation } = useGeolocation();
+
+    React.useEffect(() => {
+        if (geoAddress) {
+            setFormData(prev => ({
+                ...prev,
+                location: geoAddress.full || `${geoAddress.street}, ${geoAddress.city}`,
+                lat: geoAddress.lat, // assuming we want to store coords too
+                lng: geoAddress.lng
+            }));
+        }
+    }, [geoAddress]);
 
     const [formData, setFormData] = useState({
         type: 'house', // house, land, rental
@@ -46,6 +63,28 @@ const AddRealEstate = () => {
             navigate('/seller/dashboard');
         } catch (error) {
             alert("Erreur: " + error.message);
+        }
+    };
+
+    const handleAIGenerate = async () => {
+        if (!formData.title) {
+            alert("Veuillez d'abord saisir un titre pour l'annonce.");
+            return;
+        }
+
+        setAiGenerating(true);
+        try {
+            const propertyContext = `${formData.type}, ${formData.surface}m2, ${formData.rooms} chambres, ${formData.location}`;
+            const generated = await geminiService.generateProductDescription(formData.title, propertyContext, aiTone);
+            
+            if (generated) {
+                setFormData(prev => ({ ...prev, description: generated }));
+            }
+        } catch (error) {
+            console.error("AI Generation failed:", error);
+            alert("L'assistant IA est temporairement indisponible.");
+        } finally {
+            setAiGenerating(false);
         }
     };
 
@@ -119,7 +158,18 @@ const AddRealEstate = () => {
                             )}
 
                             <div className="col-span-2">
-                                <label className="block text-sm font-bold mb-1">Adresse complète</label>
+                                <div className="flex justify-between items-center mb-1">
+                                    <label className="block text-sm font-bold">{t('address_street') || 'Adresse complète'}</label>
+                                    <button
+                                        type="button"
+                                        onClick={getLocation}
+                                        disabled={geoLoading}
+                                        className="text-xs flex items-center gap-1 text-blue-600 hover:underline disabled:opacity-50"
+                                    >
+                                        <MapPin className="w-3 h-3" />
+                                        {geoLoading ? t('locating') : t('locate_me')}
+                                    </button>
+                                </div>
                                 <div className="flex items-center gap-2 border rounded-lg p-3 bg-white">
                                     <MapPin className="text-gray-400" />
                                     <input name="location" value={formData.location} onChange={handleChange} required className="w-full outline-none" placeholder="Rue, Quartier, Ville..." />
@@ -127,8 +177,41 @@ const AddRealEstate = () => {
                             </div>
 
                             <div className="col-span-2">
-                                <label className="block text-sm font-bold mb-1">Description</label>
-                                <textarea name="description" value={formData.description} onChange={handleChange} rows="4" className="w-full p-3 border rounded-lg" placeholder="Décrivez les atouts de votre bien..."></textarea>
+                                <div className="flex items-center justify-between mb-1">
+                                    <label className="block text-sm font-bold">Description</label>
+                                    <div className="flex items-center gap-2">
+                                        <select 
+                                            value={aiTone}
+                                            onChange={(e) => setAiTone(e.target.value)}
+                                            className="text-xs border rounded p-1 bg-gray-50 outline-none"
+                                        >
+                                            <option value="creative">Ton Créatif</option>
+                                            <option value="professional">Ton Pro</option>
+                                            <option value="excited">Ton Vendeur</option>
+                                        </select>
+                                        <button
+                                            type="button"
+                                            onClick={handleAIGenerate}
+                                            disabled={aiGenerating || !formData.title}
+                                            className="flex items-center gap-1.5 px-2 py-1 bg-indigo-50 text-indigo-700 rounded-md text-xs font-bold hover:bg-indigo-100 transition-colors disabled:opacity-50"
+                                        >
+                                            {aiGenerating ? <Loader className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+                                            Assistant IA
+                                        </button>
+                                    </div>
+                                </div>
+                                <textarea 
+                                    name="description" 
+                                    value={formData.description} 
+                                    onChange={handleChange} 
+                                    rows="4" 
+                                    className="w-full p-3 border rounded-lg focus:ring-secondary" 
+                                    placeholder="Décrivez les atouts de votre bien ou utilisez l'assistant IA..."
+                                ></textarea>
+                                <p className="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
+                                    <Sparkles className="w-2.5 h-2.5" />
+                                    L'IA rédige une description immobilière professionnelle et captivante.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -147,7 +230,7 @@ const AddRealEstate = () => {
                         <Shield className="w-10 h-10 text-blue-600 flex-shrink-0" />
                         <div>
                             <h3 className="font-bold text-blue-900">Validation Requise</h3>
-                            <p className="text-sm text-blue-800 mt-1">Conformément à la politique d'Union Digitale, votre annonce sera vérifiée par un administrateur avant publication. Vous devez être en mesure de fournir les titres de propriété ou mandats de gestion sur demande.</p>
+                            <p className="text-sm text-blue-800 mt-1">Conformément à la politique d'Zabely, votre annonce sera vérifiée par un administrateur avant publication. Vous devez être en mesure de fournir les titres de propriété ou mandats de gestion sur demande.</p>
                         </div>
                     </div>
 

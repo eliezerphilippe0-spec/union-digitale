@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import SEO from '../../components/common/SEO';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, Shield, Clock, CheckCircle, User, Phone, DollarSign, Zap, Info, Plus, ChevronRight, Download } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -61,7 +62,7 @@ const TransfertArgent = () => {
             setTimeout(() => {
                 setIsProcessing(false);
                 setShowSuccess(true);
-                setTransactionRef(`UD-TX-${Math.random().toString(36).toUpperCase().substring(2, 10)}`);
+                setTransactionRef(`ZB-TX-${Math.random().toString(36).toUpperCase().substring(2, 10)}`);
             }, 2500);
         } catch (error) {
             console.error('Transaction error:', error);
@@ -127,13 +128,14 @@ const TransfertArgent = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
+            <SEO title="Transfert d'argent" description="Envoyez de l'argent rapidement en Haïti avec Zabely Pay." />
             {/* Header Sticky */}
             <div className="bg-white border-b sticky top-0 z-50">
                 <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
                     <button onClick={() => navigate('/services')} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
                         <ArrowLeft size={24} />
                     </button>
-                    <h1 className="text-lg font-black text-[#0A1D37] uppercase tracking-tighter">Union Direct Pay</h1>
+                    <h1 className="text-lg font-black text-[#0A1D37] uppercase tracking-tighter">Zabely Pay</h1>
                     <div className="w-10"></div>
                 </div>
             </div>
@@ -143,9 +145,13 @@ const TransfertArgent = () => {
                     <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-100 animate-bounce">
                         <Zap size={32} className="text-white fill-current" />
                     </div>
-                    <div>
+                    <div className="service-header-content">
                         <h2 className="text-2xl font-black text-[#0A1D37]">Envoyer de l'argent</h2>
-                        <p className="text-sm text-gray-400 font-medium">Instantané, sécurisé, sans frontières.</p>
+                        <div className="service-provider">
+                            <span className="text-sm text-gray-400 font-medium">Fournisseur : Zabely</span>
+                            <span className="verified-badge text-green-500 font-bold ml-2">✓ Vérifié</span>
+                        </div>
+                    </div>
                     </div>
                 </div>
 

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Cache Service
  * In-memory + localStorage caching with TTL
  * Inspired by: Redis, Apollo Client cache

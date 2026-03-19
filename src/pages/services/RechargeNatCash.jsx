@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
+import SEO from '../../components/common/SEO';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CreditCard, Shield, Clock, CheckCircle, Phone, DollarSign, Key } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -95,6 +96,7 @@ const RechargeNatCash = () => {
 
     return (
         <div className="service-page">
+            <SEO title="Recharge NatCash" description="Rechargez NatCash en quelques secondes." />
             <div className="service-container">
                 {/* Breadcrumb */}
                 <nav className="breadcrumb">
@@ -123,7 +125,7 @@ const RechargeNatCash = () => {
                     <div className="service-header-content">
                         <h1 className="service-title">Recharge NatCash</h1>
                         <div className="service-provider">
-                            <span>Fournisseur : Union Digitale</span>
+                            <span>Fournisseur : Zabely</span>
                             <span className="verified-badge">✓ Vérifié</span>
                         </div>
                     </div>

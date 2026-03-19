@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Store, Search, Filter, TrendingUp } from 'lucide-react';
 import { useVendors } from '../hooks/useVendor';
-import VendorCard from '../components/VendorCard';
+import VendorCard from '../components/seller/VendorCard';
 import './VendorsPage.css';
 
 const VendorsPage = () => {

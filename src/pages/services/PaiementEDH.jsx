@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
+import SEO from '../../components/common/SEO';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Zap, Shield, Clock, CheckCircle, Hash, Calendar, DollarSign } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -99,6 +100,7 @@ const PaiementEDH = () => {
 
     return (
         <div className="service-page">
+            <SEO title="Paiement EDH" description="Payer vos factures EDH rapidement et en toute sécurité." />
             <div className="service-container">
                 {/* Breadcrumb */}
                 <nav className="breadcrumb">
@@ -127,7 +129,7 @@ const PaiementEDH = () => {
                     <div className="service-header-content">
                         <h1 className="service-title">Paiement EDH</h1>
                         <div className="service-provider">
-                            <span>Fournisseur : Union Digitale</span>
+                            <span>Fournisseur : Zabely</span>
                             <span className="verified-badge">✓ Vérifié</span>
                         </div>
                     </div>

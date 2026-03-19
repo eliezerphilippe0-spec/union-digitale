@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+﻿import { useInfiniteQuery } from '@tanstack/react-query';
 import { collection, query, where, orderBy, limit, startAfter, getDocs, Query, DocumentData } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 

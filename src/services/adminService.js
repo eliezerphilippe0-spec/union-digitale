@@ -1,4 +1,4 @@
-import { functions } from '../lib/firebase';
+﻿import { functions } from '../lib/firebase';
 import { httpsCallable } from 'firebase/functions';
 
 // Wrapper to call Cloud Functions

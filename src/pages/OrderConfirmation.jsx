@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { CheckCircle, Package, ArrowRight, Rocket } from 'lucide-react';
-import Celebration from '../components/Celebration';
+import Celebration from '../components/marketing/Celebration';
 import { db } from '../lib/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { claimLicenseKey } from '../services/digitalService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import logger from '../utils/logger';
+import SEO from '../components/common/SEO';
 
 const OrderConfirmation = () => {
     const [searchParams] = useSearchParams();
@@ -29,7 +30,7 @@ const OrderConfirmation = () => {
                 if (orderSnap.exists()) {
                     const orderData = orderSnap.data();
 
-                    // Afficher le numéro lisible (UD-YYMMDD-XXXXXX) si disponible
+                    // Afficher le numéro lisible (ZB-YYMMDD-XXXXXX) si disponible
                     setOrderNumber(orderData.orderNumber || null);
 
                     // Only process if status is paid and not already digitally delivered
@@ -76,6 +77,7 @@ const OrderConfirmation = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+            <SEO title="Confirmation de commande" description="Votre commande Zabely est confirmée." />
             <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
                 <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6 relative">
                     <CheckCircle className="h-10 w-10 text-green-600" />

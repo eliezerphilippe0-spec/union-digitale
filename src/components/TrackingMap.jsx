@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+﻿import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -75,7 +75,7 @@ const TrackingMap = ({ route, currentPosition }) => {
 
                         <Polyline
                             positions={route}
-                            color="#f97316" // Orange/Gold for Union Digitale
+                            color="#f97316" // Orange/Gold for Zabely
                             weight={5}
                             opacity={0.8}
                             dashArray="10, 10"

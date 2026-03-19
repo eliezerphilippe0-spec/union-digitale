@@ -1,4 +1,4 @@
-import algoliasearch from 'algoliasearch';
+﻿import algoliasearch from 'algoliasearch';
 
 // Initialize Algolia client with environment variables
 const algoliaAppId = import.meta.env.VITE_ALGOLIA_APP_ID;

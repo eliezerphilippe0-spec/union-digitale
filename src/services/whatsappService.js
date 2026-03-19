@@ -118,14 +118,38 @@ export const whatsappService = {
     },
 
     /**
-     * Sends Order Confirmation
+     * Sends Order Confirmation formatted like Amazon
      * @param {Object} order - Order object with id and totalAmount
      * @param {Object} user - User object with displayName and phoneNumber
      * @returns {Promise<boolean>}
      */
     async sendOrderConfirmation(order, user) {
         const customerName = user.displayName || 'Client';
-        const message = `Bonjour ${customerName}, votre commande #${order.id} de ${order.totalAmount} G a été confirmée. Merci de votre achat chez Union Digitale ! 🎉`;
+        
+        let itemsList = '';
+        if (order.items && order.items.length > 0) {
+            itemsList = '\n*Articles :*\n' + order.items.map(item => `- ${item.quantity}x ${item.title}`).join('\n');
+        }
+
+        let shippingInfo = '';
+        if (order.shipping && order.shipping.address) {
+            shippingInfo = `\n\n*Livraison :*\nPrévue sous 24h à 48h\nAdresse : ${order.shipping.address}${order.shipping.city ? ', ' + order.shipping.city : ''}`;
+        }
+
+        const orderNumber = order.id ? order.id.slice(-6).toUpperCase() : 'N/A';
+        const totalFormatted = order.totalAmount ? order.totalAmount.toLocaleString() : '0';
+
+        const message = `📦 *CONFIRMATION DE COMMANDE* 📦\n` +
+            `\nBonjour ${customerName},\n` +
+            `Merci pour votre achat sur Zabely !\n` +
+            `Votre commande a été confirmée et est en cours de préparation.\n` +
+            `\n*Détails de la commande :*\n` +
+            `N° de commande : #${orderNumber}\n` +
+            `Total : ${totalFormatted} HTG\n` +
+            `${itemsList}${shippingInfo}\n` +
+            `\nSuivez l'état de votre commande ici :\n` +
+            `https://zabely.ht/tracking/${order.id}\n` +
+            `\nMerci pour votre confiance !`;
 
         return this.sendMessage(
             user.phoneNumber || '+50900000000',

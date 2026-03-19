@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import { collection, query, limit, startAfter, getDocs, onSnapshot, orderBy, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { products as localProducts } from '../data/products';

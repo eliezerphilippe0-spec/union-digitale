@@ -1,7 +1,7 @@
-import { z } from 'zod';
+﻿import { z } from 'zod';
 
 /**
- * Validation Schemas for Union Digitale Backend
+ * Validation Schemas for Zabely Backend
  * Using Zod for runtime type validation and schema enforcement
  */
 
@@ -213,6 +213,9 @@ export const ReviewSchema = z.object({
 
 /**
  * Validate data against a schema and return typed result
+ * @param {import('zod').ZodSchema} schema - Zod schema to validate against
+ * @param {unknown} data - Data to validate
+ * @returns {*} Validated data
  */
 export function validate(schema, data) {
     return schema.parse(data);
@@ -220,6 +223,9 @@ export function validate(schema, data) {
 
 /**
  * Safe validation that returns success/error
+ * @param {import('zod').ZodSchema} schema - Zod schema to validate against
+ * @param {unknown} data - Data to validate
+ * @returns {{ success: boolean, data?: *, error?: import('zod').ZodError }}
  */
 export function safeValidate(schema, data) {
     const result = schema.safeParse(data);
@@ -231,6 +237,8 @@ export function safeValidate(schema, data) {
 
 /**
  * Format Zod errors for user-friendly messages
+ * @param {import('zod').ZodError} error - Zod error object
+ * @returns {string[]} Array of formatted error messages
  */
 export function formatValidationErrors(error) {
     return error.errors.map(err => {

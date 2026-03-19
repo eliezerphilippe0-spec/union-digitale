@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 
 /**
- * Services Data Structure - Union Digitale Super-App
+ * Services Data Structure - Zabely Super-App
  * Organized by categories with unique visual identity
  */
 
@@ -217,11 +217,11 @@ export const services = [
 
     // Premium Services
     {
-        id: 'union-plus',
-        name: 'Union Plus',
-        nameKey: 'union_plus',
+        id: 'zabely-plus',
+        name: 'Zabely Plus',
+        nameKey: 'zabely_plus',
         description: 'Livraison 1 jour, offres VIP',
-        descriptionKey: 'union_plus_desc',
+        descriptionKey: 'zabely_plus_desc',
         icon: Crown,
         category: 'premium',
         featured: true,

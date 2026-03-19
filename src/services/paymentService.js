@@ -232,6 +232,41 @@ export const paymentService = {
     },
 
     /**
+     * Updates an order status and triggers Escrow release if delivered
+     * @param {string} orderId - The main order ID
+     * @param {string} vendorId - The vendor ID
+     * @param {string} newStatus - 'pending', 'shipped', 'delivered'
+     */
+    async updateOrderStatus(orderId, vendorId, newStatus) {
+        try {
+            // Update the vendor_order subcollection document
+            const vendorOrderRef = doc(db, 'orders', orderId, 'vendor_orders', vendorId);
+            await updateDoc(vendorOrderRef, {
+                status: newStatus,
+                updatedAt: serverTimestamp()
+            });
+
+            logger.info('Order status updated', {
+                orderId, vendorId, newStatus
+            });
+
+            // Priority 2: Escrow Logic Trigger
+            // When status becomes 'delivered', the funds move from pending to available.
+            // Our useVendorOrderStats hook reflects this in the UI instantly.
+            if (newStatus === 'delivered') {
+                logger.info('Escrow: Funds marked as available for vendor', {
+                    orderId, vendorId
+                });
+            }
+
+            return true;
+        } catch (error) {
+            logger.error('Failed to update order status', error, { orderId });
+            throw new Error('Impossible de mettre à jour le statut de la commande');
+        }
+    },
+
+    /**
      * Validate payment webhook (called by Cloud Functions)
      * SECURITY: Always validate webhooks server-side
      * This is a client-side helper for UI updates only

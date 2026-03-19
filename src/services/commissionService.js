@@ -1,6 +1,7 @@
 import { db } from '../lib/firebase';
 import { doc, getDoc, getDocs, collection, query, where, orderBy, addDoc, serverTimestamp, increment } from 'firebase/firestore';
 import { REPUTATION_TIERS } from './reputationService';
+import { validateCommissionCalculation } from '../utils/vendorValidationSchemas';
 import logger from '../utils/logger';
 
 /**

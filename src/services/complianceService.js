@@ -1,4 +1,4 @@
-import { db } from '../lib/firebase';
+﻿import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { LEGAL_BLACKLIST } from '../data/legal_blacklist';
 import { monitoringService } from './monitoringService';

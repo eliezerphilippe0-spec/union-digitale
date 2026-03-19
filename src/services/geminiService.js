@@ -43,7 +43,7 @@ export const geminiService = {
             await new Promise(resolve => setTimeout(resolve, 1500));
 
             if (platform === 'instagram') {
-                return `📸 Nouveau ! Découvrez le ${productName}.\n\nLe style rencontre la performance. ✨\n\n#${productName.replace(/\s/g, '')} #UnionDigitale #ModeSimulation`;
+                return `📸 Nouveau ! Découvrez le ${productName}.\n\nLe style rencontre la performance. ✨\n\n#${productName.replace(/\s/g, '')} #Zabely #ModeSimulation`;
             } else {
                 return `Découvrez notre dernier ajout : le ${productName}. Disponible dès maintenant ! (Mode Simulation)`;
             }

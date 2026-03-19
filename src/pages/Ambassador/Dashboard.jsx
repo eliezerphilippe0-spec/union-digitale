@@ -3,7 +3,7 @@ import { useAmbassador } from '../../contexts/AmbassadorContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Link as LinkIcon, DollarSign, Users, Award, BookOpen, Copy } from 'lucide-react';
+import { LayoutDashboard, Link as LinkIcon, DollarSign, Users, Award, BookOpen, Copy, Rocket } from 'lucide-react';
 
 const AmbassadorDashboard = () => {
     const { ambassadorData, loading, requestPayout } = useAmbassador();
@@ -34,7 +34,7 @@ const AmbassadorDashboard = () => {
     if (loading || !currentUser || !ambassadorData) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
 
     const copyLink = () => {
-        navigator.clipboard.writeText(`https://uniondigitale.ht?ref=${ambassadorData.code}`);
+        navigator.clipboard.writeText(`https://zabely.ht?ref=${ambassadorData.code}`);
         alert(t('link_copied'));
     };
 
@@ -48,18 +48,18 @@ const AmbassadorDashboard = () => {
                         <span className="text-xs text-gray-500">{t('partner_space')}</span>
                     </div>
                     <nav className="p-4 space-y-2 flex-1">
-                        <Link to="/ambassador/dashboard" className="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-lg font-medium">
+                        <Link to="/ambassador/dashboard" className="flex items-center gap-3 px-4 py-3 bg-primary-50 text-primary-700 rounded-lg font-medium border border-primary-100">
                             <LayoutDashboard className="w-5 h-5" /> {t('overview')}
                         </Link>
-                        <Link to="/ambassador/resources" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">
+                        <Link to="/ambassador/resources" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition-colors">
                             <BookOpen className="w-5 h-5" /> {t('resources_scripts')}
                         </Link>
-                        <div className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg font-medium cursor-not-allowed opacity-50">
+                        <div className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-gray-50 rounded-lg font-medium cursor-not-allowed transition-colors">
                             <DollarSign className="w-5 h-5" /> {t('payments_soon')}
                         </div>
                     </nav>
                     <div className="p-4 border-t border-gray-100">
-                        <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-4 rounded-lg">
+                        <div className="bg-gray-900 border border-gray-800 text-white p-4 rounded-lg">
                             <div className="text-xs text-gray-200 mb-1">{t('current_level')}</div>
                             <div className="font-bold text-lg flex items-center gap-2">
                                 <Award className="w-5 h-5 text-yellow-400" /> {ambassadorData.level}
@@ -78,51 +78,54 @@ const AmbassadorDashboard = () => {
                         <button
                             onClick={handlePayout}
                             disabled={ambassadorData.totalEarnings < 2500}
-                            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="bg-primary-600 text-white px-5 py-2.5 rounded-lg font-bold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             {t('request_payout')}
                         </button>
                     </header>
 
-                    {/* Stats Cards */}
+                    {/* Stats Cards - Flat Design */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        {/* Earnings */}
+                        <div className="bg-white p-6 rounded-xl border border-gray-200">
                             <div className="flex items-center justify-between mb-4">
-                                <div className="text-gray-500 text-sm font-medium">{t('total_earnings')}</div>
-                                <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                                <div className="text-gray-500 text-sm font-semibold uppercase tracking-wider">{t('total_earnings')}</div>
+                                <div className="w-10 h-10 bg-green-50 text-green-600 rounded-lg flex items-center justify-center border border-green-100">
                                     <DollarSign className="w-5 h-5" />
                                 </div>
                             </div>
-                            <div className="text-3xl font-bold text-gray-900">{ambassadorData.totalEarnings.toLocaleString()} G</div>
-                            <div className="text-xs text-green-600 mt-2 flex items-center gap-1">
+                            <div className="text-3xl font-extrabold text-gray-900">{ambassadorData.totalEarnings.toLocaleString()} G</div>
+                            <div className="text-sm font-medium text-green-600 mt-2 flex items-center gap-1">
                                 +{ambassadorData.currentMonthEarnings.toLocaleString()} G ce mois-ci
                             </div>
                         </div>
 
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        {/* Referrals */}
+                        <div className="bg-white p-6 rounded-xl border border-gray-200">
                             <div className="flex items-center justify-between mb-4">
-                                <div className="text-gray-500 text-sm font-medium">{t('sales_referrals')}</div>
-                                <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                                <div className="text-gray-500 text-sm font-semibold uppercase tracking-wider">{t('sales_referrals')}</div>
+                                <div className="w-10 h-10 bg-primary-50 text-primary-600 rounded-lg flex items-center justify-center border border-primary-100">
                                     <Users className="w-5 h-5" />
                                 </div>
                             </div>
-                            <div className="text-3xl font-bold text-gray-900">{ambassadorData.referralsCount}</div>
-                            <div className="text-xs text-gray-500 mt-2">{t('customers_acquired')}</div>
+                            <div className="text-3xl font-extrabold text-gray-900">{ambassadorData.referralsCount}</div>
+                            <div className="text-sm text-gray-500 mt-2">{t('customers_acquired')}</div>
                         </div>
 
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        {/* Conversion Rate */}
+                        <div className="bg-white p-6 rounded-xl border border-gray-200">
                             <div className="flex items-center justify-between mb-4">
-                                <div className="text-gray-500 text-sm font-medium">{t('conversion_rate')}</div>
-                                <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center">
+                                <div className="text-gray-500 text-sm font-semibold uppercase tracking-wider">{t('conversion_rate')}</div>
+                                <div className="w-10 h-10 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center border border-purple-100">
                                     <Award className="w-5 h-5" />
                                 </div>
                             </div>
-                            <div className="text-3xl font-bold text-gray-900">4.5%</div>
-                            <div className="text-xs text-gray-500 mt-2">{t('estimated_avg')}</div>
+                            <div className="text-3xl font-extrabold text-gray-900">4.5%</div>
+                            <div className="text-sm text-gray-500 mt-2">{t('estimated_avg')}</div>
                         </div>
                     </div>
 
-                    {/* Analytics Preview (Standard Upromote) */}
+                    {/* Analytics Preview */}
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="font-bold text-gray-900 flex items-center gap-2">
@@ -134,7 +137,6 @@ const AmbassadorDashboard = () => {
                             </select>
                         </div>
                         <div className="h-48 w-full bg-gray-50 rounded-xl border border-dashed border-gray-200 flex items-center justify-center text-gray-400">
-                            {/* Illustration of a chart */}
                             <div className="flex items-end gap-2 h-20">
                                 <div className="w-4 bg-blue-200 h-8 rounded-t"></div>
                                 <div className="w-4 bg-blue-300 h-12 rounded-t"></div>
@@ -146,24 +148,24 @@ const AmbassadorDashboard = () => {
                         </div>
                     </div>
 
-                    {/* Link Generator & MLM (Multi-Level Marketing) */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        {/* Link Generator - Refined */}
+                        <div className="bg-white p-6 rounded-xl border border-gray-200">
                             <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                                 <LinkIcon className="w-5 h-5 text-gray-500" /> {t('unique_link')}
                             </h3>
-                            <div className="flex gap-2">
+                            <div className="flex bg-gray-50 border border-gray-300 rounded-lg overflow-hidden focus-within:border-primary-500 focus-within:ring-1 focus-within:ring-primary-500 transition-all">
                                 <input
                                     type="text"
                                     readOnly
-                                    value={`https://uniondigitale.ht?ref=${ambassadorData.code}`}
-                                    className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-600 font-mono text-xs"
+                                    value={`https://zabely.ht?ref=${ambassadorData.code}`}
+                                    className="flex-1 bg-transparent px-4 py-3 text-gray-700 font-mono text-xs outline-none"
                                 />
                                 <button
                                     onClick={copyLink}
-                                    className="bg-[#0A1D37] text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900 flex items-center gap-2"
+                                    className="bg-gray-900 text-white px-4 font-bold hover:bg-gray-800 flex items-center gap-2 transition-colors border-l border-gray-700"
                                 >
-                                    <Copy className="w-4 h-4" />
+                                    <Copy className="w-4 h-4" /> {t('copy') || 'COPIER'}
                                 </button>
                             </div>
                             <p className="text-[10px] text-gray-400 mt-2 uppercase font-bold tracking-wider">
@@ -171,7 +173,8 @@ const AmbassadorDashboard = () => {
                             </p>
                         </div>
 
-                        <div className="bg-gradient-to-br from-indigo-900 to-blue-800 p-6 rounded-xl shadow-xl text-white relative overflow-hidden group">
+                        {/* MLM Section */}
+                        <div className="bg-gradient-to-br from-[#0A1D37] to-blue-800 p-6 rounded-xl shadow-xl text-white relative overflow-hidden group">
                             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform duration-700">
                                 <Users className="w-24 h-24" />
                             </div>
@@ -185,12 +188,12 @@ const AmbassadorDashboard = () => {
                                 <input
                                     type="text"
                                     readOnly
-                                    value={`https://uniondigitale.ht/ambassador/join?parent=${ambassadorData.code}`}
-                                    className="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white font-mono text-xs"
+                                    value={`https://zabely.ht/ambassador/join?parent=${ambassadorData.code}`}
+                                    className="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white font-mono text-[10px]"
                                 />
                                 <button
                                     onClick={() => {
-                                        navigator.clipboard.writeText(`https://uniondigitale.ht/ambassador/join?parent=${ambassadorData.code}`);
+                                        navigator.clipboard.writeText(`https://zabely.ht/ambassador/join?parent=${ambassadorData.code}`);
                                         alert("Lien de recrutement copié !");
                                     }}
                                     className="bg-yellow-400 text-blue-900 px-4 py-2 rounded-lg font-black hover:bg-yellow-300 transition-all text-xs"
@@ -202,8 +205,8 @@ const AmbassadorDashboard = () => {
                     </div>
 
                     {/* Recent Activity Placeholder */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="p-6 border-b border-gray-100">
+                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                        <div className="p-6 border-b border-gray-200 bg-gray-50">
                             <h3 className="font-bold text-gray-900">{t('recent_activity')}</h3>
                         </div>
                         <div className="p-8 text-center text-gray-500">

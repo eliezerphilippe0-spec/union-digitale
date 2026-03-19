@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Download, FileText, Lock } from 'lucide-react';
 
 interface DownloadCardProps {

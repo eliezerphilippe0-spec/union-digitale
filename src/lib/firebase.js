@@ -1,8 +1,10 @@
 import { initializeApp } from "firebase/app";
-import {
-    initializeFirestore,
-    persistentLocalCache,
-    persistentMultipleTabManager
+import { 
+  getFirestore,
+  initializeFirestore, 
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  memoryLocalCache
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
@@ -20,23 +22,54 @@ const firebaseConfig = {
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
+const isConfigValid = firebaseConfig.apiKey && firebaseConfig.projectId;
+if (!isConfigValid) {
+    console.warn('⚠️ Firebase config incomplete - some features may not work');
+}
+
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Firestore avec persistance multi-onglets — API Firebase 9+ (remplace l'ancienne
-// combinaison getFirestore() + enableIndexedDbPersistence() qui est dépréciée
-// et cause des "INTERNAL ASSERTION FAILED" avec Firebase 12)
-export const db = initializeFirestore(app, {
-    localCache: persistentLocalCache({
-        tabManager: persistentMultipleTabManager()
-    })
-});
+// Initialize Firestore (Firebase 9+ API) with persistent multiple tab manager
+// Fallback to memory cache if internal assertion failed (common with Firebase 12)
+let db;
+try {
+    db = initializeFirestore(app, {
+        localCache: persistentLocalCache({
+            tabManager: persistentMultipleTabManager()
+        })
+    });
+    console.log('✅ Firestore initialized with persistent cache');
+} catch (error) {
+    console.warn('⚠️ Persistent cache failed, using memory cache:', error.message);
+    try {
+        db = initializeFirestore(app, {
+            localCache: memoryLocalCache()
+        });
+    } catch (error2) {
+        console.warn('⚠️ Memory cache failed, using default:', error2.message);
+        db = getFirestore(app);
+    }
+}
 
+export { db };
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app);
-export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 
-// App Check — production uniquement
+// Analytics only in browser
+export const analytics = typeof window !== 'undefined' && isConfigValid 
+    ? (() => {
+        try {
+            return getAnalytics(app);
+        } catch (e) {
+            console.warn('Analytics failed:', e.message);
+            return null;
+        }
+    })()
+    : null;
+
+// Initialize App Check for production security
 if (typeof window !== 'undefined' && import.meta.env.PROD) {
     const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
     if (recaptchaSiteKey) {

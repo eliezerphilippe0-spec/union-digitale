@@ -5,7 +5,7 @@ import { ChevronRight, X, Sparkles, ShoppingBag, Wallet, Info } from 'lucide-rea
 const TOUR_STEPS = [
     {
         id: 'welcome',
-        title: "Bienvenue sur Union Digitale !",
+        title: "Bienvenue sur Zabely !",
         content: "La première Super-App d'Haïti qui regroupe E-commerce, Services, Éducation et Finance.",
         icon: <Sparkles className="w-8 h-8 text-gold-500" />
     },
@@ -36,7 +36,7 @@ const OnboardingTour = () => {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        const hasSeenTour = localStorage.getItem('union_onboarding_seen');
+        const hasSeenTour = localStorage.getItem('zabely_onboarding_seen');
         if (!hasSeenTour) {
             // Delay slightly for better UX
             const timer = setTimeout(() => setIsVisible(true), 1500);
@@ -54,7 +54,7 @@ const OnboardingTour = () => {
 
     const handleComplete = () => {
         setIsVisible(false);
-        localStorage.setItem('union_onboarding_seen', 'true');
+        localStorage.setItem('zabely_onboarding_seen', 'true');
     };
 
     if (!isVisible) return null;

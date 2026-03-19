@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { X, Shirt } from 'lucide-react';
 import SizeInputForm from './SizeInputForm';
-import SizeRecommendation from './SizeRecommendation';
+import SizeRecommendation from './product/SizeRecommendation';
 import { useFittingRoom } from './useFittingRoom';
 
 const VirtualFittingRoom = ({ product, triggerButton }) => {

@@ -1,4 +1,5 @@
 ﻿import React, { useState } from 'react';
+import SEO from '../../components/common/SEO';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Droplet, Shield, Clock, CheckCircle, Hash, Calendar, DollarSign } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -54,7 +55,7 @@ const PaiementCAMEP = () => {
         } catch (error) {
             console.error('Transaction error:', error);
             setIsProcessing(false);
-            alert('Erreur lors du paiement. Veuillez réessayer.');
+            alert('Erreur lors du paiement. Veuillez r�essayer.');
         }
     };
 
@@ -86,13 +87,13 @@ const PaiementCAMEP = () => {
                         <div className="success-checkmark">
                             <CheckCircle size={80} />
                         </div>
-                        <h2>Paiement CAMEP réussi !</h2>
-                        <p>Votre facture d'eau a été payée</p>
+                        <h2>Paiement CAMEP r�ussi !</h2>
+                        <p>Votre facture d'eau a �t� pay�e</p>
                         <div className="success-details">
                             <p><strong>Client:</strong> {formData.numeroClient}</p>
                             <p><strong>Mois:</strong> {formData.mois}</p>
                             <p><strong>Montant:</strong> {formData.montant} HTG</p>
-                            <p><strong>Référence:</strong> {transactionRef}</p>
+                            <p><strong>R�f�rence:</strong> {transactionRef}</p>
                         </div>
                         <div className="mt-6 flex gap-4">
                             <button className="flex-1 bg-white text-blue-600 font-bold py-3 rounded-xl border border-blue-200 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2">
@@ -110,6 +111,7 @@ const PaiementCAMEP = () => {
 
     return (
         <div className="service-page">
+            <SEO title="Paiement CAMEP" description="Payer vos factures CAMEP rapidement et en toute s�curit�." />
             <div className="service-container">
                 {/* Breadcrumb */}
                 <nav className="breadcrumb">
@@ -138,8 +140,8 @@ const PaiementCAMEP = () => {
                     <div className="service-header-content">
                         <h1 className="service-title">Paiement CAMEP</h1>
                         <div className="service-provider">
-                            <span>Fournisseur : Union Digitale</span>
-                            <span className="verified-badge">✓ Vérifié</span>
+                            <span>Fournisseur : Zabely</span>
+                            <span className="verified-badge">? V�rifi�</span>
                         </div>
                     </div>
                 </div>
@@ -149,8 +151,8 @@ const PaiementCAMEP = () => {
                     <div className="info-item">
                         <Clock size={20} />
                         <div>
-                            <div className="info-label">Durée</div>
-                            <div className="info-value">Instantané</div>
+                            <div className="info-label">Dur�e</div>
+                            <div className="info-value">Instantan�</div>
                         </div>
                     </div>
                     <div className="info-item">
@@ -163,15 +165,15 @@ const PaiementCAMEP = () => {
                     <div className="info-item">
                         <Shield size={20} />
                         <div>
-                            <div className="info-label">Sécurité</div>
-                            <div className="info-value">Cryptée</div>
+                            <div className="info-label">S�curit�</div>
+                            <div className="info-value">Crypt�e</div>
                         </div>
                     </div>
                 </div>
 
                 {/* Description */}
                 <div className="service-description">
-                    <p>Payez votre facture d'eau CAMEP sans déplacement, rapidement et en toute sécurité.</p>
+                    <p>Payez votre facture d'eau CAMEP sans d�placement, rapidement et en toute s�curit�.</p>
                 </div>
 
                 {/* Form */}
@@ -179,7 +181,7 @@ const PaiementCAMEP = () => {
                     <div className="form-group">
                         <label htmlFor="numeroClient">
                             <Hash size={18} />
-                            Numéro client CAMEP
+                            Num�ro client CAMEP
                         </label>
                         <input
                             type="text"
@@ -192,7 +194,7 @@ const PaiementCAMEP = () => {
                             required
                             className="form-input"
                         />
-                        <small className="form-hint">6 à 10 chiffres</small>
+                        <small className="form-hint">6 � 10 chiffres</small>
                     </div>
 
                     <div className="form-group">
@@ -227,7 +229,7 @@ const PaiementCAMEP = () => {
                             required
                             className="form-input"
                         />
-                        <small className="form-hint">Le montant est calculé automatiquement</small>
+                        <small className="form-hint">Le montant est calcul� automatiquement</small>
                     </div>
 
                     <button
@@ -252,7 +254,7 @@ const PaiementCAMEP = () => {
                 {/* Security Notice */}
                 <div className="security-notice">
                     <Shield size={20} />
-                    <p>Paiement sécurisé. Votre facture sera mise à jour instantanément.</p>
+                    <p>Paiement s�curis�. Votre facture sera mise � jour instantan�ment.</p>
                 </div>
             </div>
         </div>

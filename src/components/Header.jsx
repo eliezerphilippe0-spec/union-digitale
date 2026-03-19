@@ -28,8 +28,12 @@ const Header = () => {
                 <div className="flex items-center gap-2">
                     {/* Mobile Menu Button - handled by CatalogMenu */}
                     <CatalogMenu />
-                    <Link to="/" className="text-2xl font-bold tracking-tight hover:text-gray-200">
-                        Zabely
+                    <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+                        <img 
+                            src="/logo-zabely.png" 
+                            alt="Logo Zabely - Plateforme de vente en ligne" 
+                            className="h-10 w-auto object-contain"
+                        />
                     </Link>
                 </div>
 

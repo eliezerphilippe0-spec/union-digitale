@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import FunnelEditor from '../components/FunnelBuilder/FunnelEditor';
 import { Layout, Zap, BarChart3 } from 'lucide-react';
 

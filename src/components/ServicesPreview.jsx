@@ -17,42 +17,32 @@ const ServicesPreview = () => {
     const previewServices = featuredServices.slice(0, 6);
 
     return (
-        <section className="py-16 bg-gradient-to-br from-neutral-50 to-white dark:from-neutral-900 dark:to-neutral-800">
+        <section className="py-12 bg-white border-y border-gray-100">
             <div className="container mx-auto px-4">
                 {/* Header */}
-                <div className="text-center mb-12">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold-100 dark:bg-gold-900/20 rounded-full mb-4">
-                        <Sparkles className="w-4 h-4 text-gold-600 dark:text-gold-400" />
-                        <span className="text-gold-800 dark:text-gold-300 text-sm font-semibold">
-                            Zabely App
+                <div className="text-center mb-10">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-50 rounded-full mb-3">
+                        <Sparkles className="w-3.5 h-3.5 text-primary-600" />
+                        <span className="text-primary-800 text-xs font-bold uppercase tracking-wide">
+                            Zabely - Super-App Haïtienne
                         </span>
                     </div>
 
-                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary-900 dark:text-white mb-4">
-                        Tous vos services
-                        <br />
-                        <span className="text-gold-600 dark:text-gold-400">
-                            au même endroit
-                        </span>
+                    <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+                        Tous vos services au même endroit
                     </h2>
 
-                    <p className="text-gray-600 dark:text-gray-400 text-lg max-w-2xl mx-auto">
+                    <p className="text-gray-500 text-sm md:text-base max-w-2xl mx-auto">
                         Paiements, voyages, shopping et plus encore - gérez tout depuis une seule application
                     </p>
                 </div>
 
                 {/* Services Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mb-8">
                     {previewServices.map((service, index) => {
                         const category = serviceCategories.find(c => c.id === service.category);
                         return (
-                            <div
-                                key={service.id}
-                                className="scroll-fade-in"
-                                style={{ animationDelay: `${index * 100}ms` }}
-                            >
-                                <ServiceCard service={service} category={category} size="default" />
-                            </div>
+                            <ServiceCard key={service.id} service={service} category={category} size="default" />
                         );
                     })}
                 </div>
@@ -62,22 +52,19 @@ const ServicesPreview = () => {
                     <button
                         onClick={() => navigate('/services')}
                         className="
-                            inline-flex items-center gap-2
-                            px-8 py-4
-                            bg-gradient-to-r from-primary-600 to-primary-700
-                            hover:from-primary-700 hover:to-primary-800
-                            text-white
-                            font-bold text-lg
+                            inline-flex items-center justify-center gap-2
+                            w-full sm:w-auto
+                            px-8 py-3.5
+                            bg-primary-600 text-white
+                            hover:bg-primary-700
+                            font-bold text-sm sm:text-base
                             rounded-xl
-                            shadow-luxury-md
-                            hover:shadow-luxury-lg
-                            transition-all duration-300
-                            hover:scale-105
-                            btn-press
+                            transition-colors
+                            border border-primary-700
                         "
                     >
-                        Voir tous les services
-                        <ArrowRight className="w-5 h-5" />
+                        Explorer d'autres services
+                        <ArrowRight className="w-4 h-4" />
                     </button>
                 </div>
             </div>

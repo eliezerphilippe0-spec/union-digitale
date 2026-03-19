@@ -1,6 +1,6 @@
 /**
  * Catalog Menu Data Structure - Premium 10/10
- * Data-driven menu configuration for Union Digitale
+ * Data-driven menu configuration for Zabely
  * Mobile-first, accessible, conversion-oriented
  */
 
@@ -84,19 +84,19 @@ export const digitalSection = {
   children: [
     {
       id: 'music',
-      labelKey: 'union_music',
+      labelKey: 'zabely_music',
       icon: Music,
       href: '/music'
     },
     {
       id: 'books',
-      labelKey: 'union_books',
+      labelKey: 'zabely_books',
       icon: BookOpen,
       href: '/category/books'
     },
     {
       id: 'gaming',
-      labelKey: 'union_gaming',
+      labelKey: 'zabely_gaming',
       icon: Gamepad2,
       href: '/category/gaming'
     },
@@ -226,7 +226,7 @@ export const helpSection = {
 export const sellCTA = {
   id: 'sell',
   primaryButton: {
-    labelKey: 'menu_sell_on_union',
+    labelKey: 'menu_sell_on_zabely',
     labelKeyLoggedIn: 'dashboard_konvesia',
     icon: Store,
     href: '/register?role=seller',
@@ -251,7 +251,7 @@ export const sellCTA = {
 // ============================================
 export const servicesSection = {
   id: 'services',
-  labelKey: 'menu_ud_services',
+  labelKey: 'menu_zabely_services',
   icon: Rocket,
   children: [
     {

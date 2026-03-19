@@ -1,0 +1,745 @@
+// Union Digitale Database Schema
+// Using Prisma ORM with PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============== USERS ==============
+
+enum UserRole {
+  BUYER
+  SELLER
+  ADMIN
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  BANNED
+}
+
+model User {
+  id            String     @id @default(uuid())
+  email         String     @unique
+  phone         String?    @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  avatar        String?
+  role          UserRole   @default(BUYER)
+  status        UserStatus @default(PENDING)
+  emailVerified Boolean    @default(false)
+  phoneVerified Boolean    @default(false)
+  
+  // Loyalty
+  loyaltyPoints Int        @default(0)
+  loyaltyTier   String     @default("bronze")
+
+  // Cashback
+  cashbackBalance  Float   @default(0)
+  cashbackLifetime Float   @default(0)
+  
+  // Points Wallet
+  pointsWallet PointsWallet?
+
+  // Timestamps
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  lastLoginAt   DateTime?
+  
+  // Relations
+  store         Store?
+  orders        Order[]
+  reviews       Review[]
+  addresses     Address[]
+  favorites     Favorite[]
+  cart          CartItem[]
+  notifications Notification[]
+  cashbackTransactions CashbackTransaction[]
+  pointsLedger PointsLedger[]
+  
+  @@index([email])
+  @@index([phone])
+}
+
+model Address {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  label       String   // "Maison", "Bureau", etc.
+  fullName    String
+  phone       String
+  street      String
+  city        String
+  department  String   // Département d'Haïti
+  country     String   @default("Haïti")
+  postalCode  String?
+  instructions String?
+  isDefault   Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  orders      Order[]
+  
+  @@index([userId])
+}
+
+// ============== STORES ==============
+
+enum StoreStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REJECTED
+}
+
+enum KycStatus {
+  UNVERIFIED
+  VERIFIED
+  PENDING
+  REJECTED
+}
+
+enum RiskLevel {
+  NORMAL
+  WATCH
+  HIGH
+  FROZEN
+}
+
+model Store {
+  id              String      @id @default(uuid())
+  userId          String      @unique
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name            String
+  slug            String      @unique
+  description     String?
+  logo            String?
+  banner          String?
+  status          StoreStatus @default(PENDING)
+  kycStatus       KycStatus   @default(UNVERIFIED)
+  riskLevel       RiskLevel   @default(NORMAL)
+  riskFlag        Boolean     @default(false)
+  payoutsFrozen   Boolean     @default(false)
+  freezeExpiresAt DateTime?
+  lastRiskEvaluated DateTime?
+
+  trustScore         Int        @default(100)
+  trustTier          TrustTier  @default(STANDARD)
+  trustTierRank      Int        @default(3)
+  trustUpdatedAt     DateTime?
+  trustReasonSummary Json?
+  trustScoreStableDays Int      @default(0)
+  trustLastTierChangeAt DateTime?
+  listingBoostFactor Float      @default(1.0)
+  payoutDelayHours   Int        @default(72)
+  
+  // Contact
+  email           String?
+  phone           String?
+  whatsapp        String?
+  
+  // Location
+  address         String?
+  city            String?
+  department      String?
+  
+  // Business Info
+  businessType    String?     // "individual", "company"
+  taxId           String?     // NIF
+  
+  // Stats
+  rating          Float       @default(0)
+  reviewCount     Int         @default(0)
+  totalSales      Int         @default(0)
+  
+  // Seller Credit
+  creditLimit     Float       @default(0)
+  creditUsed      Float       @default(0)
+  creditScore     Int         @default(0)
+  
+  // Commission
+  commissionRate  Float       @default(0.10) // 10% default
+  
+  // Verification
+  isVerified      Boolean     @default(false)
+  verifiedAt      DateTime?
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // Relations
+  products        Product[]
+  orders          Order[]
+  payouts         Payout[]
+  riskEvents      RiskEvent[]
+  riskSnapshot    RiskSnapshot?
+  
+  @@index([slug])
+  @@index([status])
+}
+
+enum RiskEventType {
+  REFUND_SPIKE
+  REFUND_AFTER_RELEASE_SPIKE
+  CHARGEBACK_SPIKE
+  PAYOUT_PENDING_GROWTH
+  PAYMENT_VELOCITY
+  RAPID_PAYOUT_PATTERN
+  MANUAL_SET
+  AUTO_UNFREEZE
+}
+
+enum RiskSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum TrustTier {
+  ELITE
+  TRUSTED
+  STANDARD
+  WATCH
+  RESTRICTED
+}
+
+model RiskEvent {
+  id         String        @id @default(cuid())
+  storeId    String
+  store      Store         @relation(fields: [storeId], references: [id])
+  type       RiskEventType
+  severity   RiskSeverity
+  prevLevel  RiskLevel
+  nextLevel  RiskLevel
+  scoreDelta Int           @default(0)
+  details    Json
+  createdAt  DateTime      @default(now())
+
+  @@index([storeId, createdAt])
+  @@index([type, createdAt])
+}
+
+model RiskRuleConfig {
+  id         String        @id @default(cuid())
+  key        String        @unique
+  enabled    Boolean       @default(true)
+  severity   RiskSeverity
+  windowDays Int?
+  threshold  Float?
+  threshold2 Float?
+  limitInt   Int?
+  multiplier Float?
+  json       Json?
+  updatedAt  DateTime      @updatedAt
+  createdAt  DateTime      @default(now())
+}
+
+model RiskSnapshot {
+  id        String   @id @default(cuid())
+  storeId   String   @unique
+  store     Store    @relation(fields: [storeId], references: [id])
+  window7d  Json?
+  window30d Json?
+  computedAt DateTime @default(now())
+}
+
+model JobLock {
+  key       String   @id
+  lockedBy  String?
+  lockedAt  DateTime?
+  expiresAt DateTime?
+  lastReport Json?
+}
+
+model TrustEvent {
+  id        String    @id @default(cuid())
+  storeId   String
+  store     Store     @relation(fields: [storeId], references: [id])
+  prevScore Int
+  nextScore Int
+  prevTier  TrustTier
+  nextTier  TrustTier
+  details   Json
+  createdAt DateTime  @default(now())
+
+  @@index([storeId, createdAt])
+}
+
+// ============== PRODUCTS ==============
+
+enum ProductStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  REJECTED
+  OUT_OF_STOCK
+  ARCHIVED
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String
+  slug        String     @unique
+  description String?
+  icon        String?
+  image       String?
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  
+  products    Product[]
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  @@index([slug])
+  @@index([parentId])
+}
+
+model Product {
+  id              String        @id @default(uuid())
+  storeId         String
+  store           Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  categoryId      String
+  category        Category      @relation(fields: [categoryId], references: [id])
+  
+  title           String
+  slug            String        @unique
+  description     String
+  shortDescription String?
+  
+  // Pricing
+  price           Float
+  comparePrice    Float?        // Prix barré
+  costPrice       Float?        // Prix d'achat (pour analytics)
+  currency        String        @default("HTG")
+  
+  // Inventory
+  sku             String?
+  barcode         String?
+  stock           Int           @default(0)
+  lowStockThreshold Int         @default(5)
+  trackInventory  Boolean       @default(true)
+  
+  // Media
+  images          String[]      // Array of image URLs
+  
+  // Attributes
+  brand           String?
+  weight          Float?
+  dimensions      Json?         // {length, width, height}
+  attributes      Json?         // Custom attributes
+  
+  // Status
+  status          ProductStatus @default(DRAFT)
+  isFeatured      Boolean       @default(false)
+  
+  // Stats
+  viewCount       Int           @default(0)
+  salesCount      Int           @default(0)
+  rating          Float         @default(0)
+  reviewCount     Int           @default(0)
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  // Relations
+  reviews         Review[]
+  orderItems      OrderItem[]
+  cartItems       CartItem[]
+  favorites       Favorite[]
+  
+  @@index([storeId])
+  @@index([categoryId])
+  @@index([slug])
+  @@index([status])
+}
+
+// ============== ORDERS ==============
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH_ON_DELIVERY
+  MONCASH
+  NATCASH
+  CARD
+  BANK_TRANSFER
+}
+
+model Order {
+  id              String        @id @default(uuid())
+  orderNumber     String        @unique
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  storeId         String
+  store           Store         @relation(fields: [storeId], references: [id])
+  addressId       String
+  address         Address       @relation(fields: [addressId], references: [id])
+  
+  // Status
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentMethod   PaymentMethod
+  
+  // Amounts
+  subtotal        Float
+  shippingCost    Float         @default(0)
+  tax             Float         @default(0)
+  discount        Float         @default(0)
+  total           Float
+  
+  // Payment Info
+  paymentId       String?       // External payment ID
+  paidAt          DateTime?
+
+  // Commission / Escrow
+  subtotalProductsHTG  Float    @default(0)
+  commissionRate       Float    @default(0.10)
+  commissionAmountHTG  Float    @default(0)
+  sellerGrossHTG       Float    @default(0)
+  sellerNetHTG         Float    @default(0)
+  escrowStatus         EscrowStatus @default(NONE)
+
+  // Shipping
+  shippingMethod  String?
+  trackingNumber  String?
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+  
+  // Notes
+  customerNote    String?
+  sellerNote      String?
+  
+  // Loyalty
+  pointsEarned    Int           @default(0)
+  pointsUsed      Int           @default(0)
+
+  // Points (frozen at initialize)
+  pointsApplied              Int  @default(0)
+  pointsDiscountHtg          Int  @default(0)
+  pointsValueHtgAtRedemption Int  @default(10)
+  pointsMaxPercent           Int  @default(20)
+  pointsEligibleSubtotalHtg  Int  @default(0)
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  // Relations
+  items           OrderItem[]
+  
+  @@index([userId])
+  @@index([storeId])
+  @@index([orderNumber])
+  @@index([status])
+}
+
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  
+  title       String   // Snapshot du titre
+  price       Float    // Snapshot du prix
+  quantity    Int
+  total       Float
+  
+  @@index([orderId])
+  @@index([productId])
+}
+
+// ============== CART ==============
+
+model CartItem {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  quantity    Int      @default(1)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([userId, productId])
+  @@index([userId])
+}
+
+// ============== REVIEWS ==============
+
+model Review {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  rating      Int      // 1-5
+  title       String?
+  comment     String?
+  images      String[]
+  
+  isVerified  Boolean  @default(false) // Achat vérifié
+  isApproved  Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([userId, productId])
+  @@index([productId])
+}
+
+// ============== FAVORITES ==============
+
+model Favorite {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  
+  @@unique([userId, productId])
+  @@index([userId])
+}
+
+// ============== PAYOUTS ==============
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model Payout {
+  id          String       @id @default(uuid())
+  storeId     String
+  store       Store        @relation(fields: [storeId], references: [id])
+  
+  amount      Float
+  fee         Float        @default(0)
+  netAmount   Float
+  currency    String       @default("HTG")
+  
+  method      String       // "moncash", "bank_transfer"
+  accountInfo Json         // Détails du compte
+  
+  status      PayoutStatus @default(PENDING)
+  processedAt DateTime?
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  @@index([storeId])
+  @@index([status])
+}
+
+// ============== NOTIFICATIONS ==============
+
+model Notification {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type        String   // "order", "promotion", "system"
+  title       String
+  message     String
+  data        Json?
+  
+  isRead      Boolean  @default(false)
+  readAt      DateTime?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([isRead])
+}
+
+// ============== CASHBACK ==============
+
+enum CashbackStatus {
+  AVAILABLE
+  REDEEMED
+  EXPIRED
+}
+
+enum EscrowStatus {
+  NONE
+  HELD
+  RELEASED
+  REVERSED
+}
+
+enum FinancialLedgerType {
+  PLATFORM_EARN
+  SELLER_EARN
+  ESCROW_HOLD
+  ESCROW_RELEASE
+  REFUND
+  REVERSAL
+  PAYOUT_LOCK
+  PAYOUT_PAID
+}
+
+enum FinancialLedgerStatus {
+  PENDING
+  COMMITTED
+}
+
+model SellerBalance {
+  id                      String  @id @default(uuid())
+  storeId                 String  @unique
+  store                   Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  availableHTG            Float   @default(0)
+  escrowHTG               Float   @default(0)
+  payoutPendingHTG        Float   @default(0)
+  lifetimeEarnedHTG       Float   @default(0)
+  lifetimeCommissionPaidHTG Float @default(0)
+  updatedAt               DateTime @updatedAt
+}
+
+model FinancialLedger {
+  id        String                @id @default(uuid())
+  type      FinancialLedgerType
+  status    FinancialLedgerStatus @default(COMMITTED)
+  orderId   String?
+  order     Order?                @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  storeId   String?
+  store     Store?                @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  payoutRequestId String?
+  payoutRequest   PayoutRequest?  @relation(fields: [payoutRequestId], references: [id], onDelete: SetNull)
+  amountHTG Float
+  createdAt DateTime              @default(now())
+
+  @@index([orderId])
+  @@index([storeId])
+  @@index([type])
+}
+
+enum PayoutRequestStatus {
+  REQUESTED
+  APPROVED
+  PAID
+  REJECTED
+  CANCELED
+}
+
+model PayoutRequest {
+  id         String               @id @default(uuid())
+  storeId    String
+  store      Store                @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  amountHTG  Float
+  method     String
+  status     PayoutRequestStatus  @default(REQUESTED)
+  weekStart  DateTime?
+  batchKey   String?              @unique
+  createdAt  DateTime             @default(now())
+  approvedBy String?
+  paidAt     DateTime?
+  reference  String?
+
+  @@index([storeId])
+}
+
+model CashbackTransaction {
+  id        String         @id @default(uuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId   String?
+  amount    Float
+  status    CashbackStatus @default(AVAILABLE)
+  createdAt DateTime       @default(now())
+  expiresAt DateTime
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+// ============== POINTS ==============
+
+enum PointsTxType {
+  EARN
+  REDEEM
+  ADJUST
+  REFUND
+  EXPIRE
+}
+
+enum PointsTxStatus {
+  PENDING
+  COMMITTED
+  CANCELED
+  EXPIRED
+}
+
+model PointsWallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance   Int      @default(0)
+  version   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ledger    PointsLedger[]
+}
+
+model PointsLedger {
+  id             String        @id @default(cuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  walletId       String
+  wallet         PointsWallet  @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  type           PointsTxType
+  status         PointsTxStatus @default(PENDING)
+  points         Int
+  amountHtg      Int?
+  orderId        String?
+  paymentId      String?
+  reason         String?
+  meta           Json?
+  idempotencyKey String?       @unique
+  expiresAt      DateTime?
+  createdAt      DateTime      @default(now())
+  committedAt    DateTime?
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([status])
+}

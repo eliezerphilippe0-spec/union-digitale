@@ -7,6 +7,7 @@ import { paymentService } from '../services/paymentService';
 import { useNavigate } from 'react-router-dom';
 import { Loader, AlertCircle, Wallet } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import SEO from '../components/common/SEO';
 import { useAffiliation } from '../contexts/AffiliationContext';
 import logger from '../utils/logger';
 import LocationPickerModal from '../components/ui/LocationPickerModal';
@@ -31,7 +32,7 @@ const Checkout = () => {
     const [paymentMethod, setPaymentMethod] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const { location: geoData, loading: geoLoading, getLocation } = useGeolocation();
+
 
     // Feature: Upsell (Order Bump)
     const [warrantyAdded, setWarrantyAdded] = useState(false);
@@ -44,6 +45,25 @@ const Checkout = () => {
     const totalWithBump = finalTotal + (warrantyAdded ? WARRANTY_PRICE : 0);
     const monthlyPayment = Math.ceil(totalWithBump / 3);
 
+    const [shippingAddress, setShippingAddress] = useState({
+        name: currentUser?.displayName || '',
+        address: '',
+        city: '',
+        country: 'Haïti'
+    });
+
+    const { location: geoData, address: geoAddress, loading: geoLoading, getLocation } = useGeolocation();
+
+    useEffect(() => {
+        if (geoAddress) {
+            setShippingAddress(prev => ({
+                ...prev,
+                address: geoAddress.street || prev.address,
+                city: geoAddress.city || prev.city
+            }));
+        }
+    }, [geoAddress]);
+    
     useEffect(() => {
         if (cartItems.length === 0) {
             // navigate('/cart');
@@ -81,10 +101,10 @@ const Checkout = () => {
                 finalTotal: totalWithBump,
                 paymentMethod: method,
                 shippingAddress: isPhysical ? {
-                    name: currentUser.displayName || 'Client',
-                    address: selectedLocation?.addressFormatted || '15 Rue Pan-Américaine',
-                    city: 'Pétion-Ville',
-                    country: 'Haïti',
+                    name: shippingAddress.name || currentUser.displayName || 'Client',
+                    address: selectedLocation?.addressFormatted || shippingAddress.address || '15 Rue Pan-Américaine',
+                    city: shippingAddress.city || 'Pétion-Ville',
+                    country: shippingAddress.country || 'Haïti',
                     location: selectedLocation ? { lat: selectedLocation.lat, lng: selectedLocation.lng } : null,
                     instructions
                 } : null,
@@ -109,7 +129,7 @@ const Checkout = () => {
         }
 
         if (!paymentMethod) {
-            setError(t('select_payment_method') || "Veuillez sélectionner un moyen de paiement.");
+            setError(t('select_payment_method'));
             return;
         }
 
@@ -143,10 +163,10 @@ const Checkout = () => {
                 total: cartTotal + (warrantyAdded ? WARRANTY_PRICE : 0),
                 finalTotal: totalWithBump,
                 shippingAddress: isPhysical ? {
-                    name: currentUser.displayName || 'Client',
-                    address: selectedLocation?.addressFormatted || '15 Rue Pan-Américaine',
-                    city: 'Pétion-Ville',
-                    country: 'Haïti',
+                    name: shippingAddress.name || currentUser.displayName || 'Client',
+                    address: selectedLocation?.addressFormatted || shippingAddress.address || '15 Rue Pan-Américaine',
+                    city: shippingAddress.city || 'Pétion-Ville',
+                    country: shippingAddress.country || 'Haïti',
                     location: selectedLocation ? { lat: selectedLocation.lat, lng: selectedLocation.lng } : null,
                     instructions
                 } : null
@@ -160,20 +180,11 @@ const Checkout = () => {
                 } else {
                     window.location.href = redirectUrl;
                 }
-            } else if (paymentMethod === 'wallet') {
-                if (balance < totalWithBump) {
-                    throw new Error(t('insufficient_balance') || "Solde insuffisant");
-                }
-
-                const orderId = await paymentService.createOrder({ ...orderData, paymentMethod: 'wallet', total: totalWithBump }, currentUser, referralData);
-                await pay(totalWithBump, orderId);
-                clearCart();
-                navigate(`/order-confirmation/${orderId}`);
-            } else if (paymentMethod === 'union_pay_3x') {
+            } else if (paymentMethod === 'zabely_pay_3x') {
                 if (creditLimit < totalWithBump) throw new Error('Limite de crédit dépassée.');
 
                 setTimeout(async () => {
-                    const orderId = await paymentService.createOrder({ ...orderData, paymentMethod: 'union_pay_3x', total: totalWithBump }, currentUser, referralData);
+                    const orderId = await paymentService.createOrder({ ...orderData, paymentMethod: 'zabely_pay_3x', total: totalWithBump }, currentUser, referralData);
                     clearCart();
                     navigate(`/order-confirmation/${orderId}`);
                 }, 1500);
@@ -221,10 +232,16 @@ const Checkout = () => {
 
     return (
         <div className="bg-gray-100 min-h-screen py-8">
+            <SEO title="Checkout" description="Finalisez votre commande Zabely en toute sécurité." />
             <div className="container mx-auto px-4 max-w-5xl">
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-4">
                     <h1 className="text-2xl font-medium">{t('checkout_title')}</h1>
                     <div className="text-gray-500 text-sm">{t('secure_payment')}</div>
+                </div>
+                <div className="flex flex-wrap gap-2 mb-6">
+                    <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full">{t('secure_payment')}</span>
+                    <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">Livraison locale</span>
+                    <span className="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-full">Support 7j/7</span>
                 </div>
 
                 {error && (
@@ -239,10 +256,11 @@ const Checkout = () => {
 
                         {/* Shipping Address - Only for Physical Items */}
                         {cartItems.some(item => item.type === 'physical' || !item.type) && (
-                            <div className="bg-white p-6 rounded shadow-sm">
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                                 <h2 className="text-lg font-bold mb-4 flex justify-between">
                                     <span>{t('shipping_address_title')}</span>
-                                    <div className="flex gap-4">
+                                    <div className="flex gap-4 items-center">
+                                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">Pré-remplie</span>
                                         <button
                                             type="button"
                                             onClick={() => setIsMapOpen(true)}
@@ -253,10 +271,46 @@ const Checkout = () => {
                                         <span className="text-blue-600 text-sm font-normal cursor-pointer hover:underline">{t('edit')}</span>
                                     </div>
                                 </h2>
-                                <div className="text-sm text-gray-700">
-                                    <p className="font-bold">{currentUser?.displayName || t('shipping_guest')}</p>
-                                    <p>{selectedLocation?.addressFormatted || '15 Rue Pan-Américaine'}</p>
-                                    {!selectedLocation && <p>Pétion-Ville, Ouest, Haïti</p>}
+                                <div className="text-sm text-gray-700 space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs text-gray-500 mb-1">{t('recipient_name') || 'Nom du destinataire'}</label>
+                                            <input 
+                                                type="text" 
+                                                value={shippingAddress.name} 
+                                                onChange={e => setShippingAddress({...shippingAddress, name: e.target.value})}
+                                                className="w-full p-3 border-gray-200 rounded-lg bg-gray-50 focus:ring-primary-600 focus:border-primary-600"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-gray-500 mb-1">{t('address') || 'Adresse'}</label>
+                                            <input 
+                                                type="text" 
+                                                value={selectedLocation?.addressFormatted || shippingAddress.address} 
+                                                onChange={e => setShippingAddress({...shippingAddress, address: e.target.value})}
+                                                className="w-full p-3 border-gray-200 rounded-lg bg-gray-50 focus:ring-primary-600 focus:border-primary-600"
+                                                placeholder="Rue, #..."
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-gray-500 mb-1">{t('city')}</label>
+                                            <input 
+                                                type="text" 
+                                                value={shippingAddress.city} 
+                                                onChange={e => setShippingAddress({...shippingAddress, city: e.target.value})}
+                                                className="w-full p-3 border-gray-200 rounded-lg bg-gray-50 focus:ring-primary-600 focus:border-primary-600"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-gray-500 mb-1">{t('country')}</label>
+                                            <input 
+                                                type="text" 
+                                                value={shippingAddress.country} 
+                                                readOnly
+                                                className="w-full p-3 border-gray-200 rounded-lg bg-gray-100"
+                                            />
+                                        </div>
+                                    </div>
 
                                     <div className="mt-4">
                                         <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('instructions_placeholder')}</label>
@@ -264,7 +318,7 @@ const Checkout = () => {
                                             value={instructions}
                                             onChange={(e) => setInstructions(e.target.value)}
                                             placeholder="ex: Portail bleu, près de l'église..."
-                                            className="w-full text-sm border-gray-200 rounded-lg bg-gray-50 focus:ring-secondary focus:border-secondary transition-all"
+                                            className="w-full text-sm border-gray-200 rounded-lg bg-gray-50 focus:ring-primary-600 focus:border-primary-600 transition-all"
                                             rows="2"
                                         />
                                     </div>
@@ -289,27 +343,26 @@ const Checkout = () => {
                                 <span>{t('payment_method_title')}</span>
                             </h2>
 
-                            <div className="space-y-4">
-                                {/* Union Pay 3x (BNPL) */}
+                                {/* Zabely Pay 3x (BNPL) */}
                                 <div
-                                    className={`border rounded-lg p-4 cursor-pointer flex items-center gap-4 transition-colors ${paymentMethod === 'union_pay_3x' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'}`}
-                                    onClick={() => setPaymentMethod('union_pay_3x')}
+                                    className={`border rounded-lg p-4 cursor-pointer flex items-center gap-4 transition-colors ${paymentMethod === 'zabely_pay_3x' ? 'border-primary-600 bg-primary-600/5' : 'border-gray-200 hover:border-gray-300'}`}
+                                    onClick={() => setPaymentMethod('zabely_pay_3x')}
                                 >
                                     <input
                                         type="radio"
                                         name="payment"
-                                        checked={paymentMethod === 'union_pay_3x'}
-                                        onChange={() => setPaymentMethod('union_pay_3x')}
-                                        className="accent-primary w-5 h-5"
+                                        checked={paymentMethod === 'zabely_pay_3x'}
+                                        onChange={() => setPaymentMethod('zabely_pay_3x')}
+                                        className="accent-primary-600 w-5 h-5"
                                     />
                                     <div className="flex-1">
                                         <div className="font-bold text-gray-900 flex items-center gap-2">
-                                            <span className="bg-primary text-white text-xs px-2 py-0.5 rounded font-bold">Union Pay</span>
+                                            <span className="bg-primary-600 text-white text-xs px-2 py-0.5 rounded font-bold">Zabely Pay</span>
                                             <span>{t('pay_3x_free')}</span>
                                         </div>
                                         <div className="text-sm text-gray-500 mt-1">
                                             <span>{t('pay_today')} </span>
-                                            <span className="font-bold text-primary">{monthlyPayment.toLocaleString()} G</span>
+                                            <span className="font-bold text-primary-600">{monthlyPayment.toLocaleString()} G</span>
                                             <div className="text-xs text-green-600 mt-0.5">
                                                 {t('borrowing_capacity')} {creditLimit?.toLocaleString()} G
                                             </div>
@@ -421,7 +474,7 @@ const Checkout = () => {
                                 <div className="text-green-700 font-bold mb-2">{t('estimated_delivery')}</div>
                                 {cartItems.map((item) => (
                                     <div key={item.id} className="flex gap-4">
-                                        <div className="w-16 h-16 bg-gray-100 flex items-center justify-center text-2xl text-gray-400 overflow-hidden rounded">
+                                        <div className="w-20 h-20 bg-gray-100 flex items-center justify-center text-2xl text-gray-400 overflow-hidden rounded-lg">
                                             {item.image ? <img src={item.image} alt={item.title} className="w-full h-full object-cover" /> : <span>{t('img_placeholder')}</span>}
                                         </div>
                                         <div>
@@ -467,7 +520,7 @@ const Checkout = () => {
                                     {loading ? <Loader className="animate-spin w-4 h-4" /> : null}
                                     {paymentMethod === 'moncash' ? t('pay_with_moncash_btn') :
                                         paymentMethod === 'wallet' ? t('pay_with_wallet_btn') :
-                                            paymentMethod === 'union_pay_3x' ? t('pay_with_union_pay_btn') :
+                                            paymentMethod === 'zabely_pay_3x' ? t('pay_with_zabely_pay_btn') || 'Payer avec Zabely Pay' :
                                                 t('pay_now_btn')}
                                 </button>
                             )}
@@ -515,6 +568,29 @@ const Checkout = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Mobile sticky pay bar */}
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 z-50">
+                <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600">{t('total_amount')}</span>
+                    <span className="text-lg font-bold text-red-700">{totalWithBump.toLocaleString()} G</span>
+                </div>
+                {paymentMethod === 'stripe' || paymentMethod === 'paypal' ? (
+                    <div className="text-center text-sm text-gray-600">{t('complete_payment_form')}</div>
+                ) : (
+                    <button
+                        onClick={handlePayment}
+                        disabled={loading}
+                        className="w-full bg-secondary hover:bg-secondary-hover text-white font-medium py-2 rounded-lg shadow-sm transition-colors text-sm flex justify-center items-center gap-2"
+                    >
+                        {loading ? <Loader className="animate-spin w-4 h-4" /> : null}
+                        {paymentMethod === 'moncash' ? t('pay_with_moncash_btn') :
+                            paymentMethod === 'wallet' ? t('pay_with_wallet_btn') :
+                                paymentMethod === 'zabely_pay_3x' ? t('pay_with_zabely_pay_btn') || 'Payer avec Zabely Pay' :
+                                    t('pay_now_btn')}
+                    </button>
+                )}
             </div>
         </div>
     );

@@ -1,7 +1,7 @@
 export const FAQ_CATEGORIES = [
     { id: 'orders', label: 'Commandes & Livraison', icon: 'Truck' },
     { id: 'payments', label: 'Paiements & Remboursements', icon: 'DollarSign' },
-    { id: 'selling', label: 'Vendre sur Union', icon: 'Store' },
+    { id: 'selling', label: 'Vendre sur Zabely', icon: 'Store' },
     { id: 'transfers', label: 'Transferts & Finance', icon: 'RefreshCw' },
     { id: 'account', label: 'Compte & Sécurité', icon: 'Shield' }
 ];
@@ -23,19 +23,19 @@ export const FAQ_DATA = [
         id: 'o3',
         category: 'orders',
         q: "Livrez-vous à l'international ?",
-        a: "Oui, Union Digitale expédie vers les États-Unis, le Canada et la République Dominicaine via des transporteurs partenaires comme DHL et FedEx."
+        a: "Oui, Zabely expédie vers les États-Unis, le Canada et la République Dominicaine via des transporteurs partenaires comme DHL et FedEx."
     },
     {
         id: 'p1',
         category: 'payments',
         q: "Quels modes de paiement sont acceptés ?",
-        a: "Nous acceptons MonCash, NatCash, les virements bancaires locaux, les cartes de crédit internationales (Visa/Mastercard) et votre solde Union Wallet."
+        a: "Nous acceptons MonCash, NatCash, les virements bancaires locaux, les cartes de crédit internationales (Visa/Mastercard) et votre solde Zabely Wallet."
     },
     {
         id: 'p2',
         category: 'payments',
         q: "Comment fonctionne le remboursement ?",
-        a: "En cas d'annulation ou de retour validé, le remboursement est crédité instantanément sur votre Union Wallet ou sous 3-5 jours sur votre compte MonCash."
+        a: "En cas d'annulation ou de retour validé, le remboursement est crédité instantanément sur votre Zabely Wallet ou sous 3-5 jours sur votre compte MonCash."
     },
     {
         id: 's1',
@@ -47,7 +47,7 @@ export const FAQ_DATA = [
         id: 's2',
         category: 'selling',
         q: "Quels sont les frais de vente ?",
-        a: "L'inscription est gratuite. Union Digitale prélève une commission variable (entre 5% et 15%) uniquement lorsque vous réalisez une vente."
+        a: "L'inscription est gratuite. Zabely prélève une commission variable (entre 5% et 15%) uniquement lorsque vous réalisez une vente."
     },
     {
         id: 't1',

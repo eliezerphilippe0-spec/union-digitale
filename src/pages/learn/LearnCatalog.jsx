@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Search, Star, Users, Clock } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
+import SEO from '../../components/common/SEO';
 
 const LearnCatalog = () => {
     const navigate = useNavigate();
@@ -93,6 +94,7 @@ const LearnCatalog = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 py-8">
+            <SEO title="Union Learn" description="Formations et cours pour développer vos compétences." />
             <div className="container mx-auto px-4 max-w-7xl">
                 {/* Header */}
                 <div className="mb-8">

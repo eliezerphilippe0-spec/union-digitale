@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { BookOpen, ShieldCheck, Scale, AlertCircle, Printer, Download } from 'lucide-react';
 import { OFFICIAL_POLICIES } from '../../data/legal/official_policies';
 import { db } from '../../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import SEO from '../../components/common/SEO';
 
 const PoliciesPage = () => {
     const [policies, setPolicies] = useState(OFFICIAL_POLICIES.policies);
@@ -31,6 +32,7 @@ const PoliciesPage = () => {
 
     return (
         <div className="bg-gray-50 min-h-screen py-12 px-4 sm:px-6 lg:px-8 font-sans">
+            <SEO title="Politiques" description="Politiques et conditions officielles Zabely." />
             <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden print:shadow-none">
                 {/* Header */}
                 <div className="bg-gray-900 text-white p-8 print:bg-white print:text-black print:border-b">
@@ -40,7 +42,7 @@ const PoliciesPage = () => {
                                 <Scale className="w-8 h-8 text-secondary" />
                                 <h1 className="text-3xl font-bold">Politiques Officielles</h1>
                             </div>
-                            <p className="text-gray-400 print:text-gray-600">Union Digitale Marketplace • Haïti</p>
+                            <p className="text-gray-400 print:text-gray-600">Zabely Marketplace • Haïti</p>
                             <div className="mt-4 flex items-center gap-2 text-xs bg-white/10 w-fit px-3 py-1 rounded-full text-gray-300 print:bg-gray-100 print:text-gray-800">
                                 <ShieldCheck className="w-3 h-3 text-green-400" />
                                 Version {policies.version} • Mise à jour : {policies.lastUpdate}
@@ -149,7 +151,7 @@ const PoliciesPage = () => {
                         ))}
 
                         <div className="mt-12 pt-8 border-t border-gray-100 text-center text-sm text-gray-400 print:text-xs">
-                            <p>© {new Date().getFullYear()} Union Digitale Haïti. Tous droits réservés.</p>
+                            <p>© {new Date().getFullYear()} Zabely Haïti. Tous droits réservés.</p>
                             <p>L'utilisation de la plateforme vaut acceptation de ces politiques.</p>
                         </div>
                     </div>

@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
-const BASE_URL = 'https://uniondigitale.ht';
+const BASE_URL = 'https://zabely.ht';
 
 /**
  * Injecte les données structurées Schema.org pour une fiche produit :
@@ -40,7 +40,7 @@ export default function ProductSchema({ product, productId }) {
         ...(imageList.length > 0 && { image: imageList }),
         brand: {
             '@type': 'Brand',
-            name: product.brand || 'Union Digitale',
+            name: product.brand || 'Zabely',
         },
         sku: String(productId),
         offers: {
@@ -53,7 +53,7 @@ export default function ProductSchema({ product, productId }) {
             priceValidUntil,
             seller: {
                 '@type': 'Organization',
-                name: product.brand || 'Union Digitale',
+                name: product.brand || 'Zabely',
                 url: BASE_URL,
             },
         },

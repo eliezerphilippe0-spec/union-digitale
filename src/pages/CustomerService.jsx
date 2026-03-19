@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { FAQ_CATEGORIES, FAQ_DATA } from '../data/faqData';
-import SEO from '../components/SEO';
+import SEO from '../components/common/SEO';
 
 const iconMap = {
     Truck,
@@ -50,26 +50,26 @@ const CustomerService = () => {
             color: 'text-green-600',
             bg: 'bg-green-50'
         },
-        { icon: Mail, label: 'Envoyer Email', link: "mailto:support@uniondigitale.ht" }
+        { icon: Mail, label: 'Envoyer Email', link: "mailto:support@zabely.ht" }
     ];
 
     return (
         <MainLayout>
-            <SEO title="Centre d'Aide" description="Besoin d'aide ? Trouvez des réponses à vos questions sur les commandes, les paiements et les services d'Union Digitale." />
+            <SEO title="Service client" description="Besoin d'aide ? Trouvez des réponses à vos questions sur les commandes, les paiements et les services de Zabely." />
 
             <div className="bg-gray-50 min-h-screen pb-16">
                 {/* Hero Section */}
-                <div className="bg-[#0A1D37] text-white py-16 px-4">
+                <div className="bg-primary-900 text-white py-16 px-4">
                     <div className="container mx-auto max-w-4xl text-center">
-                        <h1 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight">Comment pouvons-nous vous aider ?</h1>
+                        <h1 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight">{t('cs_hero_title') || 'Comment pouvons-nous vous aider ?'}</h1>
                         <div className="relative max-w-2xl mx-auto">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                             <input
                                 type="text"
-                                placeholder="Rechercher une réponse (ex: MonCash, Livraison...)"
+                                placeholder={t('search_help_placeholder') || "Rechercher une réponse (ex: MonCash, Livraison...)"}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-12 pr-4 py-4 rounded-xl text-gray-900 shadow-2xl focus:ring-2 focus:ring-[#D4AF37] outline-none text-lg"
+                                className="w-full pl-12 pr-4 py-4 rounded-xl text-gray-900 shadow-2xl focus:ring-2 focus:ring-primary-600 outline-none text-lg"
                             />
                         </div>
                     </div>
@@ -191,7 +191,7 @@ const CustomerService = () => {
                                     <a href="https://wa.me/50912345678" className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg hover:shadow-green-500/20">
                                         <MessageCircle className="w-5 h-5" /> Chat WhatsApp
                                     </a>
-                                    <a href="mailto:support@uniondigitale.ht" className="flex items-center justify-center gap-2 bg-white text-secondary font-bold py-3 px-8 rounded-xl hover:bg-gray-100 transition-all shadow-lg">
+                                    <a href="mailto:support@zabely.ht" className="flex items-center justify-center gap-2 bg-white text-primary-900 font-bold py-3 px-8 rounded-xl hover:bg-gray-100 transition-all shadow-lg">
                                         <Mail className="w-5 h-5" /> Envoyer un Email
                                     </a>
                                 </div>

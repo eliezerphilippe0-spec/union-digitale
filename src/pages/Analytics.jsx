@@ -1,8 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import MainLayout from '../layouts/MainLayout';
 import { TrendingUp, Award, BarChart3, ArrowUpRight } from 'lucide-react';
 import { useProducts } from '../hooks/useProducts';
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../components/product/ProductCard';
 
 const Analytics = () => {
     const { products } = useProducts();
@@ -21,7 +21,7 @@ const Analytics = () => {
                             <BarChart3 className="w-8 h-8 text-secondary" />
                             Baromètre des Ventes
                         </h1>
-                        <p className="text-gray-600">Les tendances actuelles sur Union Digitale.</p>
+                        <p className="text-gray-600">Les tendances actuelles sur Zabely.</p>
                     </div>
 
                     {/* Stats Grid */}

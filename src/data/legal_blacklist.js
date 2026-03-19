@@ -1,5 +1,5 @@
-/**
- * Union Digitale - Legal Blacklist
+﻿/**
+ * Zabely - Legal Blacklist
  * 
  * Comprehensive list of prohibited terms and patterns based on Haitian Law.
  * Languages: FR, HT, EN, ES

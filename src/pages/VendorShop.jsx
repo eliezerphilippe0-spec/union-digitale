@@ -15,6 +15,11 @@ import { getVendor, getVendorStats } from '../services/vendorService';
 import { getVendorOffers } from '../services/offerService';
 import OfferCard from '../components/OfferCard';
 import './VendorShop.css';
+import SEO from '../components/common/SEO';
+import TrustBadge from '../components/common/TrustBadge';
+import { getStoreTrust } from '../services/trustService';
+import useAISEO from '../hooks/useAISEO';
+import { seoService } from '../services/seoService';
 
 const VendorShop = () => {
     const { vendorId } = useParams();
@@ -24,6 +29,7 @@ const VendorShop = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedType, setSelectedType] = useState('all');
+    const [trust, setTrust] = useState(null);
 
     useEffect(() => {
         loadVendorData();
@@ -41,12 +47,23 @@ const VendorShop = () => {
             setVendor(vendorData);
             setOffers(offersData);
             setStats(statsData);
+
+            const slug = vendorData?.storeSlug || vendorData?.shopSlug || vendorData?.slug;
+            if (slug) {
+                getStoreTrust(slug).then(setTrust).catch(() => {});
+            }
         } catch (error) {
             console.error('Error loading vendor:', error);
         } finally {
             setLoading(false);
         }
     };
+
+    // AI SEO: auto-generate optimized metadata for this boutique
+    const { seoMeta } = useAISEO(vendor, 'vendor');
+
+    // Schema.org JSON-LD for Store/Local Business
+    const vendorSchema = vendor ? seoService.generateVendorSchema(vendor) : null;
 
     const getVerificationBadge = () => {
         if (!vendor?.verified) return null;
@@ -107,6 +124,13 @@ const VendorShop = () => {
 
     return (
         <div className="vendor-shop">
+            <SEO 
+                title={vendor?.shopName || vendor?.name} 
+                description={vendor?.description}
+                aiMeta={seoMeta}
+                schema={vendorSchema}
+                type="business.business"
+            />
             {/* Header with banner */}
             <div className="vendor-banner">
                 {vendor.shopBanner ? (
@@ -135,6 +159,11 @@ const VendorShop = () => {
                     <div className="vendor-details">
                         <h1 className="vendor-shop-name">{vendor.shopName}</h1>
                         {getVerificationBadge()}
+                        {trust?.trustTier && (
+                            <div className="mt-2">
+                                <TrustBadge tier={trust.trustTier} />
+                            </div>
+                        )}
 
                         <div className="vendor-meta">
                             {vendor.category && (

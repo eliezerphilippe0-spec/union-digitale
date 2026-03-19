@@ -1,8 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingBag, Store, ArrowRight, Check } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import SEO from '../components/SEO';
+import SEO from '../components/common/SEO';
 
 const RegisterChoice = () => {
     const navigate = useNavigate();
@@ -25,8 +25,8 @@ const RegisterChoice = () => {
     return (
         <>
             <SEO
-                title="Inscription - Union Digitale"
-                description="Rejoignez Union Digitale en tant qu'acheteur ou vendeur"
+                title="Inscription - Zabely"
+                description="Rejoignez Zabely en tant qu'acheteur ou vendeur"
             />
 
             <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-accent-50 py-12 px-4">
@@ -34,7 +34,7 @@ const RegisterChoice = () => {
                     {/* Header */}
                     <div className="text-center mb-12">
                         <h1 className="text-4xl md:text-5xl font-bold text-primary-900 mb-4">
-                            Rejoignez Union Digitale
+                            Rejoignez Zabely
                         </h1>
                         <p className="text-xl text-neutral-600">
                             Choisissez votre type de compte pour commencer

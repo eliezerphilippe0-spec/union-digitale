@@ -21,7 +21,7 @@ const Maintenance = () => {
                 {/* Content */}
                 <h1 className="text-4xl font-black mb-4 uppercase tracking-tighter">Maintenance en cours</h1>
                 <p className="text-slate-400 text-lg mb-10 leading-relaxed">
-                    Nous mettons à jour **Union Digitale** pour vous offrir une expérience encore plus exceptionnelle. Nous serons de retour dans quelques instants.
+                    Nous mettons à jour **Zabely** pour vous offrir une expérience encore plus exceptionnelle. Nous serons de retour dans quelques instants.
                 </p>
 
                 {/* Info Cards */}
@@ -52,7 +52,7 @@ const Maintenance = () => {
                 </div>
 
                 <p className="mt-12 text-[10px] uppercase font-black tracking-[0.2em] text-slate-600">
-                    © 2026 Union Digitale - Haiti's Digital Ecosystem
+                    © 2026 Zabely - Haiti's Digital Ecosystem
                 </p>
             </div>
         </div>

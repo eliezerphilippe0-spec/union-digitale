@@ -4,7 +4,9 @@ import { db } from '../lib/firebase';
 import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { Calendar, MapPin, Gauge, Tag, DollarSign, User, Phone, MessageCircle } from 'lucide-react';
-import SEO from '../components/SEO';
+import SEO from '../components/common/SEO';
+import useAISEO from '../hooks/useAISEO';
+import { seoService } from '../services/seoService';
 
 export default function CarDetails() {
     const { id } = useParams();
@@ -40,6 +42,12 @@ export default function CarDetails() {
         };
         fetchCar();
     }, [id]);
+
+    // AI SEO: auto-generate optimized metadata for this vehicle
+    const { seoMeta } = useAISEO(car, 'car');
+
+    // Schema.org JSON-LD for Vehicles
+    const carSchema = car ? seoService.generateCarSchema(car) : null;
 
     const checkAvailability = async (start, end) => {
         // Validate dates
@@ -142,10 +150,12 @@ export default function CarDetails() {
     return (
         <div className="bg-gray-50 min-h-screen py-10">
             <SEO
-                title={`${car.brand} ${car.model} | Union Auto`}
-                description={car.description || `Louez ou achetez cette ${car.brand} ${car.model} sur Union Digitale.`}
+                title={`${car.brand} ${car.model} | Zabely Auto`}
+                description={car.description || `Louez ou achetez cette ${car.brand} ${car.model} sur Zabely.`}
                 image={car.photos?.[0]}
                 type="article"
+                aiMeta={seoMeta}
+                schema={carSchema}
             />
 
             <div className="max-w-6xl mx-auto px-4">
@@ -284,7 +294,7 @@ export default function CarDetails() {
                                         <button
                                             type="submit"
                                             disabled={reserving}
-                                            className="w-full bg-[#0A1D37] text-white font-bold py-3 rounded-lg hover:bg-[#1a3d6e] disabled:opacity-70 transition flex justify-center items-center gap-2"
+                                            className="w-full bg-primary-600 text-white font-bold py-3 rounded-lg hover:bg-primary-700 disabled:opacity-70 transition flex justify-center items-center gap-2"
                                         >
                                             {reserving ? 'Vérification...' : 'Demander la réservation'}
                                             {!reserving && <Calendar className="w-4 h-4" />}

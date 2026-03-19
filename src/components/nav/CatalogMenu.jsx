@@ -1,6 +1,15 @@
 /**
  * CatalogMenu Component - Premium 10/10
- * Mobile-first, accessible navigation menu for Union Digitale
+ * Mobile-first, accessible navigation menu for Zabely
+ *
+ * Features:
+ * - Mobile: Full-screen Drawer with accordion sections
+ * - "Découvrir" section open by default
+ * - Sticky CTA zone with 2 buttons + reassurance
+ * - Standardized badges (same height, alignment)
+ * - Chevron rules: down for sections, right only for links
+ * - Active route highlighting
+ * - Full accessibility (ARIA, keyboard, focus trap)
  */
 
 import { useState, useRef, useEffect, useCallback, memo } from 'react';
@@ -99,7 +108,7 @@ const StickyCTAZone = memo(({ currentUser, t, onNavigate }) => {
         className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-gradient-to-r from-secondary to-secondary-hover text-white font-bold text-sm rounded-xl shadow-lg shadow-secondary/25 hover:scale-[1.02] active:scale-[0.98] transition-all"
       >
         <Store className="w-5 h-5" />
-        <span>{primaryLabel || 'Vendez sur Union Digitale'}</span>
+        <span>{primaryLabel || 'Vendez sur Zabely'}</span>
       </Link>
       <Link
         to={sellCTA.secondaryButton.href}
@@ -120,6 +129,7 @@ const StickyCTAZone = memo(({ currentUser, t, onNavigate }) => {
 const MobileDrawer = ({ isOpen, onClose, currentUser, logout, t }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const drawerRef = useRef(null);
   const [openSections, setOpenSections] = useState(() => {
     const initial = {};
     mobileMenuOrder.forEach(key => {
@@ -147,8 +157,28 @@ const MobileDrawer = ({ isOpen, onClose, currentUser, logout, t }) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose} />
-      <nav className="fixed inset-y-0 left-0 z-50 w-[85%] max-w-[380px] bg-white dark:bg-gray-900 shadow-2xl flex flex-col">
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* Drawer */}
+      <nav
+        ref={drawerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu Zabely"
+        className="
+          fixed inset-y-0 left-0 z-50
+          w-[85%] max-w-[380px]
+          bg-white dark:bg-gray-900 shadow-2xl
+          flex flex-col
+          animate-in slide-in-from-left duration-300
+        "
+      >
+        {/* Header */}
         <div className="flex-shrink-0 bg-gradient-to-r from-primary to-primary-light text-white p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -209,7 +239,7 @@ const SecondaryNavBar = memo(({ onMenuClick, currentUser, t }) => (
     </button>
     <div className="w-px h-5 bg-white/20 mx-1" />
     <Link to="/catalog" className="hover:bg-white/10 px-3 py-1.5 rounded-md">Tout le catalogue</Link>
-    <Link to="/digital-store" className="flex items-center gap-1.5 font-bold px-3 py-1.5 rounded-md text-secondary bg-indigo-50/10"><Rocket className="w-4 h-4" />UD Digital</Link>
+    <Link to="/digital-store" className="flex items-center gap-1.5 font-bold px-3 py-1.5 rounded-md text-secondary bg-indigo-50/10"><Rocket className="w-4 h-4" />Zabely Digital</Link>
     <Link to="/pay-bills" className="flex items-center gap-1.5 font-bold px-3 py-1.5 rounded-md text-yellow-400 bg-yellow-400/10"><Zap className="w-4 h-4" />Peye Bil</Link>
 
     <Link to={currentUser ? sellCTA.primaryButton.hrefLoggedIn : sellCTA.primaryButton.href} className="flex items-center gap-1.5 font-bold px-3 py-1.5 rounded-md text-gold-400 hover:bg-white/10">

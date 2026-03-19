@@ -1,5 +1,5 @@
 /**
- * COD Constants for Union Digitale
+ * COD Constants for Zabely
  */
 
 export const COD_DEPOSIT_PERCENTAGE = 0.10; // 10% upfront deposit

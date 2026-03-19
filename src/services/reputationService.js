@@ -3,7 +3,7 @@ import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import logger from '../utils/logger';
 
 /**
- * Union Digitale - Reputation & Gamification Service
+ * Zabely - Reputation & Gamification Service
  * Inspired by Mercado Libre's "MercadoLider" system.
  */
 
@@ -37,7 +37,7 @@ export const REPUTATION_TIERS = {
     },
     PLATINUM: {
         id: 'platinum',
-        label: 'Union Platine',
+        label: 'Zabely Platine',
         minOrders: 200,
         minRating: 4.8,
         commissionDiscount: 0.03, // -3%

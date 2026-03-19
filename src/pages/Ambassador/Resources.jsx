@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Copy, Download, Video, FileText, Mail } from 'lucide-react';
 
@@ -11,7 +11,7 @@ const AmbassadorResources = () => {
                 </Link>
 
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">Ressources Marketing</h1>
-                <p className="text-gray-600 mb-8">Tout ce dont vous avez besoin pour promouvoir Union Digitale comme un pro.</p>
+                <p className="text-gray-600 mb-8">Tout ce dont vous avez besoin pour promouvoir Zabely comme un pro.</p>
 
                 <div className="grid md:grid-cols-2 gap-8">
                     {/* Scripts TikTok / Reels */}
@@ -26,7 +26,7 @@ const AmbassadorResources = () => {
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="font-bold text-sm mb-2 text-gray-800">Accroche "Argent en ligne" (15s)</h3>
                                 <p className="text-sm text-gray-600 italic mb-3">
-                                    "Arrête de scroller ! Tu veux savoir comment les Haïtiens génèrent des revenus passifs en 2025 ? Ils utilisent Union Digitale pour vendre leurs connaissances. Clique sur le lien en bio pour commencer !"
+                                    "Arrête de scroller ! Tu veux savoir comment les Haïtiens génèrent des revenus passifs en 2025 ? Ils utilisent Zabely pour vendre leurs connaissances. Clique sur le lien en bio pour commencer !"
                                 </p>
                                 <button className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">
                                     <Copy className="w-3 h-3" /> Copier le script
@@ -35,7 +35,7 @@ const AmbassadorResources = () => {
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="font-bold text-sm mb-2 text-gray-800">Tutoriel Rapide (30s)</h3>
                                 <p className="text-sm text-gray-600 italic mb-3">
-                                    "Regarde comment je crée une boutique en 3 clics sur Union Digitale. 1. Je m'inscris. 2. J'ajoute mon produit. 3. Je partage le lien. C'est aussi simple que ça. Reçois tes paiements par MonCash. Lien en bio !"
+                                    "Regarde comment je crée une boutique en 3 clics sur Zabely. 1. Je m'inscris. 2. J'ajoute mon produit. 3. Je partage le lien. C'est aussi simple que ça. Reçois tes paiements par MonCash. Lien en bio !"
                                 </p>
                                 <button className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">
                                     <Copy className="w-3 h-3" /> Copier le script
@@ -56,7 +56,7 @@ const AmbassadorResources = () => {
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="font-bold text-sm mb-2 text-gray-800">Message à un ami créateur</h3>
                                 <p className="text-sm text-gray-600 italic mb-3">
-                                    "Salut ! J'ai vu que tu créais du super contenu. Tu savais que tu pouvais le vendre sur Union Digitale ? C'est la plateforme n°1 en Haïti. Utilise mon code [CODE] pour avoir un bonus de départ. Check ça : [LIEN]"
+                                    "Salut ! J'ai vu que tu créais du super contenu. Tu savais que tu pouvais le vendre sur Zabely ? C'est la plateforme n°1 en Haïti. Utilise mon code [CODE] pour avoir un bonus de départ. Check ça : [LIEN]"
                                 </p>
                                 <button className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">
                                     <Copy className="w-3 h-3" /> Copier le message

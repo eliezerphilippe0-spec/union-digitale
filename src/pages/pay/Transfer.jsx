@@ -73,7 +73,7 @@ const Transfer = () => {
                             <Download size={18} /> Reçu PDF
                         </button>
                         <button onClick={() => navigate('/pay')} className="w-full text-gray-400 font-black text-xs uppercase tracking-widest py-4">
-                            Retour à Union Pay
+                            Retour à Zabely Pay
                         </button>
                     </div>
                 </div>
@@ -88,7 +88,7 @@ const Transfer = () => {
                     <button onClick={() => navigate('/pay')} className="p-2 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-xl">
                         <ArrowLeft size={24} className="text-gray-600 dark:text-white" />
                     </button>
-                    <h1 className="text-lg font-black text-[#0A1D37] dark:text-white uppercase tracking-tighter">Transfert Union-Pay</h1>
+                    <h1 className="text-lg font-black text-[#0A1D37] dark:text-white uppercase tracking-tighter">Transfert Zabely Pay</h1>
                     <div className="w-10"></div>
                 </div>
             </div>
@@ -99,7 +99,7 @@ const Transfer = () => {
                         <Zap size={32} className="text-white fill-current" />
                     </div>
                     <h2 className="text-2xl font-black text-[#0A1D37] dark:text-white mb-2">Envoyer de l'argent</h2>
-                    <p className="text-sm text-gray-400 dark:text-neutral-400 font-medium mb-8">Paiement instantané entre comptes Union Pay.</p>
+                    <p className="text-sm text-gray-400 dark:text-neutral-400 font-medium mb-8">Paiement instantané entre comptes Zabely Pay.</p>
 
                     <form onSubmit={handleSubmit} className="space-y-8">
                         <div>
@@ -187,7 +187,7 @@ const Transfer = () => {
 
                 <div className="flex items-center justify-center gap-3 text-gray-400 py-6">
                     <Shield size={18} />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Transaction Sécurisée Union Pay</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Transaction Sécurisée Zabely Pay</span>
                 </div>
             </main>
         </div>

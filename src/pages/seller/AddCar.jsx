@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db, storage } from '../../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { Sparkles, Wand2, Loader } from 'lucide-react';
+import { geminiService } from '../../services/geminiService';
+import useGeolocation from '../../hooks/useGeolocation';
 
 export default function AddCar() {
     const navigate = useNavigate();
@@ -41,8 +44,20 @@ export default function AddCar() {
         mileage: '',
         price: '',
         currency: 'HTG',
-        location: ''
+        location: '',
+        description: ''
     });
+
+    const [aiGenerating, setAiGenerating] = useState(false);
+    const [aiTone, setAiTone] = useState('professional');
+
+    const { address: geoAddress, loading: geoLoading, getLocation } = useGeolocation();
+
+    useEffect(() => {
+        if (geoAddress) {
+            setForm(prev => ({ ...prev, location: geoAddress.full || `${geoAddress.street}, ${geoAddress.city}` }));
+        }
+    }, [geoAddress]);
 
     const [images, setImages] = useState([]); // Array of {file, preview, url}
     const [uploading, setUploading] = useState(false);
@@ -60,6 +75,28 @@ export default function AddCar() {
         }));
 
         setImages(prev => [...prev, ...newImages]);
+    };
+
+    const handleAIGenerate = async () => {
+        if (!form.brand || !form.model) {
+            alert("Veuillez d'abord saisir la marque et le modèle.");
+            return;
+        }
+
+        setAiGenerating(true);
+        try {
+            const carContext = `${form.type === 'rent' ? 'location' : 'vente'}, ${form.year}, ${form.mileage}km, ${form.location}`;
+            const generated = await geminiService.generateProductDescription(`${form.brand} ${form.model}`, carContext, aiTone);
+            
+            if (generated) {
+                setForm(prev => ({ ...prev, description: generated }));
+            }
+        } catch (error) {
+            console.error("AI Generation failed:", error);
+            alert("L'assistant IA est temporairement indisponible.");
+        } finally {
+            setAiGenerating(false);
+        }
     };
 
     const uploadImages = async () => {
@@ -222,7 +259,18 @@ export default function AddCar() {
                     </div>
 
                     <label className="block col-span-1 md:col-span-2">
-                        <span className="text-gray-700 font-medium">{t('location_label')}</span>
+                        <div className="flex justify-between items-center mb-1">
+                            <span className="text-gray-700 font-medium">{t('location_label')}</span>
+                            <button
+                                type="button"
+                                onClick={getLocation}
+                                disabled={geoLoading}
+                                className="text-xs flex items-center gap-1 text-blue-600 hover:underline disabled:opacity-50"
+                            >
+                                <MapPin className="w-3 h-3" />
+                                {geoLoading ? t('locating') : t('locate_me')}
+                            </button>
+                        </div>
                         <input
                             value={form.location}
                             onChange={e => setForm({ ...form, location: e.target.value })}
@@ -230,6 +278,43 @@ export default function AddCar() {
                             placeholder="Ex: Pétion-Ville"
                         />
                     </label>
+
+                    <div className="col-span-1 md:col-span-2">
+                        <div className="flex items-center justify-between mb-1">
+                            <label className="text-gray-700 font-medium">Description</label>
+                            <div className="flex items-center gap-2">
+                                <select 
+                                    value={aiTone}
+                                    onChange={(e) => setAiTone(e.target.value)}
+                                    className="text-xs border rounded p-1 bg-gray-50 outline-none"
+                                >
+                                    <option value="professional">Ton Pro</option>
+                                    <option value="excited">Ton Vendeur</option>
+                                    <option value="creative">Ton Créatif</option>
+                                </select>
+                                <button
+                                    type="button"
+                                    onClick={handleAIGenerate}
+                                    disabled={aiGenerating || !form.brand}
+                                    className="flex items-center gap-1.5 px-2 py-1 bg-indigo-50 text-indigo-700 rounded-md text-xs font-bold hover:bg-indigo-100 transition-colors disabled:opacity-50"
+                                >
+                                    {aiGenerating ? <Loader className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+                                    Assistant IA
+                                </button>
+                            </div>
+                        </div>
+                        <textarea
+                            value={form.description}
+                            onChange={e => setForm({ ...form, description: e.target.value })}
+                            className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-secondary focus:border-secondary"
+                            placeholder="Décrivez l'état du véhicule, les options..."
+                            rows="4"
+                        />
+                        <p className="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
+                            <Sparkles className="w-2.5 h-2.5" />
+                            L'IA rédige une annonce attrayante pour votre véhicule.
+                        </p>
+                    </div>
                 </div>
 
                 <div>

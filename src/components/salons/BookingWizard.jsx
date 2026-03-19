@@ -202,7 +202,7 @@ const BookingWizard = ({ salon, services, initialServiceId }) => {
                         </div>
 
                         <p className="text-center text-[10px] text-slate-400 font-medium px-8 italic">
-                            En confirmant, vous acceptez les politiques d'annulation du salon et les conditions d'utilisation d'Union Digitale.
+                            En confirmant, vous acceptez les politiques d'annulation du salon et les conditions d'utilisation de Zabely.
                         </p>
                     </div>
                 )}
